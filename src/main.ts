@@ -95,7 +95,7 @@ class Portfolio {
         </div>
         
         <div class="container-custom relative z-10">
-          <div class="grid md:grid-cols-[340px_1fr] lg:grid-cols-[400px_1fr] gap-10 md:gap-16 lg:gap-24 items-start">
+          <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-24 items-start">
             <!-- Left Column: Avatar and About Me -->
             <div class="section-reveal bg-white/90 backdrop-blur-sm rounded-2xl p-6 md:p-8 shadow-lg mt-4 md:mt-6 lg:mt-8 relative">
               <!-- Avatar with Signature Overlay -->
@@ -183,12 +183,12 @@ class Portfolio {
             <!-- Right Column: Experience and Tech Stack -->
               <div class="section-reveal flex flex-col gap-8">
                 <!-- Experience Section -->
-                <div id="experience-section" class="p-6 rounded-lg transition-all duration-500 mb-0">
+                <div id="experience-section" class="py-6 rounded-lg transition-all duration-500 mb-0">
                 <h2 class="text-2xl font-bold mb-4 flex items-center">
                   <span class="w-2 h-2 bg-clean-accent rounded-full mr-3"></span>
                   Experience
                 </h2>
-                <div class="flex flex-col gap-2.5">
+                <div class="flex flex-col gap-5">
                   ${experiences.map((exp, index) => `
                     <div class="experience-card">
                       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-2">
