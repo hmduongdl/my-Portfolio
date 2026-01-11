@@ -85,7 +85,7 @@ class Portfolio {
       <section id="about" class="section about-section-bg relative overflow-hidden">
         <!-- Background Image with Blur -->
         <div class="absolute inset-0 -z-10">
-          <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('/img/profile-background.jpg'); filter: blur(8px); transform: scale(1.1);"></div>
+          <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('/profile-background.jpg'); filter: blur(8px); transform: scale(1.1);"></div>
           <div class="absolute inset-0 bg-white/80"></div>
         </div>
         
@@ -105,23 +105,40 @@ class Portfolio {
               </div>
               
               <!-- About Me Title -->
-              <h2 class="text-2xl font-bold mb-4">About Me</h2>
+              <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <span class="w-2 h-2 bg-clean-accent rounded-full mr-3"></span>
+                About Me
+              </h2>
               
               <!-- Description -->
-              <p class="text-gray-700 leading-relaxed mb-4">
-                I'm a developer with a passion for creating elegant solutions to complex problems. I specialize in building modern web applications with a focus on user experience and clean, maintainable code.
-              </p>
               <p class="text-gray-700 leading-relaxed mb-6">
-                With experience in both frontend and backend development, I enjoy working on full-stack projects that challenge me to grow and learn new technologies.
+                I am a Modern Web Developer who loves solving real-world technical challenges. My focus is simple: seamless user experiences and high-quality, standard-compliant code.
               </p>
               
-              <!-- Contact -->
-              <h2 class="text-2xl font-bold mb-4">Contact</h2>
-              <div class="mb-6">
-                <span class="text-gray-600 text-sm mr-2">Email:</span>
-                <a href="mailto:hoanglong.workdl@gmail.com" class="text-clean-accent hover:text-green-700 font-medium">hoanglong.workdl@gmail.com</a>
-                <span class="text-gray-600 text-sm mr-2">Phone:</span>
-                <a href="tel:+84 911818016" class="text-clean-accent hover:text-green-700 font-medium">+84 911 818 016</a>
+              <!-- Languages -->
+              <h2 class="text-2xl font-bold mb-4 flex items-center">
+                <span class="w-2 h-2 bg-clean-accent rounded-full mr-3"></span>
+                Languages
+              </h2>
+              <div class="space-y-4">
+                <div>
+                  <div class="flex justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">Vietnamese</span>
+                    <span class="text-xs text-gray-500">Native</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-clean-accent h-2 rounded-full" style="width: 100%"></div>
+                  </div>EN
+                </div>
+                <div>
+                  <div class="flex justify-between mb-2">
+                    <span class="text-sm font-medium text-gray-700">English</span>
+                    <span class="text-xs text-gray-500">Independent</span>
+                  </div>
+                  <div class="w-full bg-gray-200 rounded-full h-2">
+                    <div class="bg-clean-accent h-2 rounded-full" style="width: 65%"></div>
+                  </div>
+                </div>
               </div>
               
             </div>
@@ -286,10 +303,22 @@ class Portfolio {
       <section id="contact" class="section">
         <div class="container-custom text-center">
           <h2 class="text-4xl font-bold mb-6 section-reveal">Let's Work Together</h2>
-          <p class="text-gray-600 mb-12 max-w-2xl mx-auto text-lg section-reveal">
+          <p class="text-gray-600 mb-8 max-w-2xl mx-auto text-lg section-reveal">
             I'm always open to new opportunities, interesting projects, and meaningful collaborations.
             Feel free to reach out!
           </p>
+          
+          <!-- Contact Info -->
+          <div class="mb-8 section-reveal">
+            <p class="text-gray-700 mb-2">
+              <span class="font-semibold">Email:</span> 
+              <a href="mailto:hoanglong.workdl@gmail.com" class="text-clean-accent hover:text-green-700 ml-2">hoanglong.workdl@gmail.com</a>
+            </p>
+            <p class="text-gray-700">
+              <span class="font-semibold">Phone:</span> 
+              <a href="tel:+84911818016" class="text-clean-accent hover:text-green-700 ml-2">+84 911 818 016</a>
+            </p>
+          </div>
           
           <!-- Social Icons -->
           <div class="flex gap-4 justify-center mb-8 section-reveal">
