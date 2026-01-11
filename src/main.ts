@@ -33,7 +33,6 @@ class Portfolio {
       ${this.renderHero()}
       ${this.renderAbout()}
       ${this.renderProjects()}
-      ${this.renderExperience()}
       ${this.renderContact()}
     `;
   }
@@ -47,7 +46,7 @@ class Portfolio {
             <ul class="flex gap-8">
               <li><a href="#about" class="link-hover text-sm font-medium">About</a></li>
               <li><a href="#projects" class="link-hover text-sm font-medium">Projects</a></li>
-              <li><a href="#experience" class="link-hover text-sm font-medium">Experience</a></li>
+              <li><a href="#about" data-scroll-to-experience class="link-hover text-sm font-medium">Experience</a></li>
               <li><a href="#contact" class="link-hover text-sm font-medium">Contact</a></li>
             </ul>
           </div>
@@ -85,7 +84,7 @@ class Portfolio {
     return `
       <section id="about" class="section bg-clean-bg-alt">
         <div class="container-custom">
-          <div class="grid md:grid-cols-[340px_1fr] gap-12 items-start">
+          <div class="grid md:grid-cols-[340px_1fr] lg:grid-cols-[380px_1fr] gap-8 md:gap-12 lg:gap-16 items-start">
             <!-- Left Column: Avatar and About Me -->
             <div class="section-reveal">
               <!-- Avatar -->
@@ -140,10 +139,8 @@ class Portfolio {
             <!-- Right Column: Experience and Tech Stack -->
             <div class="section-reveal">
               <!-- Experience Section -->
-              <div class="mb-12">
+              <div id="experience-section" class="mb-12 p-6 -mx-6 rounded-lg transition-all duration-500">
                 <h2 class="text-3xl font-bold mb-2">Experience</h2>
-                <p class="text-gray-600 mb-8 text-sm">My professional journey</p>
-                
                 <div class="space-y-6">
                   ${experiences.map((exp, index) => `
                     <div class="border-l-4 border-clean-accent pl-6 pb-6">
@@ -289,49 +286,7 @@ class Portfolio {
     `;
   }
 
-  private renderExperience(): string {
-    const experiences: Experience[] = [
-      {
-        role: 'Full Stack Developer Intern',
-        company: 'Tech Startup Vietnam',
-        period: 'Jun 2025 - Present',
-        description: 'Developing microservices architecture for SaaS platform. Implemented caching layer reducing API response time by 60%. Working with React, Node.js, and AWS services.'
-      },
-      {
-        role: 'Frontend Developer',
-        company: 'Freelance Projects',
-        period: 'Jan 2024 - May 2025',
-        description: 'Built responsive web applications for 5+ clients. Specialized in React and TypeScript with focus on performance optimization and accessibility.'
-      },
-      {
-        role: 'Teaching Assistant',
-        company: 'University CS Department',
-        period: 'Sep 2023 - Dec 2023',
-        description: 'Assisted in Web Development course for 100+ students. Created tutorial materials and conducted lab sessions on HTML, CSS, JavaScript, and React fundamentals.'
-      }
-    ];
 
-    return `
-      <section id="experience" class="section bg-clean-bg-alt">
-        <div class="container-custom">
-          <h2 class="text-4xl font-bold mb-4 section-reveal">Experience</h2>
-          <p class="text-gray-600 mb-12 section-reveal">My professional journey</p>
-          <div class="space-y-8">
-            ${experiences.map((exp, index) => `
-              <div class="border-l-4 border-clean-accent pl-8 pb-8 section-reveal group" style="animation-delay: ${index * 0.1}s;">
-                <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-3">
-                  <h3 class="text-2xl font-bold group-hover:text-clean-accent transition-colors">${exp.role}</h3>
-                  <span class="text-sm font-mono text-gray-500 mt-1 md:mt-0">${exp.period}</span>
-                </div>
-                <p class="text-lg text-gray-600 font-medium mb-3">${exp.company}</p>
-                <p class="text-gray-700 leading-relaxed">${exp.description}</p>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      </section>
-    `;
-  }
 
   private renderContact(): string {
     return `
@@ -384,7 +339,24 @@ class Portfolio {
       anchor.addEventListener('click', (e) => {
         e.preventDefault();
         const href = anchor.getAttribute('href');
-        if (href && href !== '#') {
+        
+        // Check if this is the Experience link
+        if (anchor.hasAttribute('data-scroll-to-experience')) {
+          const aboutSection = document.querySelector('#about');
+          const experienceSection = document.querySelector('#experience-section');
+          
+          aboutSection?.scrollIntoView({ behavior: 'smooth' });
+          
+          // Highlight experience section with animation
+          setTimeout(() => {
+            if (experienceSection) {
+              experienceSection.classList.add('experience-highlight');
+              setTimeout(() => {
+                experienceSection.classList.remove('experience-highlight');
+              }, 2000);
+            }
+          }, 500);
+        } else if (href && href !== '#') {
           const target = document.querySelector(href);
           target?.scrollIntoView({ behavior: 'smooth' });
         }

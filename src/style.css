@@ -37,4 +37,49 @@
   .gradient-text {
     @apply bg-gradient-to-r from-deep-accent to-deep-accent-alt bg-clip-text text-transparent;
   }
+  
+  /* Experience highlight animation */
+  @keyframes highlightBorder {
+    0% {
+      background: linear-gradient(0deg, #059669 0%, transparent 0%);
+    }
+    25% {
+      background: linear-gradient(0deg, #059669 100%, transparent 0%),
+                  linear-gradient(90deg, #059669 0%, transparent 0%);
+      background-position: bottom left, bottom left;
+      background-size: 100% 3px, 3px 100%;
+      background-repeat: no-repeat;
+    }
+    50% {
+      background: linear-gradient(0deg, #059669 100%, transparent 0%),
+                  linear-gradient(90deg, #059669 100%, transparent 0%),
+                  linear-gradient(180deg, #059669 0%, transparent 0%);
+      background-position: bottom left, bottom right, top right;
+      background-size: 100% 3px, 3px 100%, 100% 3px;
+      background-repeat: no-repeat;
+    }
+    75% {
+      background: linear-gradient(0deg, #059669 100%, transparent 0%),
+                  linear-gradient(90deg, #059669 100%, transparent 0%),
+                  linear-gradient(180deg, #059669 100%, transparent 0%),
+                  linear-gradient(270deg, #059669 0%, transparent 0%);
+      background-position: bottom left, bottom right, top right, top left;
+      background-size: 100% 3px, 3px 100%, 100% 3px, 3px 100%;
+      background-repeat: no-repeat;
+    }
+    100% {
+      background: linear-gradient(0deg, #059669 100%, transparent 0%),
+                  linear-gradient(90deg, #059669 100%, transparent 0%),
+                  linear-gradient(180deg, #059669 100%, transparent 0%),
+                  linear-gradient(270deg, #059669 100%, transparent 0%);
+      background-position: bottom left, bottom right, top right, top left;
+      background-size: 100% 3px, 3px 100%, 100% 3px, 3px 100%;
+      background-repeat: no-repeat;
+    }
+  }
+  
+  .experience-highlight {
+    animation: highlightBorder 0.3s ease-in-out;
+    background-color: #d1fae5;
+  }
 }
