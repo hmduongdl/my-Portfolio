@@ -203,7 +203,7 @@ class Portfolio {
               </div>
 
               <!-- Tech Stack Section -->
-              <div>
+              <div class="mt-2">
                 <h2 class="text-2xl font-bold mb-3 flex items-center">
                   <span class="w-2 h-2 bg-clean-accent rounded-full mr-3"></span>
                   Tech Stack
