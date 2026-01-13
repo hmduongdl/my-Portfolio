@@ -127,7 +127,7 @@ class Portfolio {
                   <svg class="w-5 h-5 text-gray-600 group-hover:text-blue-500" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M12 0C5.373 0 0 4.975 0 11.111c0 3.497 1.745 6.616 4.472 8.652V24l4.086-2.242c1.09.301 2.246.464 3.442.464 6.627 0 12-4.974 12-11.111C24 4.975 18.627 0 12 0zm.5 14.969l-3.062-3.259-5.978 3.259L9.938 8.25l3.14 3.259L19 8.25l-6.5 6.719z"/>
                   </svg>
-                </a>
+                </a> 
                 <a href="tel:+84911818016" class="w-10 h-10 rounded-full border-2 border-gray-300 hover:border-green-600 hover:bg-green-50 flex items-center justify-center transition-all group">
                   <svg class="w-5 h-5 text-gray-600 group-hover:text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
@@ -189,7 +189,7 @@ class Portfolio {
                   Experience
                 </h2>
                 <div class="flex flex-col gap-5">
-                  ${experiences.map((exp, index) => `
+                  ${experiences.map((exp) => `
                     <div class="experience-card">
                       <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between mb-2">
                         <h3 class="text-xl font-bold">${exp.role}</h3>
