@@ -6,7 +6,7 @@
   html {
     scroll-behavior: smooth;
   }
-  
+
   body {
     @apply font-sans;
   }
@@ -14,32 +14,50 @@
 
 @layer components {
   .section {
-    @apply min-h-screen flex items-center justify-center px-4 py-20;
+    @apply flex items-center justify-center;
+    @apply px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8;
+    min-height: 100vh;
   }
-  
+
+  @media (max-width: 640px) {
+    .section {
+      min-height: auto;
+      padding-top: 4rem;
+      padding-bottom: 4rem;
+    }
+  }
+
   .section-compact {
+    @apply flex items-center justify-center;
     min-height: auto;
     padding-top: 3rem;
     padding-bottom: 2rem;
   }
-  
-  .container-custom {
-    @apply max-w-5xl mx-auto;
+
+  @media (max-width: 640px) {
+    .section-compact {
+      padding-top: 2rem;
+      padding-bottom: 1.5rem;
+    }
   }
-  
+
+  .container-custom {
+    @apply max-w-5xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
   .link-hover {
     @apply relative after:absolute after:bottom-0 after:left-0 after:h-[1px] after:w-0 after:bg-gray-900 after:transition-all after:duration-300 hover:after:w-full;
   }
-  
+
   .tech-tag {
     @apply font-mono text-xs px-3 py-1 bg-clean-bg-alt border border-gray-200 rounded-full inline-block;
   }
-  
+
   .project-card {
     @apply border border-gray-200 rounded-lg p-6 transition-all duration-300;
     @apply hover:shadow-xl hover:-translate-y-2;
   }
-  
+
   .experience-card {
     @apply border-l-4 border-gray-300 rounded-lg bg-white/70 transition-all duration-200;
     @apply px-5 py-5 md:px-7 md:py-6;
@@ -49,9 +67,9 @@
     @apply border-clean-accent bg-white shadow-md;
     transform: translateY(-2px);
   }
-  
+
   .gradient-text {
     @apply bg-gradient-to-r from-deep-accent to-deep-accent-alt bg-clip-text text-transparent;
   }
-  
+
 }
