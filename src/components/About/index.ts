@@ -1,8 +1,10 @@
 import { renderExperience } from './Experience';
 import { renderSkills } from './Skills';
+import { renderProjectsLayer } from './ProjectsLayer';
+import { renderContactLayer } from './ContactLayer';
 
 export const renderAbout = (): string => {
-    return `
+  return `
     <!-- About Section: 200vh height to allow scrolling "through" the content -->
     <section id="about" class="relative" style="height: 200vh;">
       
@@ -10,7 +12,7 @@ export const renderAbout = (): string => {
       <div class="sticky top-0 h-screen flex items-start overflow-hidden pt-[46px] md:pt-[54px]">
       
         <!-- Background Image with Blur (Absolute to sticky container) -->
-        <div class="absolute inset-0 -z-10">
+        <div id="about-bg" class="absolute inset-0 -z-10">
           <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('/profile-background.jpg'); filter: blur(8px); transform: scale(1.1);"></div>
           <div class="absolute inset-0 bg-white/80"></div>
         </div>
@@ -18,7 +20,7 @@ export const renderAbout = (): string => {
         <div class="container-custom relative z-10 w-full">
           <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-24 items-stretch">
             <!-- Left Column: Avatar and About Me -->
-            <div class="bg-white/90 backdrop-blur-sm rounded-xl p-6 md:px-8 md:py-6 shadow-lg relative h-full flex flex-col">
+            <div id="about-left" class="bg-white/90 backdrop-blur-sm rounded-xl p-6 md:px-8 md:py-6 shadow-lg relative h-full flex flex-col transition-transform duration-700">
               <!-- Avatar with Signature Overlay -->
               <div class="relative w-auto mx-auto overflow-visible" style="width: 256px; margin-bottom: 43px; margin-top: 0;">
                 <!-- Avatar -->
@@ -75,9 +77,11 @@ export const renderAbout = (): string => {
             </div>
 
             <!-- Right Column: Layered Content (Experience / Tech Stack) -->
-            <div class="grid grid-cols-1">
+            <div id="about-right" class="grid grid-cols-1 transition-transform duration-700">
               ${renderExperience()}
               ${renderSkills()}
+              ${renderProjectsLayer()}
+              ${renderContactLayer()}
             </div>
           </div>
         </div>
