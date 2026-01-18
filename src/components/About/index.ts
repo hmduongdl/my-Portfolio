@@ -15,7 +15,7 @@ export const renderAbout = (): string => {
           <div class="absolute inset-0 bg-white/80"></div>
         </div>
         
-        <div class="container-custom relative z-10 w-full mt-[15px]">
+        <div class="container-custom relative z-10 w-full mt-[10px]">
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-10 lg:gap-24 items-stretch">
             <!-- Left Column: Avatar and About Me -->
             <div id="about-left" class="bg-white/90 backdrop-blur-sm rounded-xl p-4 md:p-5 shadow-lg relative h-full flex flex-col transition-transform duration-700 overflow-hidden">
