@@ -15,9 +15,10 @@ export function initAboutCarousel() {
             carouselTrack.style.transform = `translateX(${translateX}%)`;
         }
 
-        // Update dots
-        dots.forEach((dot, i) => {
-            if (i === index) {
+        // Update ALL dots (both mobile and desktop)
+        dots.forEach((dot) => {
+            const dotSlide = parseInt(dot.getAttribute('data-slide') || '0');
+            if (dotSlide === index) {
                 dot.classList.add('active');
                 dot.classList.remove('bg-gray-300');
                 dot.classList.add('bg-clean-accent');
@@ -46,11 +47,12 @@ export function initAboutCarousel() {
         }
     }
 
-    // Dot click handlers
-    dots.forEach((dot, index) => {
+    // Dot click handlers - use data-slide attribute
+    dots.forEach((dot) => {
         dot.addEventListener('click', () => {
+            const slideIndex = parseInt(dot.getAttribute('data-slide') || '0');
             stopAutoSlide();
-            showSlide(index);
+            showSlide(slideIndex);
             startAutoSlide(); // Restart auto-slide after manual interaction
         });
     });
