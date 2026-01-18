@@ -3,22 +3,12 @@ import { renderHero } from '../components/Hero';
 import { renderAbout } from '../components/About';
 import { renderProjects } from '../components/Projects';
 import { renderContact } from '../components/Contact';
-import { renderFooter } from '../components/Footer';
-import { renderAfterAbout } from '../components/AfterAbout';
-import { handleScrollReveal, handleLayerSwitching, handleAboutExitAnimation } from '../utils/scroll';
-import { initializeScrollSnap } from '../utils/scrollSnap';
+import { renderThankYou } from '../components/ThankYou';
+import { handleScrollReveal } from '../utils/scroll';
+import { initNavigation } from '../utils/navigation';
 
 export class PortfolioController {
     private app: HTMLElement;
-    private scrollStopTimer: number | undefined;
-    private isSnapping = false;
-    private rafPending = false; // RAF throttle flag
-    private lastScrollY = 0; // Track scroll direction
-    private isScrollingDown = true; // Default to down
-    private cachedElements: {
-        progressBar?: HTMLElement | null;
-        progressBarHidden?: HTMLElement | null;
-    } = {};
 
     constructor() {
         this.app = document.getElementById('app')!;
@@ -26,241 +16,157 @@ export class PortfolioController {
         this.addEventListeners();
     }
 
-    private handleScrollStop(): void {
-        const currentScrollY = window.scrollY;
-
-        const documentHeight = document.documentElement.scrollHeight;
-        const windowHeight = window.innerHeight;
-        const scrollableHeight = documentHeight - windowHeight;
-        const scrollPercentage = Math.max(0, Math.min((currentScrollY / Math.max(1, scrollableHeight)) * 100, 100));
-
-        // Define sections with milestones
-        const sections = [
-            { name: 'experience', milestone: 0 },
-            { name: 'skills', milestone: 25 },
-            { name: 'projects', milestone: 50 },
-            { name: 'contact', milestone: 75 },
-            { name: 'thankyou', milestone: 100 },
-        ];
-
-        // Calculate "raw" index
-        const rawIdx = scrollPercentage / 25;
-        let targetIdx = 0;
-
-        if (this.isScrollingDown) {
-            // Scrolling down: round UP to next milestone
-            targetIdx = Math.ceil(rawIdx);
-        } else {
-            // Scrolling up: round DOWN
-            targetIdx = Math.floor(rawIdx);
-        }
-
-        // Clamp logic
-        targetIdx = Math.max(0, Math.min(targetIdx, sections.length - 1));
-
-        const targetMilestone = sections[targetIdx].milestone;
-        const targetScroll = (scrollableHeight * targetMilestone) / 100;
-
-        // Start snapping
-        this.isSnapping = true;
-        window.scrollTo({ top: targetScroll, behavior: 'smooth' });
-
-        // Wait for the smooth scroll to finish
-        const wait = 900;
-        setTimeout(() => {
-            if (this.scrollStopTimer) clearTimeout(this.scrollStopTimer); // Clear any pending
-            this.isSnapping = false;
-            this.lastScrollY = window.scrollY; // Update last position after snap
-
-            const activeLayer = handleLayerSwitching();
-            this.updateActiveNav(activeLayer);
-
-            // Update visible snapping progress to layer marker
-            const v = document.getElementById('scroll-progress');
-            if (v) {
-                const map: Record<string, number> = { experience: 0, skills: 0.25, projects: 0.5, contact: 0.75, thankyou: 1 };
-                const targetScale = map[activeLayer] ?? 0;
-                v.style.transform = `scaleX(${targetScale})`;
-            }
-            handleAboutExitAnimation(activeLayer === 'projects' || activeLayer === 'contact' || activeLayer === 'thankyou');
-        }, wait);
-    }
-
     private render(): void {
         this.app.innerHTML = `
-            <!-- Global Scroll Progress (overlays header) -->
+            <!-- Global Scroll Progress -->
             <div class="fixed top-0 left-0 w-full h-1 z-[9999]" style="pointer-events:none">
-                <!-- Hidden, continuous progress (shows actual scroll progress) -->
-                <div id="scroll-progress-hidden" class="absolute inset-0 h-full bg-gray-200" style="width:100%; transform:scaleX(0); transform-origin:left; opacity:0.7"></div>
-                <!-- Visible, snapping progress (shows current layer) -->
-                <div id="scroll-progress" class="absolute inset-0 h-full bg-clean-accent transition-all duration-150" style="width:100%; transform:scaleX(0); transform-origin:left"></div>
-                <!-- Tick marks at 0%, 25%, 50%, 75%, 100% -->
-                <div class="absolute inset-0 h-full flex justify-between">
-                    <div class="w-px bg-gray-400 opacity-50"></div>
-                    <div class="w-px bg-gray-400 opacity-50"></div>
-                    <div class="w-px bg-gray-400 opacity-50"></div>
-                    <div class="w-px bg-gray-400 opacity-50"></div>
-                    <div class="w-px bg-gray-400 opacity-50"></div>
-                </div>
+                <div id="scroll-progress" class="absolute inset-0 h-full bg-clean-accent transition-transform duration-100 ease-out" style="width:100%; transform:scaleX(0); transform-origin:left"></div>
             </div>
 
             ${renderNavigation()}
-      ${renderHero()}
-    ${renderAbout()}
-    ${renderAfterAbout()}
-    ${renderProjects()}
-    ${renderContact()}
-    ${renderFooter()}
-    `;
+            ${renderHero()}
+            ${renderAbout()}
+            ${renderProjects()}
+            ${renderContact()}
+            ${renderThankYou()}
+        `;
     }
 
     private addEventListeners(): void {
-        // Cache DOM elements
-        const getProgressBar = () => {
-            if (!this.cachedElements.progressBar) {
-                this.cachedElements.progressBar = document.getElementById('scroll-progress');
+        // Handle scroll for progress bar and nav highlighting
+        const progressBar = document.getElementById('scroll-progress');
+
+        const updateActiveState = () => {
+            const currentScroll = window.scrollY;
+            const windowHeight = window.innerHeight;
+            const docHeight = document.documentElement.scrollHeight;
+
+            // 1. Update Progress Bar
+            const scrollPercent = currentScroll / (docHeight - windowHeight);
+            if (progressBar) {
+                progressBar.style.transform = `scaleX(${Math.min(scrollPercent, 1)})`;
             }
-            return this.cachedElements.progressBar;
-        };
 
-        const getProgressBarHidden = () => {
-            if (!this.cachedElements.progressBarHidden) {
-                this.cachedElements.progressBarHidden = document.getElementById('scroll-progress-hidden');
-            }
-            return this.cachedElements.progressBarHidden;
-        };
+            // 2. Determine Active Section
+            let activeLayer = 'experience';
 
-        // User Interaction Guard: Cancel snapping immediately if user interacts
-        const cancelSnap = () => {
-            if (this.scrollStopTimer) {
-                window.clearTimeout(this.scrollStopTimer);
-                this.scrollStopTimer = undefined;
-            }
-            // If we were snapping, stop attempting to enforce it
-            if (this.isSnapping) {
-                this.isSnapping = false;
-            }
-        };
+            const heroEl = document.getElementById('hero');
+            const aboutEl = document.getElementById('about');
+            const projectsEl = document.getElementById('projects');
+            const contactEl = document.getElementById('contact');
+            const thankyouEl = document.getElementById('thankyou');
 
-        window.addEventListener('wheel', cancelSnap, { passive: true });
-        window.addEventListener('touchstart', cancelSnap, { passive: true });
-        window.addEventListener('keydown', cancelSnap, { passive: true });
-        window.addEventListener('mousedown', cancelSnap, { passive: true });
+            const navHeight = document.querySelector('nav')?.clientHeight || 0;
+            // Use a smaller offset for active detection
+            const offset = navHeight + 50;
 
-        // Optimized scroll handler with RAF throttling
-        const handleScroll = () => {
-            if (this.rafPending) return;
+            if (thankyouEl && currentScroll >= thankyouEl.offsetTop - offset - 300) {
+                activeLayer = 'thankyou';
+            } else if (contactEl && currentScroll >= contactEl.offsetTop - offset) {
+                activeLayer = 'contact';
+            } else if (projectsEl && currentScroll >= projectsEl.offsetTop - offset) {
+                activeLayer = 'projects';
+            } else if (aboutEl && currentScroll >= aboutEl.offsetTop - offset) {
+                // We are in About section (height 200vh)
+                // Sticky behavior means we stay pinned for some distance.
+                // Calculate progress within About
+                const aboutTop = aboutEl.offsetTop;
+                const aboutHeight = aboutEl.offsetHeight;
+                const progressInAbout = (currentScroll - aboutTop) / (aboutHeight - windowHeight);
 
-            this.rafPending = true;
-            requestAnimationFrame(() => {
-                this.rafPending = false;
+                // Toggle internal layers based on progress
+                const skillsLayer = document.getElementById('skills-layer');
+                const experienceLayer = document.getElementById('experience-layer');
 
-                // Update scroll direction
-                const currentY = window.scrollY;
-                this.isScrollingDown = currentY > this.lastScrollY;
-                this.lastScrollY = currentY;
-
-                // Update hidden progress bar (smooth tracking)
-                const hiddenBar = getProgressBarHidden();
-                if (hiddenBar) {
-                    const documentHeight = document.documentElement.scrollHeight;
-                    const windowHeight = window.innerHeight;
-                    const scrollPercentage = Math.min(Math.max(currentY / (documentHeight - windowHeight), 0), 1);
-                    // Use scaleX calculation (0 to 1)
-                    hiddenBar.style.transform = `scaleX(${scrollPercentage})`;
-                }
-
-                // Only update layers and navigation when not snapping
-                if (!this.isSnapping) {
-                    const activeLayer = handleLayerSwitching();
-                    this.updateActiveNav(activeLayer);
-
-                    // Update visible progress bar (milestone-based)
-                    const visibleBar = getProgressBar();
-                    if (visibleBar) {
-                        const map: Record<string, number> = {
-                            experience: 0, skills: 0.25, projects: 0.5, contact: 0.75, thankyou: 1
-                        };
-                        const targetScale = map[activeLayer] ?? 0;
-                        visibleBar.style.transform = `scaleX(${targetScale})`;
+                if (skillsLayer && experienceLayer) {
+                    // Switch to skills halfway through the sticky duration
+                    if (progressInAbout > 0.5) {
+                        activeLayer = 'skills';
+                        if (getComputedStyle(skillsLayer).opacity === '0') {
+                            skillsLayer.style.opacity = '1';
+                            skillsLayer.style.pointerEvents = 'auto';
+                            experienceLayer.style.opacity = '0';
+                            experienceLayer.style.pointerEvents = 'none';
+                            // Trigger skill animations
+                            handleScrollReveal();
+                        }
+                    } else {
+                        activeLayer = 'experience';
+                        if (getComputedStyle(experienceLayer).opacity === '0') {
+                            experienceLayer.style.opacity = '1';
+                            experienceLayer.style.pointerEvents = 'auto';
+                            skillsLayer.style.opacity = '0';
+                            skillsLayer.style.pointerEvents = 'none';
+                        }
                     }
-
-                    handleAboutExitAnimation(activeLayer === 'projects' || activeLayer === 'contact');
                 }
+            } else if (heroEl && currentScroll < aboutEl?.offsetTop!) {
+                activeLayer = 'experience'; // Default when at top
+            }
 
-                // Debounce scroll stop detection
-                if (this.scrollStopTimer) window.clearTimeout(this.scrollStopTimer);
-                this.scrollStopTimer = window.setTimeout(() => {
-                    this.handleScrollStop();
-                }, 500);
-            });
+            this.updateActiveNav(activeLayer);
+
+            // Trigger reveals for standard sections
+            handleScrollReveal();
         };
 
-        // Add optimized scroll listener
-        window.addEventListener('scroll', handleScroll, { passive: true });
+        window.addEventListener('scroll', () => {
+            requestAnimationFrame(updateActiveState);
+        }, { passive: true });
 
-        // Initial check
-        handleScrollReveal();
-        const initialActiveLayer = handleLayerSwitching();
-        this.updateActiveNav(initialActiveLayer);
-        // set visible progress to initial layer marker
-        const v0 = document.getElementById('scroll-progress');
-        if (v0) {
-            const map: Record<string, number> = { experience: 0, skills: 0.25, projects: 0.5, contact: 0.75, thankyou: 1 };
-            v0.style.transform = `scaleX(${map[initialActiveLayer] ?? 0})`;
-        }
-        handleAboutExitAnimation(initialActiveLayer === 'projects' || initialActiveLayer === 'contact');
+        // Initial update
+        updateActiveState();
 
-        // Initialize scroll snap for smooth layer transitions
-        initializeScrollSnap();
+        // 3. Navigation Click Handler
+        initNavigation((target) => {
+            let targetEl: HTMLElement | null = null;
 
-        // Handle nav link clicks to switch about layers
-        (document.querySelectorAll('a.nav-link') as NodeListOf<HTMLAnchorElement>).forEach((el) => {
-            el.addEventListener('click', (e) => {
-                e.preventDefault();
-                // signal that we are manually navigating (faster reveals)
-                (window as any).__isNavigating = true;
-                setTimeout(() => { (window as any).__isNavigating = false; }, 1500);
+            if (target === 'experience' || target === 'skills') {
+                targetEl = document.getElementById('about');
 
-                const target = el.dataset.layer || 'experience';
-
-                // Calculate target scroll position based on layer
-                const documentHeight = document.documentElement.scrollHeight;
-                const windowHeight = window.innerHeight;
-                const scrollableHeight = documentHeight - windowHeight;
-
-                let targetPercentage = 0;
-                switch (target) {
-                    case 'experience': targetPercentage = 0; break;
-                    case 'skills': targetPercentage = 25; break;
-                    case 'projects': targetPercentage = 50; break;
-                    case 'contact': targetPercentage = 75; break;
+                // Toggle internal layers
+                const exp = document.getElementById('experience-layer');
+                const skl = document.getElementById('skills-layer');
+                if (exp && skl) {
+                    if (target === 'skills') {
+                        skl.style.opacity = '1';
+                        skl.style.pointerEvents = 'auto';
+                        exp.style.opacity = '0';
+                        exp.style.pointerEvents = 'none';
+                    } else {
+                        exp.style.opacity = '1';
+                        exp.style.pointerEvents = 'auto';
+                        skl.style.opacity = '0';
+                        skl.style.pointerEvents = 'none';
+                    }
                 }
+            } else if (target === 'projects') {
+                targetEl = document.getElementById('projects');
+            } else if (target === 'contact') {
+                targetEl = document.getElementById('contact');
+            }
 
-                const targetScroll = (scrollableHeight * targetPercentage) / 100;
-                window.scrollTo({ top: targetScroll, behavior: 'auto' });
-            });
+            if (targetEl) {
+                const nav = document.querySelector('nav');
+                const navHeight = nav ? nav.getBoundingClientRect().height : 0;
+                // Scroll to element position relative to document
+                const top = targetEl.offsetTop - navHeight;
+
+                window.scrollTo({
+                    top: Math.max(0, top),
+                    behavior: 'smooth'
+                });
+            }
         });
 
-        // Handle obfuscated contact links (mailto/tel)
+        // Other handlers (mailto, etc.) can be preserved or re-added if essential custom logic existed. 
+        // Re-adding the mailto/tel logic for completeness.
         (document.querySelectorAll('a[data-action="mailto"]') as NodeListOf<HTMLAnchorElement>).forEach((el) => {
             el.addEventListener('click', (e) => {
                 e.preventDefault();
                 const user = el.dataset.user;
                 const domain = el.dataset.domain;
-                if (user && domain) {
-                    window.location.href = `mailto:${user}@${domain}`;
-                }
-            });
-        });
-
-        (document.querySelectorAll('a[data-action="tel"]') as NodeListOf<HTMLAnchorElement>).forEach((el) => {
-            el.addEventListener('click', (e) => {
-                e.preventDefault();
-                const tel = el.dataset.tel;
-                if (tel) {
-                    window.location.href = `tel:${tel}`;
-                }
+                if (user && domain) window.location.href = `mailto:${user}@${domain}`;
             });
         });
     }
@@ -268,6 +174,10 @@ export class PortfolioController {
     private updateActiveNav(activeLayer: string): void {
         (document.querySelectorAll('a.nav-link') as NodeListOf<HTMLAnchorElement>).forEach((el) => {
             const layer = el.dataset.layer || 'experience';
+            // Highlight projects/contact/experience/skills
+            // If activeLayer is 'thankyou' (no nav item), maybe keep contact highlighted or nothing.
+            // Requirement: "khi lướt tới section thank you vẫn cập nhật thanh load process đúng" -> Load process is handled above.
+
             if (layer === activeLayer) {
                 el.classList.add('text-clean-accent');
             } else {

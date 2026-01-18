@@ -104,121 +104,54 @@ export function handleLayerSwitching(): string {
     if (documentHeight > windowHeight) {
         const scrollPercentage = (scrollTop / (documentHeight - windowHeight)) * 100;
 
-        // Use cached elements or query and cache them
+        // Determine active layer based on percentage
+        if (scrollPercentage >= 80) {
+            activeLayer = 'thankyou';
+        } else if (scrollPercentage >= 60) {
+            activeLayer = 'contact';
+        } else if (scrollPercentage >= 40) {
+            activeLayer = 'projects';
+        } else if (scrollPercentage >= 20) {
+            activeLayer = 'skills';
+        } else {
+            activeLayer = 'experience';
+        }
+
+        // Manage About Card Internal Layers (Experience vs Skills)
         if (!layerCache.experience) layerCache.experience = document.getElementById('experience-layer');
         if (!layerCache.skills) layerCache.skills = document.getElementById('skills-layer');
-        if (!layerCache.projects) layerCache.projects = document.getElementById('projects-layer');
-        if (!layerCache.contact) layerCache.contact = document.getElementById('contact-layer');
-        if (!layerCache.thankyou) layerCache.thankyou = document.getElementById('thankyou-layer');
 
-        const { experience: experienceLayer, skills: skillsLayer, projects: projectsLayer, contact: contactLayer, thankyou: thankyouLayer } = layerCache;
-
-
-        // About Section Layer Switching (5 partitions)
-        // 0-20%: Experience
-        // 20-40%: Skills
-        // 40-60%: Projects
-        // 60-80%: Contact
-        // 80-100%: Thank You
-        if (experienceLayer && skillsLayer && projectsLayer && contactLayer) {
-            if (scrollPercentage >= 80) {
-                // Thank you / final layer (may not exist yet)
-                activeLayer = 'thankyou';
-                experienceLayer.style.opacity = '0';
-                experienceLayer.style.pointerEvents = 'none';
-                skillsLayer.style.opacity = '0';
-                skillsLayer.style.pointerEvents = 'none';
-                projectsLayer.style.opacity = '0';
-                projectsLayer.style.pointerEvents = 'none';
-                contactLayer.style.opacity = '0';
-                contactLayer.style.pointerEvents = 'none';
-                if (thankyouLayer) {
-                    thankyouLayer.style.opacity = '1';
-                    thankyouLayer.style.pointerEvents = 'auto';
-                }
-            } else if (scrollPercentage >= 60) {
-                // Contact Layer
-                activeLayer = 'contact';
-                experienceLayer.style.opacity = '0';
-                experienceLayer.style.pointerEvents = 'none';
-                skillsLayer.style.opacity = '0';
-                skillsLayer.style.pointerEvents = 'none';
-                projectsLayer.style.opacity = '0';
-                projectsLayer.style.pointerEvents = 'none';
-                contactLayer.style.opacity = '1';
-                contactLayer.style.pointerEvents = 'auto';
-                if (thankyouLayer) {
-                    thankyouLayer.style.opacity = '0';
-                    thankyouLayer.style.pointerEvents = 'none';
-                }
-            } else if (scrollPercentage >= 40) {
-                // Projects Layer
-                activeLayer = 'projects';
-                experienceLayer.style.opacity = '0';
-                experienceLayer.style.pointerEvents = 'none';
-                skillsLayer.style.opacity = '0';
-                skillsLayer.style.pointerEvents = 'none';
-                // Quick appear: start with 0 -> 30% at 80ms, then full after split duration
-                if ((window as any).__isNavigating) {
-                    projectsLayer.style.opacity = '1';
-                    projectsLayer.style.pointerEvents = 'auto';
-                    (window as any).__projectsTimers = (window as any).__projectsTimers || {};
-                    if ((window as any).__projectsTimers.q) clearTimeout((window as any).__projectsTimers.q);
-                    if ((window as any).__projectsTimers.full) clearTimeout((window as any).__projectsTimers.full);
-                } else {
-                    projectsLayer.style.opacity = '0';
-                    projectsLayer.style.pointerEvents = 'auto';
-                    (window as any).__projectsTimers = (window as any).__projectsTimers || {};
-                    // clear previous timers
-                    if ((window as any).__projectsTimers.q) clearTimeout((window as any).__projectsTimers.q);
-                    if ((window as any).__projectsTimers.full) clearTimeout((window as any).__projectsTimers.full);
-                    // quick fade to 30% after 80ms
-                    (window as any).__projectsTimers.q = setTimeout(() => {
-                        projectsLayer.style.opacity = '0.3';
-                    }, 80) as unknown as number;
-                    // set to full opacity after split duration (match CSS split duration)
-                    const afterFull = 800;
-                    (window as any).__projectsTimers.full = setTimeout(() => {
-                        projectsLayer.style.opacity = '1';
-                    }, afterFull) as unknown as number;
-                }
-                contactLayer.style.opacity = '0';
-                contactLayer.style.pointerEvents = 'none';
-                if (thankyouLayer) {
-                    thankyouLayer.style.opacity = '0';
-                    thankyouLayer.style.pointerEvents = 'none';
-                }
-            } else if (scrollPercentage >= 20) {
-                // Skills Layer
-                activeLayer = 'skills';
-                experienceLayer.style.opacity = '0';
-                experienceLayer.style.pointerEvents = 'none';
-                skillsLayer.style.opacity = '1';
-                skillsLayer.style.pointerEvents = 'auto';
-                projectsLayer.style.opacity = '0';
-                projectsLayer.style.pointerEvents = 'none';
-                contactLayer.style.opacity = '0';
-                contactLayer.style.pointerEvents = 'none';
-                if (thankyouLayer) {
-                    thankyouLayer.style.opacity = '0';
-                    thankyouLayer.style.pointerEvents = 'none';
-                }
-                animateSkillProgress(skillsLayer);
-            } else {
-                // Experience Layer
-                activeLayer = 'experience';
+        const { experience: experienceLayer, skills: skillsLayer } = layerCache;
+        if (experienceLayer && skillsLayer) {
+            if (activeLayer === 'experience') {
                 experienceLayer.style.opacity = '1';
                 experienceLayer.style.pointerEvents = 'auto';
                 skillsLayer.style.opacity = '0';
                 skillsLayer.style.pointerEvents = 'none';
-                projectsLayer.style.opacity = '0';
-                projectsLayer.style.pointerEvents = 'none';
-                contactLayer.style.opacity = '0';
-                contactLayer.style.pointerEvents = 'none';
-                if (thankyouLayer) {
-                    thankyouLayer.style.opacity = '0';
-                    thankyouLayer.style.pointerEvents = 'none';
-                }
+            } else if (activeLayer === 'skills') {
+                skillsLayer.style.opacity = '1';
+                skillsLayer.style.pointerEvents = 'auto';
+                experienceLayer.style.opacity = '0';
+                experienceLayer.style.pointerEvents = 'none';
+                animateSkillProgress(skillsLayer);
+            } else {
+                // For projects, contact, thankyou: Hide both internal layers
+                experienceLayer.style.opacity = '0';
+                experienceLayer.style.pointerEvents = 'none';
+                skillsLayer.style.opacity = '0';
+                skillsLayer.style.pointerEvents = 'none';
+            }
+        }
+
+        // Thank You layer logic (if exists separate)
+        if (!layerCache.thankyou) layerCache.thankyou = document.getElementById('thankyou-layer');
+        if (layerCache.thankyou) {
+            if (activeLayer === 'thankyou') {
+                layerCache.thankyou.style.opacity = '1';
+                layerCache.thankyou.style.pointerEvents = 'auto';
+            } else {
+                layerCache.thankyou.style.opacity = '0';
+                layerCache.thankyou.style.pointerEvents = 'none';
             }
         }
     }
@@ -277,61 +210,17 @@ export function snapToLayerIfClose(): string | null {
     return null;
 }
 
-export function handleAboutExitAnimation(force = false): void {
-    const about = document.getElementById('about');
-    const after = document.getElementById('after-about');
-    if (!about || !after) return;
 
-    const rect = about.getBoundingClientRect();
-    const windowHeight = window.innerHeight;
 
-    // If we've scrolled past the About section (bottom moved above viewport)
-    const passed = rect.bottom <= windowHeight * 0.15; // adjustable threshold
-
+export function handleAboutExitAnimation(_force = false): void {
+    // Split animation removed: ensure any split-related classes are cleared.
     const left = document.getElementById('about-left');
     const right = document.getElementById('about-right');
+    const aboutBg = document.getElementById('about-bg');
 
-    // clear any existing timers to avoid duplicates
-    const timers = (window as any).__aboutTimers || {};
-    if (timers.step1) clearTimeout(timers.step1);
-    if (timers.step2) clearTimeout(timers.step2);
-    if (timers.reveal) clearTimeout(timers.reveal);
-
-    const doSplitSequence = () => {
-        // primary split -> push out
-        left?.classList.add('about-split');
-        right?.classList.add('about-split');
-        // also apply background split class immediately
-        const aboutBg = document.getElementById('about-bg');
-        aboutBg?.classList.add('bg-split');
-
-        const stepDuration = 800; // CSS duration for full split (ms)
-        (window as any).__aboutTimers = {};
-
-        // reveal overlay 30ms after split starts (user request)
-        (window as any).__aboutTimers.reveal = setTimeout(() => {
-            after.classList.add('revealed');
-            // hide background slightly when overlay appears
-            const aboutBg = document.getElementById('about-bg');
-            aboutBg?.classList.add('bg-hidden');
-        }, 30) as unknown as number;
-
-        // still perform secondary push later (no longer gating the reveal)
-        (window as any).__aboutTimers.step1 = setTimeout(() => {
-            left?.classList.add('about-split-2');
-            right?.classList.add('about-split-2');
-        }, stepDuration) as unknown as number;
-    };
-
-    if (passed || force) {
-        doSplitSequence();
-    } else {
-        // reset everything and cancel timers
-        left?.classList.remove('about-split', 'about-split-2');
-        right?.classList.remove('about-split', 'about-split-2');
-        after.classList.remove('revealed');
-        const aboutBg = document.getElementById('about-bg');
-        aboutBg?.classList.remove('bg-split', 'bg-hidden');
-        (window as any).__aboutTimers = {};
-    }
+    // No split classes to remove anymore; ensure no-op
+    left?.classList.remove('about-split', 'about-split-2');
+    right?.classList.remove('about-split', 'about-split-2');
+    aboutBg?.classList.remove('bg-split');
+    // Do not add or trigger any split animation; keep existing visibility state.
 }

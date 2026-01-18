@@ -2,31 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  html {
-    scroll-behavior: smooth;
-    scrollbar-width: none;
-    /* Firefox */
-    /* Scroll stops handled by JavaScript debouncing + 20/80 rule */
-  }
-
-  /* Chrome, Safari, Opera */
-  html::-webkit-scrollbar {
-    display: none;
-  }
-
-  body {
-    @apply font-sans;
-    -ms-overflow-style: none;
-    /* IE and Edge */
-  }
-}
 
 @layer components {
   .section {
     @apply flex items-center justify-center;
     @apply px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8;
     min-height: 100vh;
+    /* Align sections to scroll-snap */
+    scroll-snap-align: start;
   }
 
   @media (max-width: 640px) {
@@ -157,38 +140,19 @@
     transition: color 300ms ease-in-out;
   }
 
-  /* About split animation */
+  /* About section - uses sticky for base positioning */
+  #about {
+    position: relative;
+    min-height: 100vh;
+    z-index: 10;
+  }
+
   #about-left,
   #about-right {
     transition: transform 800ms cubic-bezier(0.4, 0, 0.2, 1), opacity 800ms ease-in-out;
   }
 
   /* primary split: push columns fully out of viewport (vw-based) */
-  #about-left.about-split {
-    transform: translateX(calc(-100vw - 2rem));
-    opacity: 0.95;
-  }
-
-  #about-right.about-split {
-    transform: translateX(calc(100vw + 2rem));
-    opacity: 0.95;
-  }
-
-  /* secondary split: push further but not excessively (ensure quick return) */
-  #about-left.about-split-2 {
-    transform: translateX(calc(-150vw - 2rem));
-  }
-
-  #about-right.about-split-2 {
-    transform: translateX(calc(150vw + 2rem));
-  }
-
-  /* After-about reveal */
-  #after-about.revealed {
-    opacity: 1 !important;
-    transform: translateY(0) !important;
-    pointer-events: auto !important;
-  }
 
   /* About background sync */
   #about-bg {
@@ -197,10 +161,35 @@
   }
 
   /* Layer quick-fade helper for projects/contact appearing */
-  #projects-layer,
-  #contact-layer {
+  #projects-layer {
     transition: opacity 240ms ease-in-out, transform 400ms ease-in-out;
   }
+
+  /* Contact section - fixed overlay that reveals on top */
+  /* Contact section - standard scroll flow */
+  #contact {
+    position: relative;
+    min-height: 100vh;
+    z-index: 10;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 54px;
+    padding-bottom: 2rem;
+    box-sizing: border-box;
+    background: linear-gradient(to bottom right, #ffffff 0%, #f9fafb 100%);
+  }
+
+  @media (max-width: 768px) {
+    #contact {
+      padding-top: 46px;
+    }
+  }
+
+  #contact::-webkit-scrollbar {
+    display: none;
+  }
+
 
   /* Hidden continuous progress bar (beneath visible snapping bar) */
   #scroll-progress-hidden {
@@ -225,17 +214,59 @@
     contain: layout style paint;
   }
 
-  /* subtle zoom/dim when split starts */
-  #about-bg.bg-split {
-    transform: scale(1.08);
-    opacity: 0.95;
-    filter: blur(10px) saturate(0.95);
+  /* split animations removed */
+}
+
+/* Projects section - fixed overlay that reveals on top of About after split */
+/* Projects section - standard scroll flow */
+#projects {
+  position: relative;
+  min-height: 100vh;
+  z-index: 10;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 54px;
+  padding-bottom: 2rem;
+  box-sizing: border-box;
+  background-color: white;
+}
+
+
+
+@media (max-width: 768px) {
+  #projects {
+    padding-top: 46px;
+  }
+}
+
+
+
+#projects.section {
+  min-height: 100vh;
+  height: auto;
+}
+
+
+
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    /* Enable vertical scroll snapping across sections - DISABLED to fix stuck scroll */
+    /* scroll-snap-type: y mandatory; */
+    /* Hide scrollbar Firefox */
   }
 
-  /* hide/fade when reveal pops up */
-  #about-bg.bg-hidden {
-    transform: scale(1.12);
-    opacity: 0;
-    pointer-events: none;
+  html::-webkit-scrollbar {
+    display: none;
+    /* Hide scrollbar Chrome/Safari/Opera */
+  }
+
+  body {
+    @apply font-sans;
+    -ms-overflow-style: none;
+    /* Hide scrollbar IE/Edge */
   }
 }

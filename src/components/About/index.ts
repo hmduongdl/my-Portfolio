@@ -1,12 +1,10 @@
 import { renderExperience } from './Experience';
 import { renderSkills } from './Skills';
-import { renderProjectsLayer } from './ProjectsLayer';
-import { renderContactLayer } from './ContactLayer';
 
 export const renderAbout = (): string => {
   return `
     <!-- About Section: 200vh height to allow scrolling "through" the content -->
-    <section id="about" class="relative" style="height: 200vh;">
+    <section id="about" class="relative" style="height: 150vh;">
       
       <!-- Sticky Container: Keeps content visible while scrolling the parent section -->
       <div class="sticky top-0 h-screen flex items-start overflow-hidden pt-[46px] md:pt-[54px]">
@@ -20,7 +18,7 @@ export const renderAbout = (): string => {
         <div class="container-custom relative z-10 w-full">
           <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-24 items-stretch">
             <!-- Left Column: Avatar and About Me -->
-            <div id="about-left" class="bg-white/90 backdrop-blur-sm rounded-xl p-6 md:px-8 md:py-6 shadow-lg relative h-full flex flex-col transition-transform duration-700">
+            <div id="about-left" class="bg-white/90 backdrop-blur-sm rounded-xl p-6 md:px-8 md:py-6 shadow-lg relative h-full flex flex-col transition-transform duration-700 overflow-hidden">
               <!-- Avatar with Signature Overlay -->
               <div class="relative w-auto mx-auto overflow-visible" style="width: 256px; margin-bottom: 43px; margin-top: 0;">
                 <!-- Avatar -->
@@ -51,7 +49,7 @@ export const renderAbout = (): string => {
               </p>
 
               <!-- Social Links -->
-              <div class="flex gap-4 justify-center mt-3 pb-1">
+              <div class="flex gap-4 justify-center mt-auto pb-1">
                  <a href="https://www.facebook.com/hmd.stewiclez" target="_blank" class="w-10 h-10 rounded-full border-2 border-gray-300 hover:border-blue-600 hover:bg-blue-50 hover:scale-110 flex items-center justify-center transition-all group">
                   <svg class="w-5 h-5 text-gray-600 group-hover:text-blue-600" fill="currentColor" viewBox="0 0 24 24">
                     <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
@@ -80,8 +78,6 @@ export const renderAbout = (): string => {
             <div id="about-right" class="grid grid-cols-1 transition-transform duration-700">
               ${renderExperience()}
               ${renderSkills()}
-              ${renderProjectsLayer()}
-              ${renderContactLayer()}
             </div>
           </div>
         </div>
