@@ -6,7 +6,6 @@ export const renderNavigation = (): string => {
           <a href="#" class="text-xl font-semibold">HMD</a>
           <ul class="flex gap-8">
             <li><a href="#" data-layer="experience" id="nav-about" class="nav-link link-hover text-sm font-medium">About</a></li>
-            <li><a href="#" data-layer="skills" id="nav-skills" class="nav-link link-hover text-sm font-medium">Skills</a></li>
             <li><a href="#" data-layer="projects" id="nav-projects" class="nav-link link-hover text-sm font-medium">Projects</a></li>
             <li><a href="#" data-layer="contact" id="nav-contact" class="nav-link link-hover text-sm font-medium">Contact</a></li>
           </ul>

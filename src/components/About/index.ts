@@ -3,11 +3,11 @@ import { renderSkills } from './Skills';
 
 export const renderAbout = (): string => {
   return `
-    <!-- About Section: Compact height for better flow -->
-    <section id="about" class="relative" style="height: 100vh;">
+    <!-- About Section: Responsive height -->
+    <section id="about" class="relative overflow-x-hidden" style="min-height: 100vh;">
       
-      <!-- Sticky Container: Keeps content visible while scrolling the parent section -->
-      <div class="sticky top-0 h-screen flex items-start overflow-hidden pt-[46px] md:pt-[54px]">
+      <!-- Sticky Container: Desktop only, normal flow on mobile -->
+      <div class="md:sticky md:top-0 h-auto md:h-screen flex items-start overflow-x-hidden pt-[46px] md:pt-[54px] pb-6 md:pb-0">
       
         <!-- Background Image with Blur (Absolute to sticky container) -->
         <div id="about-bg" class="absolute inset-0 -z-10">
@@ -16,18 +16,18 @@ export const renderAbout = (): string => {
         </div>
         
         <div class="container-custom relative z-10 w-full">
-          <div class="grid md:grid-cols-2 lg:grid-cols-2 gap-10 md:gap-16 lg:gap-24 items-stretch">
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-10 lg:gap-24 items-stretch">
             <!-- Left Column: Avatar and About Me -->
-            <div id="about-left" class="bg-white/90 backdrop-blur-sm rounded-xl p-6 md:px-8 md:py-6 shadow-lg relative h-full flex flex-col transition-transform duration-700 overflow-hidden">
+            <div id="about-left" class="bg-white/90 backdrop-blur-sm rounded-xl p-4 md:p-6 md:px-8 md:py-6 shadow-lg relative h-full flex flex-col transition-transform duration-700 overflow-hidden">
               <!-- Avatar with Signature Overlay -->
-              <div class="relative w-auto mx-auto overflow-visible" style="width: 256px; margin-bottom: 43px; margin-top: 0;">
+              <div class="relative w-full max-w-[256px] mx-auto overflow-visible md:overflow-visible" style="margin-bottom: 43px; margin-top: 0;">
                 <!-- Avatar -->
-                <div class="w-64 h-64 rounded-full border-4 border-gray-900 overflow-hidden bg-gray-200">
+                <div class="w-full aspect-square max-w-[256px] rounded-full border-4 border-gray-900 overflow-hidden bg-gray-200 mx-auto">
                   <img src="/img/my-avatar.jpg" alt="Profile Avatar" class="w-full h-full object-cover">
                 </div>
                 
                 <!-- Signature positioned at bottom of avatar --> 
-                <div class="absolute left-1/2" style="bottom: -5.5rem; width: 300px; transform: translateX(-50%);">
+                <div class="absolute left-1/2 hidden md:block" style="bottom: -5.5rem; width: 300px; transform: translateX(-50%);">
                   <img src="/img/signature.png" alt="Signature" class="w-full h-auto object-contain drop-shadow-lg">
                 </div>
               </div>
@@ -74,10 +74,27 @@ export const renderAbout = (): string => {
               
             </div>
 
-            <!-- Right Column: Layered Content (Experience / Tech Stack) -->
-            <div id="about-right" class="grid grid-cols-1 transition-transform duration-700">
-              ${renderExperience()}
-              ${renderSkills()}
+            <!-- Right Column: Auto-sliding Content (Experience / Skills) -->
+            <div id="about-right" class="relative flex flex-col h-auto md:h-full">
+              <!-- Slide Container with horizontal overflow -->
+              <div class="relative overflow-hidden flex-1 min-h-[400px] md:min-h-0">
+                <div class="flex transition-transform duration-700 ease-in-out h-full" id="carousel-track">
+                  <!-- Experience Slide -->
+                  <div class="w-full flex-shrink-0 h-full">
+                    ${renderExperience()}
+                  </div>
+                  <!-- Skills Slide -->
+                  <div class="w-full flex-shrink-0 h-full">
+                    ${renderSkills()}
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Horizontal Slide Dots (Sticky at Bottom) -->
+              <div class="sticky bottom-0 flex justify-center gap-2 py-3 bg-gradient-to-t from-white/95 to-transparent backdrop-blur-sm mt-2">
+                <button class="slide-dot active w-2.5 h-2.5 rounded-full bg-clean-accent transition-all duration-300 hover:scale-125" data-slide="0" aria-label="Go to Experience"></button>
+                <button class="slide-dot w-2.5 h-2.5 rounded-full bg-gray-300 hover:bg-gray-400 transition-all duration-300 hover:scale-125" data-slide="1" aria-label="Go to Skills"></button>
+              </div>
             </div>
           </div>
         </div>

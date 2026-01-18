@@ -6,6 +6,7 @@ import { renderContact } from '../components/Contact';
 import { renderThankYou } from '../components/ThankYou';
 import { handleScrollReveal } from '../utils/scroll';
 import { initNavigation } from '../utils/navigation';
+import { initAboutCarousel } from '../utils/aboutCarousel';
 
 export class PortfolioController {
     private app: HTMLElement;
@@ -33,6 +34,9 @@ export class PortfolioController {
     }
 
     private addEventListeners(): void {
+        // Initialize About section carousel
+        initAboutCarousel();
+
         // Handle scroll for progress bar and nav highlighting
         const progressBar = document.getElementById('scroll-progress');
 
@@ -67,39 +71,8 @@ export class PortfolioController {
             } else if (projectsEl && currentScroll >= projectsEl.offsetTop - offset) {
                 activeLayer = 'projects';
             } else if (aboutEl && currentScroll >= aboutEl.offsetTop - offset) {
-                // We are in About section (height 200vh)
-                // Sticky behavior means we stay pinned for some distance.
-                // Calculate progress within About
-                const aboutTop = aboutEl.offsetTop;
-                const aboutHeight = aboutEl.offsetHeight;
-                const progressInAbout = (currentScroll - aboutTop) / (aboutHeight - windowHeight);
-
-                // Toggle internal layers based on progress
-                const skillsLayer = document.getElementById('skills-layer');
-                const experienceLayer = document.getElementById('experience-layer');
-
-                if (skillsLayer && experienceLayer) {
-                    // Switch to skills halfway through the sticky duration
-                    if (progressInAbout > 0.5) {
-                        activeLayer = 'skills';
-                        if (getComputedStyle(skillsLayer).opacity === '0') {
-                            skillsLayer.style.opacity = '1';
-                            skillsLayer.style.pointerEvents = 'auto';
-                            experienceLayer.style.opacity = '0';
-                            experienceLayer.style.pointerEvents = 'none';
-                            // Trigger skill animations
-                            handleScrollReveal();
-                        }
-                    } else {
-                        activeLayer = 'experience';
-                        if (getComputedStyle(experienceLayer).opacity === '0') {
-                            experienceLayer.style.opacity = '1';
-                            experienceLayer.style.pointerEvents = 'auto';
-                            skillsLayer.style.opacity = '0';
-                            skillsLayer.style.pointerEvents = 'none';
-                        }
-                    }
-                }
+                // In About section - auto-slide handles layer switching
+                activeLayer = 'experience';
             } else if (heroEl && currentScroll < aboutEl?.offsetTop!) {
                 activeLayer = 'experience'; // Default when at top
             }
@@ -122,24 +95,8 @@ export class PortfolioController {
             let targetEl: HTMLElement | null = null;
 
             if (target === 'experience' || target === 'skills') {
+                // Both navigate to About section - auto-slide handles the rest
                 targetEl = document.getElementById('about');
-
-                // Toggle internal layers
-                const exp = document.getElementById('experience-layer');
-                const skl = document.getElementById('skills-layer');
-                if (exp && skl) {
-                    if (target === 'skills') {
-                        skl.style.opacity = '1';
-                        skl.style.pointerEvents = 'auto';
-                        exp.style.opacity = '0';
-                        exp.style.pointerEvents = 'none';
-                    } else {
-                        exp.style.opacity = '1';
-                        exp.style.pointerEvents = 'auto';
-                        skl.style.opacity = '0';
-                        skl.style.pointerEvents = 'none';
-                    }
-                }
             } else if (target === 'projects') {
                 targetEl = document.getElementById('projects');
             } else if (target === 'contact') {
