@@ -7,7 +7,9 @@
   .section {
     @apply flex items-center justify-center;
     @apply px-4 py-12 sm:px-6 sm:py-16 md:py-20 lg:px-8;
-    min-height: 100vh;
+    /* Reduce vertical spacing between sections for denser layout */
+    @apply py-8 sm:py-10 md:py-12 lg:px-8;
+    min-height: 80vh;
     /* Align sections to scroll-snap */
     scroll-snap-align: start;
   }
