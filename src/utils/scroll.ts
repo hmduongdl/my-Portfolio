@@ -112,7 +112,7 @@ export function handleLayerSwitching(): string {
         } else if (scrollPercentage >= 40) {
             activeLayer = 'projects';
         } else if (scrollPercentage >= 20) {
-            activeLayer = 'skills';
+            activeLayer = 'skills'; 
         } else {
             activeLayer = 'experience';
         }
@@ -155,6 +155,9 @@ export function handleLayerSwitching(): string {
             }
         }
     }
+
+    // Trigger snapping logic to ensure smooth transitions
+    snapToLayerIfClose();
 
     return activeLayer;
 }

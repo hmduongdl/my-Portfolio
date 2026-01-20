@@ -144,7 +144,6 @@
   /* About section - uses sticky for base positioning */
   #about {
     position: relative;
-    min-height: 100vh;
     z-index: 10;
   }
 

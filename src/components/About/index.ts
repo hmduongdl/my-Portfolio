@@ -3,20 +3,17 @@ import { renderSkills } from './Skills';
 
 export const renderAbout = (): string => {
   return `
-    <!-- About Section: Responsive height -->
-    <section id="about" class="relative overflow-x-hidden" style="min-height: 100vh;">
+    <!-- About Section -->
+    <section id="about" class="relative overflow-x-hidden bg-gray-100">
       
-      <!-- Sticky Container: Desktop only, normal flow on mobile -->
-      <div class="md:sticky md:top-0 h-auto md:h-screen flex items-start overflow-hidden pt-[46px] md:pt-[54px] pb-4 md:pb-0 bg-gray-100 md:bg-transparent">
-      
+      <div class="relative pt-[30px] pb-[10px] md:pt-[62px] md:pb-[10px]">
         <!-- Background Image with Blur (Desktop only) -->
-        <div id="about-bg" class="absolute inset-0 -z-10 hidden md:block overflow-hidden">
-          <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('/profile-background.jpg'); filter: blur(10px); transform: scale(1.2);"></div>
-          <div class="absolute inset-0 bg-white/80"></div>
+        <div class="absolute inset-x-0 top-0 -z-10 hidden md:block" style="height: auto;">
+          <div class="absolute inset-0 bg-cover bg-center bg-no-repeat" style="background-image: url('/profile-background.jpg'); height: auto;"></div>
         </div>
         
-        <div class="container-custom relative z-10 w-full mt-[10px]">
-          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-10 lg:gap-24 items-stretch">
+        <div class="container-custom relative z-10 w-full">
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 md:gap-10 lg:gap-24 items-stretch">
             <!-- Left Column: Avatar and About Me -->
             <div id="about-left" class="bg-white/90 backdrop-blur-sm rounded-xl p-4 md:p-5 shadow-lg relative h-full flex flex-col transition-transform duration-700 overflow-hidden">
               <!-- Avatar with Signature Overlay -->
@@ -27,7 +24,7 @@ export const renderAbout = (): string => {
                 </div>
                 
                 <!-- Signature positioned at bottom of avatar --> 
-                <div class="absolute left-1/2 hidden md:block" style="bottom: -5.5rem; width: 300px; transform: translateX(-50%);">
+                <div class="absolute left-1/2 block" style="bottom: -5.5rem; width: 300px; transform: translateX(-50%);">
                   <img src="/img/signature.png" alt="Signature" class="w-full h-auto object-contain drop-shadow-lg">
                 </div>
               </div>
@@ -43,7 +40,7 @@ export const renderAbout = (): string => {
                   <span class="w-2 h-2 bg-clean-accent rounded-full mr-3"></span>
                   About Me
                 </h2>
-                <p class="text-sm text-gray-700 leading-relaxed text-justify">
+                <p class="text-gray-700 leading-relaxed text-justify">
                   IT Student at Dalat University and Song Phương Technology, specializing in modern web development and solving real-world technical challenges.
                 </p>
               </div>
