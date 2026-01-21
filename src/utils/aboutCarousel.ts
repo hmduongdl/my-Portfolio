@@ -6,6 +6,48 @@ export function initAboutCarousel() {
     const carouselTrack = document.getElementById('carousel-track');
     let autoSlideInterval: number | null = null;
 
+    function resetAndPlayAnimations() {
+        // 1. Language Bars
+        const bars = document.querySelectorAll('.lang-bar-fill') as NodeListOf<HTMLElement>;
+        bars.forEach(bar => {
+            bar.style.width = '0%';
+            bar.style.transition = 'none'; // Disable transition for instant reset
+        });
+
+        // 2. Skill Circles
+        const circles = document.querySelectorAll('.progress-ring__circle') as NodeListOf<SVGCircleElement>;
+        circles.forEach(circle => {
+            const radius = 18;
+            const circumference = 2 * Math.PI * radius;
+            circle.style.strokeDashoffset = `${circumference}`;
+            circle.style.transition = 'none'; // Disable transition
+        });
+
+        // Force reflow/repaint to apply the reset
+        void document.body.offsetHeight;
+
+        // Re-enable validation and set values
+        setTimeout(() => {
+            // Bars
+            bars.forEach(bar => {
+                const pct = bar.getAttribute('data-percentage') || '0';
+                bar.style.transition = 'width 1500ms cubic-bezier(.2, .8, .2, 1)';
+                bar.style.width = `${pct}%`;
+            });
+
+            // Circles
+            circles.forEach(circle => {
+                const pct = parseInt(circle.getAttribute('data-percentage') || '0');
+                const radius = 18;
+                const circumference = 2 * Math.PI * radius;
+                const offset = circumference - (pct / 100) * circumference;
+
+                circle.style.transition = 'stroke-dashoffset 1500ms ease-in-out';
+                circle.style.strokeDashoffset = `${offset}`;
+            });
+        }, 50);
+    }
+
     function showSlide(index: number) {
         currentSlide = index;
 
@@ -13,6 +55,11 @@ export function initAboutCarousel() {
         if (carouselTrack) {
             const translateX = -index * 100;
             carouselTrack.style.transform = `translateX(${translateX}%)`;
+        }
+
+        // ** Trigger Animation Replay if showing Skills Slide (Index 1) **
+        if (index === 1) {
+            resetAndPlayAnimations();
         }
 
         // Update ALL dots (both mobile and desktop)
