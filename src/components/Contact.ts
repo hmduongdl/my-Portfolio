@@ -41,11 +41,11 @@ export const renderContact = (): string => {
                         <div class="md:col-span-7 flex flex-col gap-6">
                             
                             <!-- ===================== ZONE 2: Name Header (Rounded Pill) ===================== -->
-                            <div class="bg-emerald-600 rounded-full py-1 px-2 inline-flex items-center gap-2 shadow-md">
-                                <div class="w-12 h-12 flex items-center justify-center flex-shrink-0">
+                            <div class="bg-emerald-600 rounded-full py-2 px-6 inline-flex items-center justify-center gap-3 shadow-md">
+                                <div class="w-10 h-10 flex items-center justify-center flex-shrink-0">
                                      <img src="/icons8-zalo-64.png" alt="Zalo" class="w-full h-full object-contain">
                                 </div>
-                                <h3 class="text-xl md:text-2xl font-bold text-white leading-tight whitespace-nowrap">
+                                <h3 class="text-lg md:text-xl font-bold text-white leading-tight whitespace-nowrap">
                                     Hoàng Minh Dương
                                 </h3>
                             </div>
@@ -55,22 +55,22 @@ export const renderContact = (): string => {
                                 <div class="flex gap-4 items-start">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">1</div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Mở ứng dụng Zalo</h4>
-                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">Trên điện thoại hoặc máy tính của bạn</p>
+                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Open Zalo App</h4>
+                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">On your phone or computer</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-4 items-start">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">2</div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Chọn "Quét mã QR"</h4>
-                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">Nằm ở góc trên bên phải màn hình</p>
+                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Select "Scan QR Code"</h4>
+                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">Located at the top right of the screen</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-4 items-start">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">3</div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Hướng camera vào mã QR</h4>
-                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">Và bắt đầu trò chuyện ngay với tôi</p>
+                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Point camera at QR Code</h4>
+                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">And start chatting with me instantly</p>
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +78,7 @@ export const renderContact = (): string => {
                     </div>
 
                     <!-- ===================== ZONE 4: Action Buttons (FULL WIDTH - Separate Row) ===================== -->
-                    <div class="pt-2 border-t border-gray-100 grid grid-cols-2 md:flex md:flex-row gap-3 md:justify-end">
+                    <div class="pt-4 md:pt-2 border-t border-gray-100 grid grid-cols-2 md:flex md:flex-row gap-3 md:justify-end md:pr-0.5">
                         <!-- Download Button -->
                         <button id="btn-download-qr" class="inline-flex items-center justify-center gap-2 px-3 md:px-5 py-3 bg-emerald-600 text-white rounded-xl shadow-md font-medium hover:bg-emerald-700 transition-all text-sm md:text-base">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
@@ -88,7 +88,7 @@ export const renderContact = (): string => {
                         <!-- Copy Link Button -->
                         <button id="btn-copy-link" class="inline-flex items-center justify-center gap-2 px-3 md:px-5 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium shadow-sm hover:bg-gray-50 transition-all text-sm md:text-base">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                            Sao chép link
+                            Copy Link
                         </button>
                     </div>
                 </div>
@@ -121,7 +121,7 @@ export const initContact = (): void => {
                 await navigator.clipboard.writeText(zaloLink);
                 // Simple Toast notification or alert
                 const originalText = btnCopy.innerHTML;
-                btnCopy.innerHTML = `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Đã sao chép!`;
+                btnCopy.innerHTML = `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Copied!`;
                 btnCopy.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
 
                 setTimeout(() => {
