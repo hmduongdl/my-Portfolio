@@ -3,7 +3,7 @@ import { renderHero } from '../components/Hero';
 import { renderAbout } from '../components/About';
 import { renderProjects } from '../components/Projects';
 import { renderContact } from '../components/Contact';
-import { renderThankYou } from '../components/ThankYou';
+import { renderFooter, initFooter } from '../components/Footer';
 import { handleScrollReveal } from '../utils/scroll';
 import { initNavigation } from '../utils/navigation';
 import { initAboutCarousel } from '../utils/aboutCarousel';
@@ -31,7 +31,7 @@ export class PortfolioController {
             ${renderAbout()}
             ${renderProjects()}
             ${renderContact()}
-            ${renderThankYou()}
+            ${renderFooter()}
             ${renderStickySocialButton()}
         `;
     }
@@ -45,6 +45,9 @@ export class PortfolioController {
 
         // Initialize Contact Section Buttons
         initContact();
+
+        // Initialize Footer Navigation
+        initFooter();
 
         // Handle scroll for progress bar and nav highlighting
         const progressBar = document.getElementById('scroll-progress');
@@ -67,14 +70,14 @@ export class PortfolioController {
             const aboutEl = document.getElementById('about');
             const projectsEl = document.getElementById('projects');
             const contactEl = document.getElementById('contact');
-            const thankyouEl = document.getElementById('thankyou');
+            const footerEl = document.getElementById('footer');
 
             const navHeight = document.querySelector('nav')?.clientHeight || 0;
             // Use a smaller offset for active detection
             const offset = navHeight + 50;
 
-            if (thankyouEl && currentScroll >= thankyouEl.offsetTop - offset - 300) {
-                activeLayer = 'thankyou';
+            if (footerEl && currentScroll >= footerEl.offsetTop - offset - 300) {
+                activeLayer = 'footer';
             } else if (contactEl && currentScroll >= contactEl.offsetTop - offset) {
                 activeLayer = 'contact';
             } else if (projectsEl && currentScroll >= projectsEl.offsetTop - offset) {

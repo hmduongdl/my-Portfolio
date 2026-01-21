@@ -8,8 +8,8 @@ export const renderContact = (): string => {
                 <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 font-serif tracking-tight">
                     Get In Touch
                 </h2>
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                    I'm here to help you with any questions or concerns you may have. Don't hesitate to reach out!
+                <p id="contact-typewriter" class="text-lg text-gray-600 max-w-2xl mx-auto min-h-[1.75rem]">
+                    <!-- Text will be injected via JS -->
                 </p>
             </div>
 
@@ -52,21 +52,21 @@ export const renderContact = (): string => {
 
                             <!-- ===================== ZONE 3: Steps List ===================== -->
                             <div class="space-y-5">
-                                <div class="flex gap-4 items-start">
+                                <div class="flex gap-4 items-start opacity-0 translate-y-4 transition-all duration-700 ease-out contact-step" style="transition-delay: 0ms;">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">1</div>
                                     <div>
                                         <h4 class="font-bold text-gray-900 text-lg leading-tight">Open Zalo App</h4>
                                         <p class="text-gray-500 text-base mt-1 leading-relaxed">On your phone or computer</p>
                                     </div>
                                 </div>
-                                <div class="flex gap-4 items-start">
+                                <div class="flex gap-4 items-start opacity-0 translate-y-4 transition-all duration-700 ease-out contact-step" style="transition-delay: 200ms;">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">2</div>
                                     <div>
                                         <h4 class="font-bold text-gray-900 text-lg leading-tight">Select "Scan QR Code"</h4>
                                         <p class="text-gray-500 text-base mt-1 leading-relaxed">Located at the top right of the screen</p>
                                     </div>
                                 </div>
-                                <div class="flex gap-4 items-start">
+                                <div class="flex gap-4 items-start opacity-0 translate-y-4 transition-all duration-700 ease-out contact-step" style="transition-delay: 400ms;">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">3</div>
                                     <div>
                                         <h4 class="font-bold text-gray-900 text-lg leading-tight">Point camera at QR Code</h4>
@@ -82,7 +82,7 @@ export const renderContact = (): string => {
                         <!-- Download Button -->
                         <button id="btn-download-qr" class="inline-flex items-center justify-center gap-2 px-3 md:px-5 py-3 bg-emerald-600 text-white rounded-xl shadow-md font-medium hover:bg-emerald-700 transition-all text-sm md:text-base">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            Tải xuống QR
+                            Download QR
                         </button>
                         
                         <!-- Copy Link Button -->
@@ -116,7 +116,7 @@ export const initContact = (): void => {
     const btnCopy = document.getElementById('btn-copy-link');
     if (btnCopy) {
         btnCopy.addEventListener('click', async () => {
-            const zaloLink = 'https://zalo.me/0911818016';
+            const zaloLink = 'https://sp-hoangminhduong.id.vn/';
             try {
                 await navigator.clipboard.writeText(zaloLink);
                 // Simple Toast notification or alert
@@ -134,6 +134,58 @@ export const initContact = (): void => {
         });
     }
 
+    // 3. Typewriter Effect (Type -> Delete -> Loop)
+    const typeWriterElement = document.getElementById('contact-typewriter');
+    if (typeWriterElement) {
+        const textToType = "I'm here to help you with any questions or concerns you may have. Don't hesitate to reach out! "; // Text + space
+        let isDeleting = false;
+        let charIndex = 0;
+        let typingSpeed = 30; // Faster typing speed
+        let deleteSpeed = 15; // Faster deleting speed
+        let pauseEnd = 3000;  // Shorter pause after finishing typing
+
+        function type() {
+            const currentText = textToType.substring(0, charIndex);
+            if (typeWriterElement) typeWriterElement.textContent = currentText + '|'; // Cursor
+
+            if (!isDeleting && charIndex < textToType.length) {
+                // Typing
+                charIndex++;
+                setTimeout(type, typingSpeed);
+            } else if (isDeleting && charIndex > 0) {
+                // Deleting
+                charIndex--;
+                setTimeout(type, deleteSpeed);
+            } else if (!isDeleting && charIndex === textToType.length) {
+                // Finished typing, pause then delete
+                if (typeWriterElement) typeWriterElement.textContent = currentText; // Remove cursor briefly
+                isDeleting = true;
+                setTimeout(type, pauseEnd);
+            } else if (isDeleting && charIndex === 0) {
+                // Finished deleting, loop again
+                isDeleting = false;
+                setTimeout(type, 500);
+            }
+        }
+
+        // Start typing
+        type();
+    }
+
+    // 4. Staggered Step Animation on Scroll
+    const steps = document.querySelectorAll('.contact-step');
+    if (steps.length > 0) {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'translate-y-4');
+                    observer.unobserve(entry.target); // Animate once
+                }
+            });
+        }, { threshold: 0.2 });
+
+        steps.forEach(step => observer.observe(step));
+    }
 };
 
 

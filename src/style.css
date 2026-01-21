@@ -287,22 +287,6 @@
   height: auto;
 }
 
-/* Thank You section - white background to alternate with Contact */
-#thankyou {
-  position: relative;
-  min-height: auto;
-  z-index: 10;
-  padding-top: calc(24px);
-  padding-bottom: 24px;
-  background-color: white;
-}
-
-@media (max-width: 768px) {
-  #thankyou {
-    padding-top: calc(24px);
-    padding-bottom: 24px;
-  }
-}
 
 /* Glow effect for social icons */
 .social-icon {
