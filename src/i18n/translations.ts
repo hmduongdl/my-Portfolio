@@ -161,8 +161,8 @@ export const translations = {
             tech_stack_title: "Công nghệ",
             vietnamese: "Tiếng Việt",
             english: "Tiếng Anh",
-            native: "Bản ngữ",
-            independent: "Độc lập",
+            native: "Bản địa",
+            independent: "Trung cấp",
             fluent: "Thành thạo"
         },
         footer: {
