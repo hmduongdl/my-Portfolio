@@ -22,7 +22,14 @@ export const renderStickySocialButton = (): string => {
 
         <!-- Button -->
         <button id="sticky-social-toggle" aria-label="Open social contacts">
-            <img src="https://img.icons8.com/?size=160&id=B2axSwNLcemm&format=png" alt="Contact Icon" class="w-8 h-8">
+            <!-- Icon Closed (Chat) -->
+            <svg class="w-6 h-6 icon-closed transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path>
+            </svg>
+            <!-- Icon Open (Chevron Down) -->
+            <svg class="w-6 h-6 icon-open absolute opacity-0 transition-opacity duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
         </button>
         <!-- Back To Top Button -->
         <button id="back-to-top" aria-label="Back to Top">

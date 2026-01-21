@@ -8,7 +8,7 @@
     height: 3.5rem;
     border-radius: 9999px;
     background-color: #059669;
-    /* Clean Accent */
+    /* Clean Accent (Match Zalo Pill) */
     color: white;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     display: flex;
@@ -20,8 +20,8 @@
 }
 
 #sticky-social-toggle:hover {
-    background-color: #00ff00;
-    /* Deep Accent */
+    background-color: #059669;
+    /* Keep same color, just scale */
     transform: scale(1.05);
 }
 
@@ -30,9 +30,35 @@
 }
 
 #sticky-social-toggle.active {
-    transform: rotate(45deg);
-    background-color: #EF4444;
-    /* Red to indicate close */
+    background-color: white;
+    color: #059669;
+    /* Active State: White bg, Green icon */
+    transform: none;
+    /* No rotation needed */
+}
+
+/* Icon Toggling */
+#sticky-social-toggle .icon-closed {
+    opacity: 1;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#sticky-social-toggle .icon-open {
+    opacity: 0;
+    transform: rotate(-180deg);
+    /* Start rotated for effect */
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+#sticky-social-toggle.active .icon-closed {
+    opacity: 0;
+    transform: scale(0.5);
+    position: absolute;
+}
+
+#sticky-social-toggle.active .icon-open {
+    opacity: 1;
+    transform: rotate(0deg);
 }
 
 /* Panel */
@@ -107,9 +133,10 @@
     height: 3.5rem;
     border-radius: 9999px;
     background-color: #059669;
-    /* Clean Accent (Brand Green) */
+    /* Clean Accent (Match Zalo Pill) */
     color: white;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -124,14 +151,15 @@
     transform: translateY(20px);
 }
 
+#back-to-top:hover {
+    transform: scale(1.05);
+}
+
 #back-to-top.visible {
     opacity: 1;
     pointer-events: auto;
     transform: translateY(0);
 }
-
-/* Removed hover effect as requested */
-
 
 /* Visibility Control */
 
