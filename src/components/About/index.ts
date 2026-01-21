@@ -1,11 +1,13 @@
 import { renderExperience } from './Experience';
 import { renderSkills } from './Skills';
-
 import { renderStats } from './Stats';
+import { languageManager } from '../../utils/language';
 
 // About Section Component
 
 export const renderAbout = (): string => {
+  const t = languageManager.getText('about');
+
   return `
     <!-- About Section -->
     <section id="about" class="relative overflow-x-hidden bg-gray-100">
@@ -59,10 +61,10 @@ export const renderAbout = (): string => {
               <div class="flex-1 mb-4">
                 <h2 class="text-xl font-bold mb-3 flex items-center">
                   <span class="w-2 h-2 bg-clean-accent rounded-full mr-3"></span>
-                  About Me
+                  ${t.title}
                 </h2>
                 <p class="text-gray-700 leading-relaxed text-justify">
-                  IT Student at Dalat University and Song Phương Technology, specializing in modern web development and solving real-world technical challenges.
+                  ${t.role}
                 </p>
               </div>
 

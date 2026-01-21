@@ -24,7 +24,10 @@ export function handleScrollReveal(): void {
         } else {
             if (reveal.classList.contains('active')) {
                 reveal.classList.remove('active');
-                resetSkillProgress(reveal);
+                // Only reset if necessary
+                if (reveal.dataset.reset !== 'false') {
+                    resetSkillProgress(reveal);
+                }
             }
         }
     });

@@ -1,9 +1,13 @@
+import { languageManager } from '../utils/language';
+
 export const renderProjects = (): string => {
+    const t = languageManager.getText('projects');
+
     return `
             <section id="projects" class="section relative z-50">
                 <div class="container-custom">
                 <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 font-serif tracking-tight text-center">
-                    Projects
+                    ${t.title}
                 </h2>
 
                     <div class="projects-grid">
@@ -24,8 +28,8 @@ export const renderProjects = (): string => {
                                     <span class="tech-tag">Tailwind</span>
                                 </div>
                                 <div class="flex gap-3">
-                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">Live demo</a>
-                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">Source</a>
+                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
+                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
                                 </div>
                             </div>
                         </article>
@@ -46,8 +50,8 @@ export const renderProjects = (): string => {
                                     <span class="tech-tag">Node</span>
                                 </div>
                                 <div class="flex gap-3">
-                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">Live demo</a>
-                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">Source</a>
+                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
+                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
                                 </div>
                             </div>
                         </article>
@@ -67,8 +71,8 @@ export const renderProjects = (): string => {
                                     <span class="tech-tag">Go</span>
                                 </div>
                                 <div class="flex gap-3">
-                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">Live demo</a>
-                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">Source</a>
+                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
+                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
                                 </div>
                             </div>
                         </article>

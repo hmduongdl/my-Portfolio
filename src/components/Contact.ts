@@ -1,4 +1,8 @@
+import { languageManager } from '../utils/language';
+
 export const renderContact = (): string => {
+    const t = languageManager.getText('contact');
+
     return `
     <section id="contact" class="section bg-white relative z-[55]">
         <div class="container-custom h-auto">
@@ -6,9 +10,9 @@ export const renderContact = (): string => {
             <!-- Header -->
             <div class="mb-8 text-center">
                 <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 font-serif tracking-tight">
-                    Get In Touch
+                    ${t.title}
                 </h2>
-                <p id="contact-typewriter" class="text-lg text-gray-600 max-w-2xl mx-auto min-h-[1.75rem]">
+                <p id="contact-typewriter" class="text-lg text-gray-600 max-w-2xl mx-auto min-h-[1.75rem]" data-text="${t.subtitle}">
                     <!-- Text will be injected via JS -->
                 </p>
             </div>
@@ -32,7 +36,7 @@ export const renderContact = (): string => {
                                 
                                 <!-- Text -->
                                 <p class="text-gray-500 font-medium text-sm">
-                                    Scan with camera or Zalo app
+                                    ${t.scan_text}
                                 </p>
                             </div>
                         </div>
@@ -55,22 +59,22 @@ export const renderContact = (): string => {
                                 <div class="flex gap-4 items-start opacity-0 translate-y-4 transition-all duration-700 ease-out contact-step" style="transition-delay: 0ms;">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">1</div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Open Zalo App</h4>
-                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">On your phone or computer</p>
+                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">${t.step1_title}</h4>
+                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">${t.step1_desc}</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-4 items-start opacity-0 translate-y-4 transition-all duration-700 ease-out contact-step" style="transition-delay: 200ms;">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">2</div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Select "Scan QR Code"</h4>
-                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">Located at the top right of the screen</p>
+                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">${t.step2_title}</h4>
+                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">${t.step2_desc}</p>
                                     </div>
                                 </div>
                                 <div class="flex gap-4 items-start opacity-0 translate-y-4 transition-all duration-700 ease-out contact-step" style="transition-delay: 400ms;">
                                     <div class="flex-shrink-0 w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center font-bold text-sm shadow-md">3</div>
                                     <div>
-                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">Point camera at QR Code</h4>
-                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">And start chatting with me instantly</p>
+                                        <h4 class="font-bold text-gray-900 text-lg leading-tight">${t.step3_title}</h4>
+                                        <p class="text-gray-500 text-base mt-1 leading-relaxed">${t.step3_desc}</p>
                                     </div>
                                 </div>
                             </div>
@@ -82,13 +86,13 @@ export const renderContact = (): string => {
                         <!-- Download Button -->
                         <button id="btn-download-qr" class="inline-flex items-center justify-center gap-2 px-3 md:px-5 py-3 bg-emerald-600 text-white rounded-xl shadow-md font-medium hover:bg-emerald-700 transition-all text-sm md:text-base">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                            Download QR
+                            ${t.btn_download}
                         </button>
                         
                         <!-- Copy Link Button -->
                         <button id="btn-copy-link" class="inline-flex items-center justify-center gap-2 px-3 md:px-5 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium shadow-sm hover:bg-gray-50 transition-all text-sm md:text-base">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
-                            Copy Link
+                            ${t.btn_copy}
                         </button>
                     </div>
                 </div>
@@ -137,7 +141,7 @@ export const initContact = (): void => {
     // 3. Typewriter Effect (Type -> Delete -> Loop)
     const typeWriterElement = document.getElementById('contact-typewriter');
     if (typeWriterElement) {
-        const textToType = "I'm here to help you with any questions or concerns you may have. Don't hesitate to reach out! "; // Text + space
+        const textToType = (typeWriterElement.getAttribute('data-text') || "I'm here to help you with any questions or concerns you may have. Don't hesitate to reach out!") + " ";
         let isDeleting = false;
         let charIndex = 0;
         let typingSpeed = 30; // Faster typing speed

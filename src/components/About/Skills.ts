@@ -1,7 +1,9 @@
 import { Skill } from '../../types';
 import { getSkillIcon } from '../../icons';
+import { languageManager } from '../../utils/language';
 
 export const renderSkills = (): string => {
+  const t = languageManager.getText('skills');
   const skills: Skill[] = [
     { name: 'TypeScript', description: '', percentage: 90, iconType: 'ts' },
     { name: 'Node.js', description: '', percentage: 80, iconType: 'node' },
@@ -22,13 +24,13 @@ export const renderSkills = (): string => {
       <div class="section-reveal">
       <h2 class="text-2xl font-bold mb-4 flex items-center">
         <span class="w-2 h-2 bg-clean-accent rounded-full mr-3"></span>
-        Languages
+        ${t.languages_title}
       </h2>
       <div class="space-y-4 mb-8">
         <div>
           <div class="flex justify-between mb-2">
-            <span class="text-sm font-medium text-gray-700">Vietnamese</span>
-            <span class="text-xs text-gray-500">Native</span>
+            <span class="text-sm font-medium text-gray-700">${t.vietnamese}</span>
+            <span class="text-xs text-gray-500">${t.native}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
             <div class="bg-clean-accent h-2 rounded-full lang-bar-fill" data-percentage="100" style="width: 0%"></div>
@@ -36,8 +38,8 @@ export const renderSkills = (): string => {
         </div>
         <div>
           <div class="flex justify-between mb-2">
-            <span class="text-sm font-medium text-gray-700">English</span>
-            <span class="text-xs text-gray-500">Independent</span>
+            <span class="text-sm font-medium text-gray-700">${t.english}</span>
+            <span class="text-xs text-gray-500">${t.independent}</span>
           </div>
           <div class="w-full bg-gray-200 rounded-full h-2">
             <div class="bg-clean-accent h-2 rounded-full lang-bar-fill" data-percentage="60" style="width: 0%"></div>
@@ -49,7 +51,7 @@ export const renderSkills = (): string => {
       <!-- Tech Stack -->
       <h2 class="text-2xl font-bold mb-4 flex items-center">
         <span class="w-2 h-2 bg-clean-accent rounded-full mr-3"></span>
-        Tech Stack
+        ${t.tech_stack_title}
       </h2>
       
       <div class="section-reveal">

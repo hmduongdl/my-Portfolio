@@ -1,4 +1,9 @@
+import { languageManager } from '../utils/language';
+
 export const renderFooter = (): string => {
+    const t = languageManager.getText('footer');
+    const methods = t.contact_methods;
+
     return `
     <footer id="footer" class="bg-[#1a4d3e] text-white py-6">
         <div class="container-custom">
@@ -9,27 +14,27 @@ export const renderFooter = (): string => {
                 <div class="space-y-4">
                     <h2 class="text-xl md:text-2xl font-bold font-serif">Hoàng Minh Dương</h2>
                     <p class="text-gray-300 leading-relaxed text-sm md:text-base">
-                        A web developer based in Dalat. Passionate about sharing technology knowledge and helping people bring their website ideas to life.
+                        ${t.description}
                     </p>
                 </div>
 
                 <!-- Column 2: Navigation -->
                 <div class="md:pl-8">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4 font-sans">Navigation</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4 font-sans">${t.navigation_title}</h3>
                     <ul class="space-y-3 font-medium text-sm">
                         <li>
                             <a href="#about" class="footer-nav-link text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block" data-target="about">
-                                About
+                                ${t.nav.about}
                             </a>
                         </li>
                         <li>
                             <a href="#projects" class="footer-nav-link text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block" data-target="projects">
-                                Projects
+                                ${t.nav.projects}
                             </a>
                         </li>
                         <li>
                             <a href="#contact" class="footer-nav-link text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block" data-target="contact">
-                                Contact
+                                ${t.nav.contact}
                             </a>
                         </li>
                     </ul>
@@ -37,26 +42,26 @@ export const renderFooter = (): string => {
 
                 <!-- Column 3: Contact -->
                 <div class="md:pl-6">
-                    <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4 font-sans">Contact</h3>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-emerald-400 mb-4 font-sans">${t.contact_title}</h3>
                     <ul class="space-y-3 font-medium text-sm">
                         <li>
                             <a href="mailto:hoanglong.workdl@gmail.com" class="text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block">
-                                Email
+                                ${methods.email}
                             </a>
                         </li>
                         <li>
                             <a href="tel:+84911818016" class="text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block">
-                                Phone
+                                ${methods.phone}
                             </a>
                         </li>
                         <li>
                             <a href="https://github.com/hmduongdl" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block">
-                                GitHub
+                                ${methods.github}
                             </a>
                         </li>
                         <li>
                             <a href="https://www.facebook.com/hmd.stewiclez" target="_blank" rel="noopener noreferrer" class="text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block">
-                                Facebook
+                                ${methods.facebook}
                             </a>
                         </li>
                     </ul>

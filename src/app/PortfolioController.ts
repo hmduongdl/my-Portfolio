@@ -2,21 +2,37 @@ import { renderNavigation } from '../components/Navigation';
 import { renderHero } from '../components/Hero';
 import { renderAbout } from '../components/About';
 import { renderProjects } from '../components/Projects';
-import { renderContact } from '../components/Contact';
+import { renderContact, initContact } from '../components/Contact';
 import { renderFooter, initFooter } from '../components/Footer';
 import { handleScrollReveal } from '../utils/scroll';
 import { initNavigation } from '../utils/navigation';
 import { initAboutCarousel } from '../utils/aboutCarousel';
 import { renderStickySocialButton, initStickySocialButton } from '../components/StickySocialButton';
-import { initContact } from '../components/Contact';
+import { languageManager } from '../utils/language';
 
 export class PortfolioController {
     private app: HTMLElement;
 
     constructor() {
         this.app = document.getElementById('app')!;
+
+        // Initial render
         this.render();
-        this.addEventListeners();
+        this.initGlobalListeners();
+        this.attachDOMListeners();
+
+        // Subscribe to language changes
+        languageManager.subscribe(() => {
+            // Save scroll position
+            const scrollPos = window.scrollY;
+
+            // Re-render
+            this.render();
+            this.attachDOMListeners();
+
+            // Restore scroll position
+            window.scrollTo(0, scrollPos);
+        });
     }
 
     private render(): void {
@@ -36,23 +52,14 @@ export class PortfolioController {
         `;
     }
 
-    private addEventListeners(): void {
-        // Initialize About section carousel
-        initAboutCarousel();
-
-        // Initialize Sticky Social Button
-        initStickySocialButton();
-
-        // Initialize Contact Section Buttons
-        initContact();
-
-        // Initialize Footer Navigation
-        initFooter();
-
+    private initGlobalListeners(): void {
         // Handle scroll for progress bar and nav highlighting
-        const progressBar = document.getElementById('scroll-progress');
+        // We define the function here once to avoid closure issues if we were adding/removing, 
+        // but for global "permanent" listener it's fine.
 
         const updateActiveState = () => {
+            // Re-query elements on every frame/check since DOM might have changed
+            const progressBar = document.getElementById('scroll-progress');
             const currentScroll = window.scrollY;
             const windowHeight = window.innerHeight;
             const docHeight = document.documentElement.scrollHeight;
@@ -101,13 +108,39 @@ export class PortfolioController {
 
         // Initial update
         updateActiveState();
+    }
 
-        // 3. Navigation Click Handler
+    private attachDOMListeners(): void {
+        // Clean up previous listeners if any (though for simple button clicks this might be overkill 
+        // if we are replacing the whole DOM, but strict frameworks do it. 
+        // Here, replacing innerHTML removes old elements and their listeners automatically from DOM tree.)
+        // So we just need to attach new ones.
+
+        // Initialize About section carousel
+        initAboutCarousel();
+
+        // Initialize Sticky Social Button
+        initStickySocialButton();
+
+        // Initialize Contact Section Buttons
+        initContact();
+
+        // Initialize Footer Navigation
+        initFooter();
+
+        // Language Switcher Logic
+        const langBtn = document.getElementById('lang-switch');
+        if (langBtn) {
+            langBtn.addEventListener('click', () => {
+                languageManager.toggleLanguage();
+            });
+        }
+
+        // Navigation Click Handler
         initNavigation((target) => {
             let targetEl: HTMLElement | null = null;
 
             if (target === 'experience' || target === 'skills') {
-                // Both navigate to About section - auto-slide handles the rest
                 targetEl = document.getElementById('about');
             } else if (target === 'projects') {
                 targetEl = document.getElementById('projects');
@@ -118,7 +151,6 @@ export class PortfolioController {
             if (targetEl) {
                 const nav = document.querySelector('nav');
                 const navHeight = nav ? nav.getBoundingClientRect().height : 0;
-                // Scroll to element position relative to document
                 const top = targetEl.offsetTop - navHeight;
 
                 window.scrollTo({
@@ -128,8 +160,7 @@ export class PortfolioController {
             }
         });
 
-        // Other handlers (mailto, etc.) can be preserved or re-added if essential custom logic existed. 
-        // Re-adding the mailto/tel logic for completeness.
+        // Mailto Handlers
         (document.querySelectorAll('a[data-action="mailto"]') as NodeListOf<HTMLAnchorElement>).forEach((el) => {
             el.addEventListener('click', (e) => {
                 e.preventDefault();
