@@ -1,89 +1,132 @@
 export const renderContact = (): string => {
     return `
-    <section id="contact" class="section text-gray-800 relative z-[55]">
-        <div class="container-custom py-20 h-full flex flex-col justify-center">
+    <section id="contact" class="section bg-white relative z-[55]">
+        <div class="container-custom py-24 h-full">
             
-            <div class="mb-12">
-                <h2 class="text-3xl font-bold mb-4 text-center">
-                    Contact
+            <!-- Header -->
+            <div class="mb-14 text-center">
+                <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 font-serif tracking-tight">
+                    Get In Touch
                 </h2>
-                <p class="text-gray-600 text-lg max-w-2xl mx-auto text-center">
-                    I'm currently looking for new opportunities. Whether you have a question or just want to say hi, I'll try my best to get back to you!
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+                    I'm here to help you with any questions or concerns you may have. Don't hesitate to reach out!
                 </p>
             </div>
 
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-24">
-                <!-- Contact Info -->
-                <div class="space-y-6">
-                     <div class="grid grid-cols-1 gap-4">
-                        <a href="mailto:hello@example.com" class="flex items-center group p-4 border border-gray-100 rounded-xl hover:border-green-500 hover:shadow-md transition-all duration-300 bg-white">
-                            <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-green-500 shadow-sm group-hover:scale-110 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+            <!-- Content Card -->
+            <div class="max-w-5xl mx-auto">
+                <div class="flex flex-col md:flex-row gap-8 md:gap-20 items-center justify-center">
+                    
+                    <!-- Left: QR Code Card -->
+                    <div class="relative mx-auto md:mx-0 max-w-[280px] w-full">
+                        <!-- Decorative Blob (Static) -->
+                        <div class="absolute -inset-4 bg-clean-accent/5 rounded-[2.5rem] transform -rotate-2 scale-105"></div>
+                        
+                        <div class="relative bg-white p-6 rounded-[2rem] shadow-lg border border-gray-100 text-center">
+                            <div class="aspect-square w-full bg-white rounded-2xl overflow-hidden mb-6 border-2 border-dashed border-gray-200 flex items-center justify-center p-2 relative">
+                                <img src="/img/zalo-contact-qr.jpg" 
+                                     alt="Zalo QR Code" 
+                                     class="w-full h-full object-contain"
+                                >
                             </div>
-                            <div class="ml-4">
-                                <p class="text-sm text-gray-500 font-medium">Email Me</p>
-                                <p class="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors">hello@example.com</p>
-                            </div>
-                        </a>
-
-                        <a href="#" class="flex items-center group p-4 border border-gray-100 rounded-xl hover:border-green-500 hover:shadow-md transition-all duration-300 bg-white">
-                             <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-green-500 shadow-sm group-hover:scale-110 transition-transform">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/></svg>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm text-gray-500 font-medium">LinkedIn</p>
-                                <p class="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Connect with me</p>
-                            </div>
-                        </a>
-
-                        <a href="#" class="flex items-center group p-4 border border-gray-100 rounded-xl hover:border-green-500 hover:shadow-md transition-all duration-300 bg-white">
-                             <div class="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center text-green-500 shadow-sm group-hover:scale-110 transition-transform">
-                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
-                            </div>
-                            <div class="ml-4">
-                                <p class="text-sm text-gray-500 font-medium">GitHub</p>
-                                <p class="text-lg font-semibold text-gray-900 group-hover:text-green-600 transition-colors">Check my code</p>
-                            </div>
-                        </a>
+                            <p class="text-gray-500 font-medium flex items-center justify-center gap-2">
+                                Scan with camera or Zalo app
+                            </p>
+                        </div>
                     </div>
 
-                    <div class="pt-8">
-                            <h3 class="text-sm uppercase tracking-wider text-gray-500 font-semibold mb-4">Availability</h3>
-                            <div class="flex items-center text-green-600 bg-green-50 px-4 py-2 rounded-full w-fit border border-green-100">
-                            <span class="relative flex h-3 w-3 mr-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
-                            </span>
-                            Open for opportunities
-                            </div>
-                    </div>
-                </div>
+                    <!-- Right: Instructions & Actions -->
+                    <div class="space-y-10">
+                        <div>
+                            <h3 class="text-3xl font-bold flex items-center gap-3 text-clean-accent mb-8">
+                                <img src="https://img.icons8.com/?size=128&id=ipvR9njjOZmB&format=png" alt="Zalo" class="w-10 h-10 object-contain">
+                                Hoàng Minh Dương
+                            </h3>
 
-                <!-- Contact Form -->
-                <div class="bg-white p-8 rounded-2xl shadow-xl border border-gray-100 relative overflow-hidden">
-                    <div class="absolute top-0 right-0 w-20 h-20 bg-green-50 rounded-bl-full -mr-4 -mt-4 z-0"></div>
-                    <form class="space-y-6 relative z-10" onsubmit="event.preventDefault();">
-                        <div class="relative">
-                            <input type="text" id="name" class="peer w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-green-500 focus:bg-white focus:ring-0 transition duration-200 outline-none placeholder-transparent" placeholder="Name">
-                            <label for="name" class="absolute left-4 -top-2.5 bg-white px-1 text-xs text-green-600 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:bg-transparent peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-green-600 peer-focus:bg-white">Name</label>
+                            <div class="space-y-8">
+                                <div class="flex gap-5">
+                                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-clean-accent text-white flex items-center justify-center font-bold text-base shadow-md">1</div>
+                                    <div class="pt-1">
+                                        <h4 class="font-bold text-gray-900 text-lg mb-1">Mở ứng dụng Zalo</h4>
+                                        <p class="text-gray-500">Trên điện thoại hoặc máy tính của bạn</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-5">
+                                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-clean-accent text-white flex items-center justify-center font-bold text-base shadow-md">2</div>
+                                    <div class="pt-1">
+                                        <h4 class="font-bold text-gray-900 text-lg mb-1">Chọn "Quét mã QR"</h4>
+                                        <p class="text-gray-500">Nằm ở góc trên bên phải màn hình</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-5">
+                                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-clean-accent text-white flex items-center justify-center font-bold text-base shadow-md">3</div>
+                                    <div class="pt-1">
+                                        <h4 class="font-bold text-gray-900 text-lg mb-1">Hướng camera vào mã QR</h4>
+                                        <p class="text-gray-500">Và bắt đầu trò chuyện ngay với tôi</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="relative">
-                            <input type="email" id="email" class="peer w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-green-500 focus:bg-white focus:ring-0 transition duration-200 outline-none placeholder-transparent" placeholder="Email">
-                            <label for="email" class="absolute left-4 -top-2.5 bg-white px-1 text-xs text-green-600 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:bg-transparent peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-green-600 peer-focus:bg-white">Email</label>
+
+                        <div class="flex flex-wrap gap-3 pt-6 border-t border-gray-100">
+                            <!-- Download Button -->
+                            <button id="btn-download-qr" class="inline-flex items-center gap-2 px-6 py-3.5 bg-clean-accent text-white rounded-xl shadow-lg font-medium border border-transparent">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Tải xuống QR
+                            </button>
+                            
+                            <!-- Copy Link Button -->
+                            <button id="btn-copy-link" class="inline-flex items-center gap-2 px-6 py-3.5 bg-white border border-gray-200 text-gray-700 rounded-xl font-medium shadow-sm">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                Sao chép link
+                            </button>
                         </div>
-                        <div class="relative">
-                            <textarea id="message" rows="4" class="peer w-full px-4 py-3 rounded-lg bg-gray-50 border-transparent focus:border-green-500 focus:bg-white focus:ring-0 transition duration-200 outline-none placeholder-transparent" placeholder="Message"></textarea>
-                            <label for="message" class="absolute left-4 -top-2.5 bg-white px-1 text-xs text-green-600 transition-all peer-placeholder-shown:text-base peer-placeholder-shown:text-gray-400 peer-placeholder-shown:top-3.5 peer-placeholder-shown:bg-transparent peer-focus:-top-2.5 peer-focus:text-xs peer-focus:text-green-600 peer-focus:bg-white">Message</label>
-                        </div>
-                        <button type="submit" class="w-full bg-gray-900 text-white font-medium py-3 px-6 rounded-lg hover:bg-black transition duration-300 transform hover:-translate-y-1 shadow-lg hover:shadow-xl">
-                            Send Message
-                        </button>
-                    </form>
+                    </div>
+
                 </div>
             </div>
-
 
         </div>
     </section>
     `;
 };
+
+export const initContact = (): void => {
+    // 1. Handle Download QR
+    const btnDownload = document.getElementById('btn-download-qr');
+    if (btnDownload) {
+        btnDownload.addEventListener('click', () => {
+            const link = document.createElement('a');
+            link.href = '/img/zalo-contact-qr.jpg';
+            link.download = 'HoangMinhDuong_ZaloQR.jpg';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
+    }
+
+    // 2. Handle Copy Link
+    const btnCopy = document.getElementById('btn-copy-link');
+    if (btnCopy) {
+        btnCopy.addEventListener('click', async () => {
+            const zaloLink = 'https://zalo.me/0911818016';
+            try {
+                await navigator.clipboard.writeText(zaloLink);
+                // Simple Toast notification or alert
+                const originalText = btnCopy.innerHTML;
+                btnCopy.innerHTML = `<svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg> Đã sao chép!`;
+                btnCopy.classList.add('border-green-500', 'text-green-600', 'bg-green-50');
+
+                setTimeout(() => {
+                    btnCopy.innerHTML = originalText;
+                    btnCopy.classList.remove('border-green-500', 'text-green-600', 'bg-green-50');
+                }, 2000);
+            } catch (err) {
+                console.error('Failed to copy', err);
+            }
+        });
+    }
+
+};
+
+
