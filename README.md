@@ -10,7 +10,7 @@
 **A high-performance, minimalist personal portfolio built with modern web technologies.**
 Presenting experience, skills, and projects with a clean, dynamic user and developer experience.
 
-[View Demo](https://sp-hoangminhduong.id.vn/) <!-- Update if needed -->
+[View Demo](https://sp-hoangminhduong.id.vn/)
 
 </div>
 
@@ -19,6 +19,9 @@ Presenting experience, skills, and projects with a clean, dynamic user and devel
 ## 🎨 Overview
 
 This portfolio showcases a professional profile with a focus on minimalism and performance. It features a unique **layered scrolling interaction** where content flows dynamically over a sticky background, creating an immersive reading experience.
+
+**New Feature: Internationalization (i18n)**
+The portfolio now supports full **English (EN)** and **Vietnamese (VN)** language switching with instant content updates and persistent user preference.
 
 ## 🛠️ Tech Stack
 
@@ -31,22 +34,22 @@ This portfolio showcases a professional profile with a focus on minimalism and p
 
 ## 📂 Project Structure
 
-The project has been refactored for maintainability and scalability:
+The project has been refactored for maintainability and scalability, now including a robust i18n system:
 
 ```bash
 📦 Portfolio
-├── 📂 public/              # Static assets (images, icons)
+├── 📂 public/              # Static assets (images, icons, flags)
 ├── 📂 src/                 # Source code
 │   ├── 📂 app/             # Core application logic
-│   │   └── PortfolioController.ts # Main controller class
-│   ├── 📂 components/      # UI Components
-│   │   ├── 📂 About/       # Complex About section modules
-│   │   ├── Navigation.ts
-│   │   ├── Hero.ts
-│   │   └── ...
+│   │   └── PortfolioController.ts # Main controller (handles translations & events)
+│   ├── 📂 components/      # UI Components (Navigation, About, Contact, etc.)
+│   ├── 📂 i18n/            # Internationalization
+│   │   └── translations.ts # English/Vietnamese dictionaries
 │   ├── 📂 icons/           # SVG Icon definitions
 │   ├── 📂 types/           # TS Interfaces & Types
-│   ├── 📂 utils/           # Utility functions (scroll, logic)
+│   ├── 📂 utils/           # Utility functions
+│   │   ├── language.ts     # LanguageManager singleton
+│   │   └── ...
 │   ├── main.ts             # Entry point (Bootstrap)
 │   └── style.css           # Global Tailwind directives
 ├── index.html              # Entry HTML
@@ -54,31 +57,39 @@ The project has been refactored for maintainability and scalability:
 └── tailwind.config.js      # Tailwind configuration
 ```
 
+## ✨ Key Features
+
+-   **Bilingual Support**: Seamless toggle between English and Vietnamese with flag indicators (🇬🇧 / 🇻🇳).
+-   **Dynamic Rendering**: Content updates instantly without page reloads using a custom `LanguageManager`.
+-   **Responsive Design**: Mobile-first approach ensuring perfect display on all devices.
+-   **Scroll Animations**: Smooth reveal effects and sticky navigation.
+-   **Singleton Pattern**: Efficient state management for language and scroll events.
+
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- Node.js (v16+)
-- npm
+-   Node.js (v16+)
+-   npm
 
 ### Installation
 
-1. **Clone the repository**
-   ```bash
-   git clone https://github.com/hmduongdl/Minimalist-Design-Portfolio.git
-   cd Minimalist-Design-Portfolio
-   ```
+1.  **Clone the repository**
+    ```bash
+    git clone https://github.com/hmduongdl/Minimalist-Design-Portfolio.git
+    cd Minimalist-Design-Portfolio
+    ```
 
-2. **Install dependencies**
-   ```bash
-   npm install
-   ```
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
 
-3. **Run development server**
-   ```bash
-   npm run dev
-   ```
-   Open `http://localhost:5173` to view it in the browser.
+3.  **Run development server**
+    ```bash
+    npm run dev
+    ```
+    Open `http://localhost:5173` to view it in the browser.
 
 ### Build for Production
 
@@ -87,6 +98,7 @@ npm run build
 ```
 
 ---
+
 <div align="center">
   <sub>Designed and built with ❤️ by HMD.</sub>
 </div>
