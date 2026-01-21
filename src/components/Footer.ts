@@ -8,10 +8,10 @@ export const renderFooter = (): string => {
     <footer id="footer" class="bg-[#1a4d3e] text-white py-6">
         <div class="container-custom">
             <!-- Top Section: 3 Columns -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12 mb-10">
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-8 md:gap-12 mb-10">
                 
                 <!-- Column 1: Info -->
-                <div class="space-y-4">
+                <div class="col-span-2 md:col-span-1 space-y-4">
                     <h2 class="text-xl md:text-2xl font-bold font-serif">Hoàng Minh Dương</h2>
                     <p class="text-gray-300 leading-relaxed text-sm md:text-base">
                         ${t.description}

@@ -124,7 +124,7 @@ export const translations = {
                     description: "Tốt nghiệp Đại học Đà Lạt với bằng Kỹ sư Công nghệ Thông tin."
                 },
                 {
-                    role: "Lập trình viên Web",
+                    role: "Lập trình Web",
                     company: '<a href="https://songphuong.vn" target="_blank" class="text-clean-accent hover:text-deep-accent">Công nghệ Song Phương</a>',
                     period: "Th3 2025 - Hiện tại",
                     description: "Chuyên về phát triển web full-stack, thiết kế đồ họa, cập nhật sản phẩm và tối ưu hóa SEO cho trải nghiệm kỹ thuật số hiệu suất cao."
