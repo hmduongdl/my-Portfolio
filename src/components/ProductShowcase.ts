@@ -1,7 +1,7 @@
 import { songPhuongProducts } from '../data/products';
 import { languageManager } from '../utils/language';
 import Swiper from 'swiper';
-import { Navigation, Autoplay } from 'swiper/modules';
+import { Navigation } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/navigation';
 
@@ -9,7 +9,7 @@ export const renderProductShowcase = (): string => {
     const t = languageManager.getText('products_showcase');
 
     return `
-    <section id="product-showcase" class="bg-slate-50 relative z-30 py-6 sm:py-8 md:py-8 overflow-hidden select-none w-full border-t border-gray-200">
+    <section id="product-showcase" class="bg-white relative z-30 py-6 sm:py-8 md:py-8 overflow-hidden select-none w-full border-t border-gray-200">
         <!-- 1. Header Section: Centered as requested -->
         <!-- 1. Header Section: Standardized to match other sections -->
         <div class="container-custom mb-12 text-center">
@@ -39,7 +39,7 @@ export const renderProductShowcase = (): string => {
                     ${songPhuongProducts.map(product => `
                         <div class="swiper-slide h-auto">
                             <!-- Product Card -->
-                            <div class="group relative flex flex-col h-full overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:shadow-xl hover:border-red-600/30 hover:-translate-y-1">
+                            <div class="group relative flex flex-col h-full overflow-hidden rounded-2xl border border-gray-100 bg-white transition-all duration-300 hover:shadow-xl hover:border-emerald-500/50 hover:-translate-y-1">
                                 
                                 <!-- Image Container (Square + Placeholder) -->
                                 <div class="relative w-full aspect-square bg-slate-50 flex items-center justify-center overflow-hidden">
@@ -52,7 +52,17 @@ export const renderProductShowcase = (): string => {
                                          alt="${product.name}" 
                                          class="relative z-10 h-full w-full object-contain p-6 transition-transform duration-700 ease-out group-hover:scale-110 mix-blend-multiply"
                                          loading="lazy"
-                                         onerror="this.style.display='none'; this.previousElementSibling.style.opacity='1';"
+                                         onerror="
+                                            const currentSrc = this.src;
+                                            if (currentSrc.endsWith('.webp')) {
+                                                this.src = currentSrc.replace('.webp', '.jpg');
+                                            } else if (currentSrc.endsWith('.jpg')) {
+                                                this.src = currentSrc.replace('.jpg', '.png');
+                                            } else {
+                                                this.style.display='none'; 
+                                                this.previousElementSibling.style.opacity='1';
+                                            }
+                                         "
                                     >
                                     
                                     <!-- Discount Badge -->
@@ -74,7 +84,7 @@ export const renderProductShowcase = (): string => {
                                         </span>` : ''}
                                     </div>
                                     
-                                    <h3 class="mb-2 line-clamp-2 text-sm md:text-base font-bold text-slate-900 leading-snug min-h-[2.5rem] group-hover:text-red-600 transition-colors">
+                                    <h3 class="mb-2 line-clamp-2 text-sm md:text-base font-bold text-slate-900 leading-snug min-h-[2.5rem] group-hover:text-emerald-600 transition-colors">
                                         <a href="${product.link}" target="_blank" class="focus:outline-none">
                                             ${product.name}
                                         </a>
@@ -93,7 +103,7 @@ export const renderProductShowcase = (): string => {
                                 
                                 <!-- Quick View Overlay (Bottom) -->
                                 <div class="absolute inset-x-0 bottom-0 z-30 translate-y-full px-4 py-3 transition-transform duration-300 group-hover:translate-y-0 bg-white/95 backdrop-blur-sm border-t border-gray-100">
-                                    <a href="${product.link}" target="_blank" class="flex w-full items-center justify-center gap-2 rounded bg-slate-900 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-red-600 transition-colors">
+                                    <a href="${product.link}" target="_blank" class="flex w-full items-center justify-center gap-2 rounded bg-slate-900 py-2 text-xs font-bold uppercase tracking-wider text-white hover:bg-emerald-600 transition-colors">
                                         <span>View Details</span>
                                     </a>
                                 </div>
@@ -126,7 +136,7 @@ export const initProductShowcase = (): void => {
     if (!swiperEl) return;
 
     new Swiper('.product-swiper', {
-        modules: [Navigation, Autoplay],
+        modules: [Navigation],
         spaceBetween: 24,
         // Centered layout configuration
         breakpoints: {
@@ -150,11 +160,6 @@ export const initProductShowcase = (): void => {
         },
         grabCursor: true,
         speed: 600,
-        autoplay: {
-            delay: 5000,
-            disableOnInteraction: false,
-            pauseOnMouseEnter: true
-        },
         navigation: {
             nextEl: '.swiper-button-custom-next',
             prevEl: '.swiper-button-custom-prev',

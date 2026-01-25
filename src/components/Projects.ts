@@ -4,7 +4,7 @@ export const renderProjects = (): string => {
     const t = languageManager.getText('projects');
 
     return `
-            <section id="projects" class="section relative z-50">
+            <section id="projects" class="section relative z-50 bg-slate-50">
                 <div class="container-custom">
                 <h2 class="text-4xl md:text-5xl font-bold mb-4 text-gray-900 font-serif tracking-tight text-center">
                     ${t.title}
