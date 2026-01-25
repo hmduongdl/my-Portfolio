@@ -13,107 +13,106 @@ export interface Product {
     status?: 'New' | 'Hot' | 'Sale' | null;
 }
 
-const INITIAL_PRODUCTS: Product[] =
-    [
-        {
-            "id": 1,
-            "name": "SP PC INTEL i5 12400F (i5 12400F/ B760/ Ram 8GB/ RTX 3050/ SSD 256GB/ 500W/ DOS)",
-            "category": "PC Gaming ",
-            "description": "",
-            "image": "https://songphuong.vn/Content/uploads/2023/05/SP-PC-INTEL-i5-12400F-1-2.webp",
-            "link": "https://songphuong.vn/product/sp-pc-intel-i5-12400f/",
-            "price": " 14.790.000",
-            "oldPrice": " 15.799.000",
-            "discount": 6,
-            "sku": "109863",
-            "rating": 5,
-            "status": "Hot"
-        },
-        {
-            "id": 2,
-            "name": "SP PC AMD 3200G (Ryzen 3 3200G/ B450/ Ram 8GB DDR4/ SSD 256GB/ 250W/ DOS)",
-            "category": "Office PC",
-            "description": "",
-            "image": "https://songphuong.vn/Content/uploads/2023/07/SP-PC-AMD-3000G.jpg",
-            "link": "https://songphuong.vn/product/sp-pc-amd-3200g/",
-            "price": "6.990.000",
-            "oldPrice": " 7.519.000",
-            "discount": 7,
-            "sku": "SP-PC-O02",
-            "rating": 5,
-            "status": null
-        },
-        {
-            "id": 3,
-            "name": "SP PC INTEL i5 14400F RTX 5060 (i5 14400F/ B760/ Ram 16GB/ RTX 5060/ SSD 256GB/ 650W/ DOS)",
-            "category": "High-End Gaming",
-            "description": "CPU: Intel Core i5 14400F\nMain: MSI PRO B760M-E DDR4\nRam: 01 Tản Ocypus Delta A40 BK ARGB: 539.000 vnđ\nVGA: Colorful RTX 5060 Battle AX Duo 8GB-V\nSSD: Colorful CN600 256GB PRO M2\nPSU: Thermaltake Litepower 650W\nCase:MIK FOCALORS M BLACK (3 Fan RGB)\nOS: DOS",
-            "image": "https://songphuong.vn/Content/uploads/2025/11/SP-PC-INTEL-i5-14400F-RTX-5060-1.jpg",
-            "link": "https://songphuong.vn/product/sp-pc-intel-i5-14400f-rtx-5060/",
-            "price": " 22.850.000",
-            "oldPrice": "23.660.000",
-            "discount": 3,
-            "sku": "147143",
-            "rating": 5,
-            "status": null
-        },
-        {
-            "id": 4,
-            "name": "Chuột Machenike L8 Pro Tri-Mode (White/Black, Wireless, 26000 DPI, RGB, Kèm Dock Sạc)",
-            "category": "Gaming Gear",
-            "description": "Chuột Machenike L8 Pro Tri-Mode Wireless\nThương Hiệu: Machenike\nPhương thức kết nối: Wired (Support 8K)/ 2.4GHz Wireless (Support 2K)/ Bluetooth 5.1\nMàu sắc: White\nCảm biến: PAW 3395\nDPI: 26000\nKèm theo Dock sạc",
-            "image": "https://songphuong.vn/Content/uploads/2025/06/L8-Pro-Tri-Modes-5.webp",
-            "link": "https://songphuong.vn/product/chuot-machenike-l8-pro-tri-mode/",
-            "price": "1.390.000",
-            "oldPrice": "1.690.000",
-            "discount": 18,
-            "sku": "137830",
-            "rating": 5,
-            "status": "Hot"
-        },
-        {
-            "id": 5,
-            "name": "Laptop Acer Aspire Lite 14 N23G2 – AL14-52M-32KV (Intel Core i3-1305U, RAM 8GB, SSD 256GB, 14 Inch WUXGA, Win11 Home, NX.J38SV.003)",
-            "category": "Laptop",
-            "description": "Ultra-portable and sleek design, perfect for students and professionals on the go.",
-            "image": "https://songphuong.vn/Content/uploads/2025/08/Laptop-Acer-Aspire-Lite-14-AL14-52M-32KV-2.webp",
-            "link": "https://songphuong.vn/product/laptop-acer-aspire-lite-14-n23g2/",
-            "price": "10.690.000",
-            "oldPrice": " 10.990.000",
-            "discount": 3,
-            "sku": "142477",
-            "rating": 5,
-            "status": null
-        },
-        {
-            "id": 6,
-            "name": "Tay Cầm Chơi Game Machenike G3 V2 Tri-mode (Black, Có dây, 2.4G Wireless, Bluetooth 5.0, RGB)",
-            "category": "Gaming Gear",
-            "description": "Enhanced gaming experience with responsive triggers and durable build quality.",
-            "image": "https://songphuong.vn/Content/uploads/2025/04/MACHENIKE-G3-V2-Tri-mode-1.jpg",
-            "link": "https://songphuong.vn/product/tay-cam-choi-game-machenike-g3-v2-black/",
-            "price": "729.000",
-            "oldPrice": " 890.000",
-            "discount": 18,
-            "sku": "134653",
-            "rating": 5,
-            "status": "Hot"
-        },
-        {
-            "name": "SP PC INTEL Ultra 5 225 (Ultra 5 225/ B860/ Ram 16GB / RTX 3060 /SSD 512GB/ 750W/ DOS)",
-            "category": "PC Gaming",
-            "price": "29.530.000",
-            "oldPrice": " 30.330.000",
-            "discount": 3,
-            "sku": "136757",
-            "status": "Hot",
-            "image": "https://songphuong.vn/Content/uploads/2025/05/SP-PC-INTEL-Ultra-5-225-6.jpg",
-            "link": "https://songphuong.vn/product/sp-pc-intel-ultra-5-225/",
-            "description": "CPU: Intel Core Ultra 5 225\nMain: Asus PRIME B860M-K-CSM\nRam: Corsair LPX 16GB (1x16GB) DDR5 5200MHz\nVGA: INNO3D RTX 3060 Twin X2 12GB GDDR6\nSSD: Lexar NQ780 512GB M2 2280 PCIe Gen 4×4\nPSU: FSP VITA BD 750W - 80 Plus Bronze\nCase: Segotep Memphis-S MEOW\nFan CPU: Tản Nhiệt Nước Segotep BeIced II 240 ARGB MEOW\nOS: DOS",
-            "rating": 5,
-            "id": 7
-        }
-    ];
+const INITIAL_PRODUCTS: Product[] = [
+    {
+        "id": 1,
+        "name": "SP PC INTEL i5 12400F (i5 12400F/ B760/ Ram 8GB/ RTX 3050/ SSD 256GB/ 500W/ DOS)",
+        "category": "PC Gaming ",
+        "description": "",
+        "image": "https://songphuong.vn/Content/uploads/2023/05/SP-PC-INTEL-i5-12400F-1-2.webp",
+        "link": "https://songphuong.vn/product/sp-pc-intel-i5-12400f/",
+        "price": " 14.790.000",
+        "oldPrice": " 15.799.000",
+        "discount": 6,
+        "sku": "109863",
+        "rating": 5,
+        "status": "Hot"
+    },
+    {
+        "name": "SP PC INTEL Ultra 5 225 (Ultra 5 225/ B860/ Ram 16GB / RTX 3060 /SSD 512GB/ 750W/ DOS)",
+        "category": "PC Gaming",
+        "price": "29.530.000",
+        "oldPrice": " 30.330.000",
+        "discount": 3,
+        "sku": "136757",
+        "status": "Hot",
+        "image": "https://songphuong.vn/Content/uploads/2025/05/SP-PC-INTEL-Ultra-5-225-6.jpg",
+        "link": "https://songphuong.vn/product/sp-pc-intel-ultra-5-225/",
+        "description": "CPU: Intel Core Ultra 5 225\nMain: Asus PRIME B860M-K-CSM\nRam: Corsair LPX 16GB (1x16GB) DDR5 5200MHz\nVGA: INNO3D RTX 3060 Twin X2 12GB GDDR6\nSSD: Lexar NQ780 512GB M2 2280 PCIe Gen 4×4\nPSU: FSP VITA BD 750W - 80 Plus Bronze\nCase: Segotep Memphis-S MEOW\nFan CPU: Tản Nhiệt Nước Segotep BeIced II 240 ARGB MEOW\nOS: DOS",
+        "rating": 5,
+        "id": 7
+    },
+    {
+        "id": 3,
+        "name": "SP PC INTEL i5 14400F RTX 5060 (i5 14400F/ B760/ Ram 16GB/ RTX 5060/ SSD 256GB/ 650W/ DOS)",
+        "category": "High-End Gaming",
+        "description": "CPU: Intel Core i5 14400F\nMain: MSI PRO B760M-E DDR4\nRam: 01 Tản Ocypus Delta A40 BK ARGB: 539.000 vnđ\nVGA: Colorful RTX 5060 Battle AX Duo 8GB-V\nSSD: Colorful CN600 256GB PRO M2\nPSU: Thermaltake Litepower 650W\nCase:MIK FOCALORS M BLACK (3 Fan RGB)\nOS: DOS",
+        "image": "https://songphuong.vn/Content/uploads/2025/11/SP-PC-INTEL-i5-14400F-RTX-5060-1.jpg",
+        "link": "https://songphuong.vn/product/sp-pc-intel-i5-14400f-rtx-5060/",
+        "price": " 22.850.000",
+        "oldPrice": "23.660.000",
+        "discount": 3,
+        "sku": "147143",
+        "rating": 5,
+        "status": null
+    },
+    {
+        "id": 2,
+        "name": "SP PC AMD 3200G (Ryzen 3 3200G/ B450/ Ram 8GB DDR4/ SSD 256GB/ 250W/ DOS)",
+        "category": "Office PC",
+        "description": "",
+        "image": "https://songphuong.vn/Content/uploads/2023/07/SP-PC-AMD-3000G.jpg",
+        "link": "https://songphuong.vn/product/sp-pc-amd-3200g/",
+        "price": "6.990.000",
+        "oldPrice": " 7.519.000",
+        "discount": 7,
+        "sku": "SP-PC-O02",
+        "rating": 5,
+        "status": null
+    },
+    {
+        "id": 4,
+        "name": "Chuột Machenike L8 Pro Tri-Mode (White/Black, Wireless, 26000 DPI, RGB, Kèm Dock Sạc)",
+        "category": "Gaming Gear",
+        "description": "Chuột Machenike L8 Pro Tri-Mode Wireless\nThương Hiệu: Machenike\nPhương thức kết nối: Wired (Support 8K)/ 2.4GHz Wireless (Support 2K)/ Bluetooth 5.1\nMàu sắc: White\nCảm biến: PAW 3395\nDPI: 26000\nKèm theo Dock sạc",
+        "image": "https://songphuong.vn/Content/uploads/2025/06/L8-Pro-Tri-Modes-5.webp",
+        "link": "https://songphuong.vn/product/chuot-machenike-l8-pro-tri-mode/",
+        "price": "1.390.000",
+        "oldPrice": "1.690.000",
+        "discount": 18,
+        "sku": "137830",
+        "rating": 5,
+        "status": "Hot"
+    },
+    {
+        "id": 6,
+        "name": "Tay Cầm Chơi Game Machenike G3 V2 Tri-mode (Black, Có dây, 2.4G Wireless, Bluetooth 5.0, RGB)",
+        "category": "Gaming Gear",
+        "description": "Enhanced gaming experience with responsive triggers and durable build quality.",
+        "image": "https://songphuong.vn/Content/uploads/2025/04/MACHENIKE-G3-V2-Tri-mode-1.jpg",
+        "link": "https://songphuong.vn/product/tay-cam-choi-game-machenike-g3-v2-black/",
+        "price": "729.000",
+        "oldPrice": " 890.000",
+        "discount": 18,
+        "sku": "134653",
+        "rating": 5,
+        "status": "Hot"
+    },
+    {
+        "id": 5,
+        "name": "Laptop Acer Aspire Lite 14 N23G2 – AL14-52M-32KV (Intel Core i3-1305U, RAM 8GB, SSD 256GB, 14 Inch WUXGA, Win11 Home, NX.J38SV.003)",
+        "category": "Laptop",
+        "description": "Ultra-portable and sleek design, perfect for students and professionals on the go.",
+        "image": "https://songphuong.vn/Content/uploads/2025/08/Laptop-Acer-Aspire-Lite-14-AL14-52M-32KV-2.webp",
+        "link": "https://songphuong.vn/product/laptop-acer-aspire-lite-14-n23g2/",
+        "price": "10.690.000",
+        "oldPrice": " 10.990.000",
+        "discount": 3,
+        "sku": "142477",
+        "rating": 5,
+        "status": null
+    }
+];
 
 class ProductStore {
     private products: Product[];
