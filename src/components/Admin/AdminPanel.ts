@@ -19,7 +19,7 @@ export const renderAdminPanel = async (): Promise<string> => {
             return `
             <div class="fixed inset-0 bg-gray-50 flex flex-col items-center justify-center z-[100]">
                 <h1 class="text-4xl font-bold text-gray-800 mb-4">404 Not Found</h1>
-                <p class="text-gray-600 mb-8">The requested administrative resource is not available on this server.</p>
+                <p class="text-gray-600 mb-8">The requested administrative resource is not available.</p>
                 <a href="#" onclick="window.location.hash=''; return false;" class="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 font-bold transition-colors">Return Home</a>
             </div>
             `;
