@@ -67,6 +67,11 @@ export const translations = {
             btn_copy: "Copy Link",
             btn_copied: "Copied!"
         },
+        products_showcase: {
+            title: "Product Showcase",
+            subtitle: "Featured products from Song Phương Technology",
+            view_details: "View Details"
+        },
         skills: {
             languages_title: "Languages",
             tech_stack_title: "Tech Stack",
@@ -155,6 +160,11 @@ export const translations = {
             btn_download: "Tải QR",
             btn_copy: "Sao chép Link",
             btn_copied: "Đã sao chép!"
+        },
+        products_showcase: {
+            title: "Sản Phẩm Nổi Bật",
+            subtitle: "Các sản phẩm nổi bật từ Công nghệ Song Phương",
+            view_details: "Xem Chi Tiết"
         },
         skills: {
             languages_title: "Ngôn ngữ",

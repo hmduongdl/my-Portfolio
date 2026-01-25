@@ -2,6 +2,7 @@ import { renderNavigation } from '../components/Navigation';
 import { renderHero } from '../components/Hero';
 import { renderAbout } from '../components/About';
 import { renderProjects } from '../components/Projects';
+import { renderProductShowcase, initProductShowcase } from '../components/ProductShowcase';
 import { renderContact, initContact } from '../components/Contact';
 import { renderFooter, initFooter } from '../components/Footer';
 import { handleScrollReveal } from '../utils/scroll';
@@ -45,6 +46,7 @@ export class PortfolioController {
             ${renderNavigation()}
             ${renderHero()}
             ${renderAbout()}
+            ${renderProductShowcase()}
             ${renderProjects()}
             ${renderContact()}
             ${renderFooter()}
@@ -135,6 +137,9 @@ export class PortfolioController {
                 languageManager.toggleLanguage();
             });
         }
+
+        // Initialize Product Showcase Carousel
+        initProductShowcase();
 
         // Navigation Click Handler
         initNavigation((target) => {
