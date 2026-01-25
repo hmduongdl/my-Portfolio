@@ -37,6 +37,22 @@ export class PortfolioController {
     }
 
     private render(): void {
+        const hash = window.location.hash;
+
+        if (hash === '#admin') {
+            import('../components/Admin/AdminPanel').then(({ renderAdminPanel, initAdminPanel }) => {
+                this.app.innerHTML = renderAdminPanel();
+                initAdminPanel();
+
+                // Add exit listener
+                document.getElementById('exit-admin')?.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.hash = ''; // Clear hash returns to main
+                });
+            });
+            return;
+        }
+
         this.app.innerHTML = `
             <!-- Global Scroll Progress -->
             <div class="fixed top-0 left-0 w-full h-1 z-[9999]" style="pointer-events:none">
@@ -51,6 +67,9 @@ export class PortfolioController {
             ${renderContact()}
             ${renderFooter()}
             ${renderStickySocialButton()}
+            
+            <!-- Hidden Admin Link (Double click footer copyright or similar to access? Or just manual url) -->
+            <!-- For now, we rely on manual URL #admin -->
         `;
     }
 
@@ -138,6 +157,16 @@ export class PortfolioController {
                 languageManager.toggleLanguage();
             });
         }
+
+        // Monitor hash changes for simple routing (Admin vs Public)
+        window.addEventListener('hashchange', () => {
+            // Scroll pos might not be relevant if switching views entirely
+            this.render();
+            // If returning to public, re-attach listeners
+            if (window.location.hash !== '#admin') {
+                setTimeout(() => this.attachDOMListeners(), 100);
+            }
+        });
 
         // Initialize Product Showcase Carousel
         initProductShowcase();
