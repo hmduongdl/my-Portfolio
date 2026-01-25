@@ -1,6 +1,6 @@
 import { renderNavigation } from '../components/Navigation';
 import { renderHero } from '../components/Hero';
-import { renderAbout } from '../components/About';
+import { renderAbout, initAbout } from '../components/About';
 import { renderProjects } from '../components/Projects';
 import { renderProductShowcase, initProductShowcase } from '../components/ProductShowcase';
 import { renderContact, initContact } from '../components/Contact';
@@ -120,6 +120,7 @@ export class PortfolioController {
 
         // Initialize About section carousel
         initAboutCarousel();
+        initAbout();
 
         // Initialize Sticky Social Button
         initStickySocialButton();

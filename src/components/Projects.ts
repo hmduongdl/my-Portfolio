@@ -28,8 +28,8 @@ export const renderProjects = (): string => {
                                     <span class="tech-tag">Tailwind</span>
                                 </div>
                                 <div class="flex gap-3">
-                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
-                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
+                                    <a href="javascript:void(0)" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
+                                    <a href="javascript:void(0)" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
                                 </div>
                             </div>
                         </article>
@@ -50,8 +50,8 @@ export const renderProjects = (): string => {
                                     <span class="tech-tag">Node</span>
                                 </div>
                                 <div class="flex gap-3">
-                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
-                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
+                                    <a href="javascript:void(0)" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
+                                    <a href="javascript:void(0)" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
                                 </div>
                             </div>
                         </article>
@@ -71,8 +71,8 @@ export const renderProjects = (): string => {
                                     <span class="tech-tag">Go</span>
                                 </div>
                                 <div class="flex gap-3">
-                                    <a href="#" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
-                                    <a href="#" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
+                                    <a href="javascript:void(0)" class="px-3 py-2 bg-clean-accent text-white rounded-md text-sm hover:opacity-90">${t.viewLive}</a>
+                                    <a href="javascript:void(0)" class="px-3 py-2 border border-gray-200 rounded-md text-sm hover:bg-gray-50">${t.viewSource}</a>
                                 </div>
                             </div>
                         </article>
