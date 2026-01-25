@@ -100,6 +100,7 @@ export class PortfolioController {
 
             const heroEl = document.getElementById('hero');
             const aboutEl = document.getElementById('about');
+            const productsEl = document.getElementById('products');
             const projectsEl = document.getElementById('projects');
             const contactEl = document.getElementById('contact');
             const footerEl = document.getElementById('footer');
@@ -114,6 +115,8 @@ export class PortfolioController {
                 activeLayer = 'contact';
             } else if (projectsEl && currentScroll >= projectsEl.offsetTop - offset) {
                 activeLayer = 'projects';
+            } else if (productsEl && currentScroll >= productsEl.offsetTop - offset) {
+                activeLayer = 'products';
             } else if (aboutEl && currentScroll >= aboutEl.offsetTop - offset) {
                 // In About section - auto-slide handles layer switching
                 activeLayer = 'experience';
@@ -181,6 +184,8 @@ export class PortfolioController {
 
             if (target === 'experience' || target === 'skills') {
                 targetEl = document.getElementById('about');
+            } else if (target === 'products') {
+                targetEl = document.getElementById('products');
             } else if (target === 'projects') {
                 targetEl = document.getElementById('projects');
             } else if (target === 'contact') {

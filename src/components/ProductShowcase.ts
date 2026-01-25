@@ -9,7 +9,7 @@ export const renderProductShowcase = (): string => {
     const t = languageManager.getText('products_showcase');
 
     return `
-    <section id="product-showcase" class="bg-white relative z-30 pt-6 sm:pt-8 md:pt-8 pb-[25px] overflow-hidden select-none w-full border-t border-gray-200">
+    <section id="products" class="bg-white relative z-30 pt-6 sm:pt-8 md:pt-8 pb-[25px] overflow-hidden select-none w-full border-t border-gray-200">
         <!-- 1. Header Section: Centered as requested -->
         <!-- 1. Header Section: Standardized to match other sections -->
         <div class="container-custom mb-12 text-center">

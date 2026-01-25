@@ -1,9 +1,20 @@
 export type Language = 'en' | 'vn';
 
+export interface Translation {
+    about: string;
+    products: string;
+    projects: string;
+    contact: string;
+    lang_en: string;
+    lang_vn: string;
+    [key: string]: any;
+}
+
 export const translations = {
     en: {
         nav: {
             about: "About",
+            products: "Showcase",
             projects: "Projects",
             contact: "Contact",
             lang_en: "EN",
@@ -101,6 +112,7 @@ export const translations = {
     vn: {
         nav: {
             about: "Giới thiệu",
+            products: "Sản phẩm",
             projects: "Dự án",
             contact: "Liên hệ",
             lang_en: "EN",
