@@ -132,7 +132,7 @@ export const initAdminPanel = (): void => {
         if (!listBody) return;
         const products = productStore.getProducts();
 
-        listBody.innerHTML = products.map((p, index) => `
+        listBody.innerHTML = products.map((p) => `
             <tr class="hover:bg-gray-50 group transition-colors">
                 <td class="px-6 py-4">
                     <div class="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden border border-gray-200">
@@ -252,10 +252,6 @@ export const initAdminPanel = (): void => {
     // Export
     document.getElementById('export-data')?.addEventListener('click', async () => {
         const products = productStore.getProducts();
-        // format as code
-        const code = JSON.stringify(products, null, 4)
-            .replace(/"([^"]+)":/g, '$1:') // Remove quotes from keys for JS object style (optional, but cleaner)
-            .replace(/"/g, "'"); // Use single quotes (optional preference)
 
         // Use JSON for reliability usually, but let's try to match the TS format decently
         // Actually, pure JSON is valid JS/TS. Let's just give them pure JSON for safety, they can just paste it into the array.
