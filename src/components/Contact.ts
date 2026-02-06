@@ -4,7 +4,7 @@ export const renderContact = (): string => {
     const t = languageManager.getText('contact');
 
     return `
-    <section id="contact" class="section bg-white relative z-[55]">
+    <section id="contact" class="section bg-slate-50 relative z-[55]">
         <div class="container-custom h-auto">
             
             <!-- Header -->

@@ -93,7 +93,7 @@ export const translations = {
             fluent: "Fluent"
         },
         footer: {
-            description: "A web developer based in Dalat. Passionate about sharing technology knowledge and helping people bring their website ideas to life.",
+            description: "A web developer based in Dalat. Passionate about sharing technology knowledge and helping people bring website ideas to life.",
             navigation_title: "Navigation",
             contact_title: "Contact",
             nav: {
@@ -188,7 +188,7 @@ export const translations = {
             fluent: "Thành thạo"
         },
         footer: {
-            description: "Một lập trình viên web tại Đà Lạt. Đam mê chia sẻ kiến thức công nghệ và giúp mọi người hiện thực hóa ý tưởng website của họ.",
+            description: "Một lập trình viên web tại Đà Lạt. Đam mê chia sẻ kiến thức công nghệ và giúp mọi người hiện thực hóa ý tưởng công nghệ vào đời sống hiện đại.",
             navigation_title: "Điều hướng",
             contact_title: "Liên hệ",
             nav: {
