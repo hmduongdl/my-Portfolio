@@ -27,11 +27,18 @@ export const renderFooter = (): string => {
                                 ${t.nav.about}
                             </a>
                         </li>
-                        <!-- <li>
+                        <li>
+                            <a href="#products" class="footer-nav-link text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block" data-target="products">
+                                ${t.nav.products}
+                            </a>
+                        </li>
+                        <!-- Projects link removed - section temporarily disabled
+                        <li>
                             <a href="#projects" class="footer-nav-link text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block" data-target="projects">
                                 ${t.nav.projects}
                             </a>
-                        </li> -->
+                        </li>
+                        -->
                         <li>
                             <a href="#contact" class="footer-nav-link text-gray-300 hover:text-white hover:translate-x-1 transition-all duration-200 inline-block" data-target="contact">
                                 ${t.nav.contact}

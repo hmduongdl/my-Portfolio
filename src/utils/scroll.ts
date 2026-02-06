@@ -13,6 +13,12 @@ export function handleScrollReveal(): void {
     const elementVisible = 150;
 
     reveals.forEach((reveal) => {
+        // Check if element has already been animated - if so, skip all processing
+        const hasBeenAnimated = reveal.getAttribute('data-animated') === 'true';
+        if (hasBeenAnimated) {
+            return; // Skip - animation already completed and should never reset
+        }
+
         const elementTop = reveal.getBoundingClientRect().top;
         const inView = elementTop < windowHeight - elementVisible;
         const el = reveal as any;
@@ -26,23 +32,18 @@ export function handleScrollReveal(): void {
 
             if (!reveal.classList.contains('active')) {
                 reveal.classList.add('active');
-                // Mark as animated to prevent future resets
+                // Mark as animated PERMANENTLY - this prevents any future resets
                 reveal.setAttribute('data-animated', 'true');
                 animateSkillProgress(reveal);
             }
         } else {
-            // Only reset if element hasn't been animated yet
-            const hasBeenAnimated = reveal.getAttribute('data-animated') === 'true';
-
-            if (reveal.classList.contains('active') && !hasBeenAnimated) {
-                // Determine if we should start a delayed reset
+            // Only allow reset for elements that have NOT been fully animated yet
+            if (reveal.classList.contains('active')) {
+                // Start delayed reset only if animation hasn't been marked as complete
                 if (!el._resetTimeout) {
                     el._resetTimeout = setTimeout(() => {
                         reveal.classList.remove('active');
-                        // Only reset if necessary
-                        if (reveal.dataset.reset !== 'false') {
-                            resetSkillProgress(reveal);
-                        }
+                        resetSkillProgress(reveal);
                         el._resetTimeout = null;
                     }, 500); // ms delay before resetting to prevent jitter
                 }

@@ -98,6 +98,7 @@ export const translations = {
             contact_title: "Contact",
             nav: {
                 about: "About",
+                products: "Showcase",
                 projects: "Projects",
                 contact: "Contact"
             },
@@ -193,6 +194,7 @@ export const translations = {
             contact_title: "Liên hệ",
             nav: {
                 about: "Giới thiệu",
+                products: "Sản phẩm",
                 projects: "Dự án",
                 contact: "Liên hệ"
             },
