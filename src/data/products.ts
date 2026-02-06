@@ -91,9 +91,9 @@ const INITIAL_PRODUCTS: Product[] = [
         "description": "Ultra-portable and sleek design, perfect for students and professionals on the go.",
         "image": "https://songphuong.vn/Content/uploads/2025/08/Laptop-Acer-Aspire-Lite-14-AL14-52M-32KV-2.webp",
         "link": "https://songphuong.vn/product/laptop-acer-aspire-lite-14-n23g2/",
-        "price": "10.690.000",
-        "oldPrice": " 10.990.000",
-        "discount": 3,
+        "price": " 11.390.000",
+        "oldPrice": "",
+        "discount": 0,
         "sku": "142477",
         "rating": 5,
         "status": null
