@@ -11,7 +11,6 @@ export function handleScrollReveal(): void {
     const reveals = document.querySelectorAll('.section-reveal') as NodeListOf<HTMLElement>;
     const windowHeight = window.innerHeight;
     const elementVisible = 150;
-    const resetDelay = 500; // ms delay before resetting to prevent jitter
 
     reveals.forEach((reveal) => {
         const elementTop = reveal.getBoundingClientRect().top;
@@ -27,10 +26,15 @@ export function handleScrollReveal(): void {
 
             if (!reveal.classList.contains('active')) {
                 reveal.classList.add('active');
+                // Mark as animated to prevent future resets
+                reveal.setAttribute('data-animated', 'true');
                 animateSkillProgress(reveal);
             }
         } else {
-            if (reveal.classList.contains('active')) {
+            // Only reset if element hasn't been animated yet
+            const hasBeenAnimated = reveal.getAttribute('data-animated') === 'true';
+
+            if (reveal.classList.contains('active') && !hasBeenAnimated) {
                 // Determine if we should start a delayed reset
                 if (!el._resetTimeout) {
                     el._resetTimeout = setTimeout(() => {
@@ -40,7 +44,7 @@ export function handleScrollReveal(): void {
                             resetSkillProgress(reveal);
                         }
                         el._resetTimeout = null;
-                    }, resetDelay);
+                    }, 500); // ms delay before resetting to prevent jitter
                 }
             }
         }

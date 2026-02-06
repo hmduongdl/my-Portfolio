@@ -1,7 +1,7 @@
 import { renderNavigation } from '../components/Navigation';
 import { renderHero } from '../components/Hero';
 import { renderAbout, initAbout } from '../components/About';
-import { renderProjects } from '../components/Projects';
+// import { renderProjects } from '../components/Projects'; // TEMP: Disabled - not enough notable projects yet
 import { renderProductShowcase, initProductShowcase } from '../components/ProductShowcase';
 import { renderContact, initContact } from '../components/Contact';
 import { renderFooter, initFooter } from '../components/Footer';
@@ -67,7 +67,7 @@ export class PortfolioController {
             ${renderHero()}
             ${renderAbout()}
             ${renderProductShowcase()}
-            ${renderProjects()}
+            ${/* renderProjects() */ ''}
             ${renderContact()}
             ${renderFooter()}
             ${renderStickySocialButton()}
@@ -101,7 +101,7 @@ export class PortfolioController {
             const heroEl = document.getElementById('hero');
             const aboutEl = document.getElementById('about');
             const productsEl = document.getElementById('products');
-            const projectsEl = document.getElementById('projects');
+            // const projectsEl = document.getElementById('projects'); // TEMP: Disabled
             const contactEl = document.getElementById('contact');
             const footerEl = document.getElementById('footer');
 
@@ -113,8 +113,8 @@ export class PortfolioController {
                 activeLayer = 'footer';
             } else if (contactEl && currentScroll >= contactEl.offsetTop - offset) {
                 activeLayer = 'contact';
-            } else if (projectsEl && currentScroll >= projectsEl.offsetTop - offset) {
-                activeLayer = 'projects';
+                // } else if (projectsEl && currentScroll >= projectsEl.offsetTop - offset) { // TEMP: Disabled
+                //     activeLayer = 'projects';
             } else if (productsEl && currentScroll >= productsEl.offsetTop - offset) {
                 activeLayer = 'products';
             } else if (aboutEl && currentScroll >= aboutEl.offsetTop - offset) {
@@ -186,8 +186,8 @@ export class PortfolioController {
                 targetEl = document.getElementById('about');
             } else if (target === 'products') {
                 targetEl = document.getElementById('products');
-            } else if (target === 'projects') {
-                targetEl = document.getElementById('projects');
+                // } else if (target === 'projects') { // TEMP: Disabled
+                //     targetEl = document.getElementById('projects');
             } else if (target === 'contact') {
                 targetEl = document.getElementById('contact');
             }

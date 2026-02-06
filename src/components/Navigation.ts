@@ -22,7 +22,7 @@ export const renderNavigation = (): string => {
             <ul class="flex gap-3 md:gap-8">
               <li><a href="#" data-layer="experience" id="nav-about" class="nav-link link-hover text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">${t.about}</a></li>
               <li><a href="#" data-layer="products" id="nav-products" class="nav-link link-hover text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">${t.products}</a></li>
-              <li><a href="#" data-layer="projects" id="nav-projects" class="nav-link link-hover text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">${t.projects}</a></li>
+              <!-- <li><a href="#" data-layer="projects" id="nav-projects" class="nav-link link-hover text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">${t.projects}</a></li> -->
               <li><a href="#" data-layer="contact" id="nav-contact" class="nav-link link-hover text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors">${t.contact}</a></li>
             </ul>
           </div>
