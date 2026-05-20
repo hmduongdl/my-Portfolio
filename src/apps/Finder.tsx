@@ -1,12 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { fetchProducts } from '../api/products';
+import React, { useEffect, useMemo, useState } from 'react';
+import { productService } from '../services/productService';
 import type { Product, ProductCategory } from '../types/product';
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 interface FinderAppProps {
   compact?: boolean;
+  lang?: 'en' | 'vn';
 }
 
 type TagType = 'Hot' | 'New' | 'Sale';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 const CATEGORY_COLORS: Record<ProductCategory, string> = {
   'PC Gaming': '#3B82F6',
@@ -18,11 +23,11 @@ const CATEGORY_COLORS: Record<ProductCategory, string> = {
   'Audio': '#06B6D4',
 };
 
-const SIDEBAR_GROUPS = [
-  { id: 'all', label: 'All Products', icon: '◯', categories: null as null | ProductCategory[] },
-  { id: 'pc-laptop', label: 'PC & Laptop', icon: '💻', categories: ['PC Gaming', 'Office PC', 'Laptop'] as ProductCategory[] },
-  { id: 'gaming-gear', label: 'Gaming Gear', icon: '🕹', categories: ['VGA', 'Gaming Gear', 'Keyboard'] as ProductCategory[] },
-  { id: 'audio', label: 'Audio & More', icon: '🎧', categories: ['Audio'] as ProductCategory[] },
+const SIDEBAR_GROUPS: { id: string; label: string; icon: string; categories: ProductCategory[] | null }[] = [
+  { id: 'all', label: 'All Products', icon: '◯', categories: null },
+  { id: 'pc-laptop', label: 'PC & Laptop', icon: '💻', categories: ['PC Gaming', 'Office PC', 'Laptop'] },
+  { id: 'gaming-gear', label: 'Gaming Gear', icon: '🕹', categories: ['VGA', 'Gaming Gear', 'Keyboard'] },
+  { id: 'audio', label: 'Audio & More', icon: '🎧', categories: ['Audio'] },
 ];
 
 const TAG_ITEMS: { id: TagType; label: string; dot: string }[] = [
@@ -31,7 +36,128 @@ const TAG_ITEMS: { id: TagType; label: string; dot: string }[] = [
   { id: 'Sale', label: 'On Sale', dot: 'bg-yellow-500' },
 ];
 
-export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+const formatVND = (price: number) =>
+  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+
+const calcDiscount = (price: number, oldPrice: number) =>
+  Math.round(((oldPrice - price) / oldPrice) * 100);
+
+const openProduct = (product: Product) => {
+  const url = product.product_url
+    ? product.product_url
+    : `https://songphuong.vn/?s=${encodeURIComponent(product.name)}`;
+  window.open(url, '_blank', 'noopener,noreferrer');
+};
+
+const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
+  e.currentTarget.src = 'https://placehold.co/300x300/f3f4f6/9ca3af?text=SongPhuong+Product';
+};
+
+// ─── SkeletonCard ─────────────────────────────────────────────────────────────
+
+const SkeletonCard: React.FC<{ compact?: boolean }> = ({ compact }) => {
+  if (compact) {
+    return (
+      <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg bg-paper-2 border border-rule animate-pulse">
+        <div className="w-[60px] h-[60px] rounded-xl bg-gray-200 dark:bg-gray-700" />
+        <div className="w-14 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700" />
+        <div className="w-10 h-2 rounded-full bg-gray-200 dark:bg-gray-700" />
+      </div>
+    );
+  }
+  return (
+    <div className="flex flex-col items-center gap-2 p-2 rounded-lg animate-pulse">
+      <div className="w-[92px] h-[92px] rounded-2xl bg-gray-200 dark:bg-gray-700" />
+      <div className="w-20 h-3 rounded-full bg-gray-200 dark:bg-gray-700" />
+      <div className="w-16 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700" />
+      <div className="w-12 h-2 rounded-full bg-gray-200 dark:bg-gray-700" />
+    </div>
+  );
+};
+
+// ─── ProductCard ──────────────────────────────────────────────────────────────
+
+const ProductCard: React.FC<{ product: Product; compact?: boolean }> = ({ product, compact }) => {
+  const hasDiscount = product.old_price != null && product.old_price > product.price;
+  const discountPct = hasDiscount ? calcDiscount(product.price, product.old_price!) : 0;
+
+  if (compact) {
+    return (
+      <div
+        onClick={() => openProduct(product)}
+        className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg bg-paper-2 border border-rule cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all"
+      >
+        <div className="relative w-[60px] h-[60px] flex-shrink-0">
+          {product.image_url ? (
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="w-full h-full rounded-xl object-contain p-1 bg-white"
+              onError={handleImgError}
+            />
+          ) : (
+            <div
+              className="w-full h-full rounded-xl flex items-center justify-center text-white text-2xl"
+              style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[product.category]}, ${CATEGORY_COLORS[product.category]}cc)` }}
+            >
+              {product.glyph ?? '📦'}
+            </div>
+          )}
+          {hasDiscount && (
+            <span className="absolute -top-1 -right-1 bg-orange-500 text-white text-[9px] font-bold px-1 py-0.5 rounded-full leading-none shadow-sm">
+              -{discountPct}%
+            </span>
+          )}
+        </div>
+        <div className="text-xs font-medium text-center leading-tight line-clamp-2 text-ink">{product.name}</div>
+        <div className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">{formatVND(product.price)}</div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      onClick={() => openProduct(product)}
+      className="flex flex-col items-center gap-2 cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-blue-500/10 group"
+    >
+      <div className="relative w-[92px] h-[92px] flex-shrink-0">
+        {product.image_url ? (
+          <img
+            src={product.image_url}
+            alt={product.name}
+            className="w-full h-full rounded-2xl object-contain p-2 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.10)]"
+            onError={handleImgError}
+          />
+        ) : (
+          <div
+            className="w-full h-full rounded-2xl flex items-center justify-center text-white text-[36px] font-light shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
+            style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[product.category]}, ${CATEGORY_COLORS[product.category]}cc)` }}
+          >
+            {product.glyph ?? '📦'}
+          </div>
+        )}
+        {hasDiscount && (
+          <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none shadow-sm">
+            -{discountPct}%
+          </span>
+        )}
+      </div>
+      <div className="text-[13px] font-medium text-center text-ink leading-tight line-clamp-2">{product.name}</div>
+      <div className="flex flex-col items-center gap-0.5">
+        <div className="text-[12px] font-semibold text-blue-600 dark:text-blue-400">{formatVND(product.price)}</div>
+        {hasDiscount && (
+          <div className="text-[11px] text-ink-3 line-through">{formatVND(product.old_price!)}</div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── FinderApp ────────────────────────────────────────────────────────────────
+
+export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'vn' }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
@@ -39,14 +165,28 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
   const [activeTag, setActiveTag] = useState<TagType | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
-  useEffect(() => {
-    fetchProducts()
-      .then(setProducts)
-      .catch((err) => setError(err?.message ?? 'Lỗi tải dữ liệu'))
+  const loadProducts = () => {
+    setIsLoading(true);
+    setError(null);
+    productService
+      .getProducts(lang)
+      .then((items) => {
+        if (!items || items.length === 0) {
+          throw new Error('Không có sản phẩm nào từ API');
+        }
+        setProducts(items);
+      })
+      .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Lỗi tải dữ liệu'))
       .finally(() => setIsLoading(false));
-  }, []);
+  };
 
-  const filtered = (() => {
+  useEffect(() => {
+    loadProducts();
+  }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── Filtering pipeline (useMemo) ──────────────────────────────────────────
+
+  const filtered = useMemo(() => {
     let result = products;
 
     if (activeCategory !== 'all') {
@@ -66,7 +206,9 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
     }
 
     return result;
-  })();
+  }, [products, activeCategory, activeTag, searchQuery]);
+
+  // ── Sidebar handlers ──────────────────────────────────────────────────────
 
   const handleGroupClick = (groupId: string) => {
     setActiveCategory(groupId);
@@ -78,76 +220,80 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
     setActiveCategory('all');
   };
 
-  const activeGroupLabel = activeTag
-    ? TAG_ITEMS.find((t) => t.id === activeTag)?.label
-    : SIDEBAR_GROUPS.find((g) => g.id === activeCategory)?.label ?? activeCategory;
+  // Build breadcrumb path for current view
+  const getBreadcrumb = useMemo(() => {
+    if (activeTag) {
+      return `Song Phương Products > Tag: ${TAG_ITEMS.find((t) => t.id === activeTag)?.label}`;
+    }
+    const groupLabel = SIDEBAR_GROUPS.find((g) => g.id === activeCategory)?.label ?? activeCategory;
+    return activeCategory === 'all' ? 'Song Phương Products' : `Song Phương Products > ${groupLabel}`;
+  }, [activeCategory, activeTag]);
+
+  // ── Error state ───────────────────────────────────────────────────────────
+
+  const ErrorPane: React.FC = () => (
+    <div className="flex flex-col items-center justify-center h-full gap-3 text-ink-3">
+      <div className="text-3xl">⚠️</div>
+      <div className="text-sm text-red-500">{error}</div>
+      <button
+        onClick={loadProducts}
+        className="px-3 py-1.5 rounded-lg bg-blue-500 text-white text-[12px] font-medium hover:bg-blue-600 active:scale-95 transition-all cursor-pointer"
+      >
+        Thử lại
+      </button>
+    </div>
+  );
+
+  // ── Compact layout ────────────────────────────────────────────────────────
 
   if (compact) {
-    const compactCategories = SIDEBAR_GROUPS.flatMap((g) =>
-      g.id === 'all' ? [{ id: 'all', label: 'All' }] : (g.categories ?? []).map((c) => ({ id: c, label: c }))
-    );
+    const compactTabs = SIDEBAR_GROUPS.map((g) => ({ id: g.id, label: g.id === 'all' ? 'All' : g.label }));
 
     return (
       <div className="flex flex-col h-full select-text">
+        {/* Tab bar */}
         <div className="flex gap-1.5 p-2.5 border-b border-rule bg-paper-2 overflow-x-auto flex-shrink-0">
-          {compactCategories.map((it) => (
+          {compactTabs.map((it) => (
             <button
               key={it.id}
-              onClick={() => { setActiveCategory(it.id === 'all' ? 'all' : it.id); setActiveTag(null); }}
-              className={`px-3 py-1.2 rounded-full text-xs font-medium border-none whitespace-nowrap cursor-pointer transition-all ${
-                activeCategory === it.id && !activeTag
-                  ? 'bg-primary text-white'
-                  : 'bg-white text-ink-2 shadow-[0_1px_0_rgba(0,0,0,0.04)]'
-              }`}
+              onClick={() => { setActiveCategory(it.id); setActiveTag(null); }}
+              className={`px-3 py-1 rounded-full text-xs font-medium border-none whitespace-nowrap cursor-pointer transition-all ${activeCategory === it.id && !activeTag
+                ? 'bg-primary text-white'
+                : 'bg-white text-ink-2 shadow-[0_1px_0_rgba(0,0,0,0.04)] hover:bg-paper-2'
+                }`}
             >
               {it.label}
             </button>
           ))}
         </div>
+
+        {/* Grid */}
         <div className="flex-1 overflow-auto p-3.5">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full text-ink-3 text-sm">Đang tải...</div>
-          ) : error ? (
-            <div className="flex items-center justify-center h-full text-red-500 text-sm">{error}</div>
+          {error ? (
+            <ErrorPane />
           ) : (
             <div className="grid grid-cols-2 gap-3.5">
-              {filtered.map((p) => (
-                <a
-                  key={p.id}
-                  href={p.product_url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg bg-paper-2 border border-rule no-underline"
-                >
-                  {p.image_url ? (
-                    <img src={p.image_url} alt={p.name} className="w-[60px] h-[60px] rounded-xl object-cover" />
-                  ) : (
-                    <div
-                      className="w-[60px] h-[60px] rounded-xl flex items-center justify-center text-white text-2xl"
-                      style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[p.category]}, ${CATEGORY_COLORS[p.category]}cc)` }}
-                    >
-                      {p.glyph ?? '📦'}
-                    </div>
-                  )}
-                  <div className="text-xs font-medium text-center leading-tight">{p.name}</div>
-                  {p.status && <div className="text-[10px] text-ink-3">{p.status}</div>}
-                </a>
-              ))}
+              {isLoading
+                ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} compact />)
+                : filtered.map((p) => <ProductCard key={p.id} product={p} compact />)
+              }
             </div>
           )}
         </div>
+
         <div className="px-3.5 py-1.5 border-t border-rule bg-paper-2 text-[11px] text-ink-3 flex-shrink-0">
-          {filtered.length} items
+          {isLoading ? 'Đang tải...' : `${filtered.length} items`}
         </div>
       </div>
     );
   }
 
+  // ── Full layout ───────────────────────────────────────────────────────────
+
   return (
     <div className="flex h-full select-text">
       {/* Sidebar */}
       <div className="w-[200px] bg-paper-2 border-r border-rule py-4 px-2 overflow-y-auto flex-shrink-0 select-none">
-        {/* Favorites group */}
         <div className="text-[11px] uppercase tracking-wider font-semibold text-ink-3 px-2 py-1">
           Favorites
         </div>
@@ -157,11 +303,10 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
             <div
               key={g.id}
               onClick={() => handleGroupClick(g.id)}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] cursor-pointer mb-0.5 transition-colors ${
-                isActive
-                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium'
-                  : 'text-ink hover:bg-[rgba(0,0,0,0.05)]'
-              }`}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] cursor-pointer mb-0.5 transition-colors ${isActive
+                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium'
+                : 'text-ink hover:bg-[rgba(0,0,0,0.05)]'
+                }`}
             >
               <span className={`w-4 text-center ${isActive ? 'text-blue-500' : 'text-ink-3'}`}>
                 {g.icon}
@@ -171,7 +316,6 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
           );
         })}
 
-        {/* Tags group */}
         <div className="text-[11px] uppercase tracking-wider font-semibold text-ink-3 px-2 py-1 mt-3">
           Tags
         </div>
@@ -181,11 +325,10 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
             <div
               key={t.id}
               onClick={() => handleTagClick(t.id)}
-              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] cursor-pointer mb-0.5 transition-colors ${
-                isActive
-                  ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium'
-                  : 'text-ink hover:bg-[rgba(0,0,0,0.05)]'
-              }`}
+              className={`flex items-center gap-2 px-2 py-1.5 rounded-lg text-[13px] cursor-pointer mb-0.5 transition-colors ${isActive
+                ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 font-medium'
+                : 'text-ink hover:bg-[rgba(0,0,0,0.05)]'
+                }`}
             >
               <span className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${t.dot}`} />
               {t.label}
@@ -194,72 +337,41 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
         })}
       </div>
 
-      {/* Main content pane */}
+      {/* Main pane */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Toolbar */}
         <div className="flex items-center gap-2.5 px-3.5 py-2.5 border-b border-rule bg-paper-2 flex-shrink-0 select-none">
           <div className="flex gap-1">
-            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">
-              ‹
-            </button>
-            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">
-              ›
-            </button>
+            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">‹</button>
+            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">›</button>
           </div>
-          <div className="text-[13px] font-semibold">{activeGroupLabel}</div>
+          <div className="text-[13px] font-semibold text-ink-2">{getBreadcrumb}</div>
           <input
             type="search"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Tìm kiếm..."
-            className="ml-4 px-2.5 py-1 rounded-md border border-rule-strong bg-white text-[12px] text-ink placeholder:text-ink-3 outline-none focus:border-blue-400 w-40"
+            className="ml-4 px-2.5 py-1 rounded-md border border-rule-strong bg-white text-[12px] text-ink placeholder:text-ink-3 outline-none focus:border-blue-400 w-40 transition-colors"
           />
           <div className="ml-auto flex gap-1.5">
-            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">
-              ⊞
-            </button>
-            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">
-              ≡
-            </button>
+            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">⊞</button>
+            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">≡</button>
           </div>
         </div>
 
         {/* Items grid */}
         <div className="flex-1 overflow-auto p-5 bg-paper">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-full text-ink-3 text-sm">Đang tải...</div>
-          ) : error ? (
-            <div className="flex items-center justify-center h-full text-red-500 text-sm">{error}</div>
+          {error ? (
+            <ErrorPane />
+          ) : isLoading ? (
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-6">
+              {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+            </div>
           ) : filtered.length === 0 ? (
             <div className="flex items-center justify-center h-full text-ink-3 text-sm">Không có sản phẩm</div>
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-6">
-              {filtered.map((p) => (
-                <a
-                  key={p.id}
-                  href={p.product_url || '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex flex-col items-center gap-2 cursor-pointer p-2 rounded-lg transition-colors duration-200 hover:bg-blue-500/10 no-underline"
-                >
-                  {p.image_url ? (
-                    <img
-                      src={p.image_url}
-                      alt={p.name}
-                      className="w-[92px] h-[92px] rounded-2xl object-cover shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
-                    />
-                  ) : (
-                    <div
-                      className="w-[92px] h-[92px] rounded-2xl flex items-center justify-center text-white text-[36px] font-light shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
-                      style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[p.category]}, ${CATEGORY_COLORS[p.category]}cc)` }}
-                    >
-                      {p.glyph ?? '📦'}
-                    </div>
-                  )}
-                  <div className="text-[13px] font-medium text-center text-ink">{p.name}</div>
-                  {p.status && <div className="text-[11px] text-ink-3">{p.status}</div>}
-                </a>
-              ))}
+              {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
             </div>
           )}
         </div>

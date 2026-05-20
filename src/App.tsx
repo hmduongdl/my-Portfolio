@@ -42,6 +42,36 @@ export const App: React.FC = () => {
     return () => document.removeEventListener('click', handleOutsideClick);
   }, [setOpenMenu]);
 
+  // Vibe check diagnostics for SQL-backed endpoints on application mount
+  useEffect(() => {
+    const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+    const endpoints = ['/products', '/projects', '/profile'].map((path) => `${API_BASE_URL}${path}`);
+
+    const pingEndpoint = async (url: string) => {
+      const response = await fetch(url, { cache: 'no-store' });
+      return { url, ok: response.ok, status: response.status };
+    };
+
+    const runDiagnostics = async () => {
+      const results = await Promise.allSettled(endpoints.map(pingEndpoint));
+      results.forEach((result, index) => {
+        const endpoint = endpoints[index];
+        if (result.status === 'fulfilled') {
+          const { ok, status } = result.value;
+          if (ok) {
+            console.log(`🟢 [SQL Engine] Connected to ${endpoint} (${status} OK)`);
+          } else {
+            console.log(`🔴 [SQL Engine] Connection failed - ${endpoint} returned ${status}`);
+          }
+        } else {
+          console.log(`🔴 [SQL Engine] Connection failed - ${endpoint} offline (${result.reason})`);
+        }
+      });
+    };
+
+    runDiagnostics();
+  }, []);
+
   // Open Social apps or normal apps inside simulated iOS smartphone screens
   const handleIOSAppOpen = (id: string) => {
     const social = SOCIAL_APPS.find((s) => s.id === id);
@@ -70,7 +100,7 @@ export const App: React.FC = () => {
     <div className="desktop relative w-screen h-screen overflow-hidden isolation-auto">
       {/* Dynamic desktop wallpapers */}
       <Wallpaper />
-      
+
       {/* Fixed top Menu bar */}
       <MenuBar />
 
@@ -90,7 +120,7 @@ export const App: React.FC = () => {
             Song Phương
           </div>
         </div>
-        
+
         {/* Notes (Welcome.md) */}
         <div
           onDoubleClick={() => openApp('welcome', APP_DEFS)}
