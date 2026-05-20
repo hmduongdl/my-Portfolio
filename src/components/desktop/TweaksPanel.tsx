@@ -100,7 +100,7 @@ interface TweakRadioProps {
   label: string;
   value: string;
   options: { value: string; label: string }[];
-  onChange: (v: any) => void;
+  onChange: (v: string) => void;
 }
 
 export const TweakRadio: React.FC<TweakRadioProps> = ({ label, value, options, onChange }) => {

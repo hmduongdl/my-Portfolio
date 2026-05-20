@@ -8,12 +8,12 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false }) => {
   const [active, setActive] = useState<string>('all');
   
   const products = [
-    { name: 'Aurora 14', kind: 'Laptop', tag: 'Featured', date: 'Apr 12, 2026', size: '1.4 kg', color: '#3B82C4', glyph: '🖥' },
-    { name: 'Aurora 16 Pro', kind: 'Laptop', tag: 'New', date: 'Mar 30, 2026', size: '2.1 kg', color: '#2966A3', glyph: '🖥' },
-    { name: 'Lumen Mini', kind: 'Desktop', tag: 'Compact', date: 'Feb 18, 2026', size: '1.2 L', color: '#7A8C5C', glyph: '◼' },
-    { name: 'Lumen Studio', kind: 'Desktop', tag: 'Workstation', date: 'Jan 22, 2026', size: '8.4 kg', color: '#4F7C8A', glyph: '◼' },
-    { name: 'Glacier All-in-One', kind: 'Desktop', tag: '27"', date: 'Dec 04, 2025', size: '7.8 kg', color: '#B85450', glyph: '▭' },
-    { name: 'Edge Compute Box', kind: 'Server', tag: 'Edge', date: 'Nov 11, 2025', size: '3.9 kg', color: '#C99A2E', glyph: '▣' },
+    { name: 'SP Laptop Pro 14', kind: 'Laptop', tag: 'Featured', date: 'Apr 12, 2026', size: '1.4 kg', color: '#3B82C4', glyph: '🖥' },
+    { name: 'SP Laptop Air 16', kind: 'Laptop', tag: 'New', date: 'Mar 30, 2026', size: '1.8 kg', color: '#2966A3', glyph: '🖥' },
+    { name: 'SP Mini Desktop', kind: 'Desktop', tag: 'Compact', date: 'Feb 18, 2026', size: '1.2 L', color: '#7A8C5C', glyph: '◼' },
+    { name: 'SP Studio Tower', kind: 'Desktop', tag: 'Workstation', date: 'Jan 22, 2026', size: '8.4 kg', color: '#4F7C8A', glyph: '◼' },
+    { name: 'SP All-in-One 27"', kind: 'Desktop', tag: '27"', date: 'Dec 04, 2025', size: '7.8 kg', color: '#B85450', glyph: '▭' },
+    { name: 'SP Edge Node', kind: 'Server', tag: 'Edge', date: 'Nov 11, 2025', size: '3.9 kg', color: '#C99A2E', glyph: '▣' },
   ];
 
   const sidebarItems = [

@@ -4,12 +4,12 @@ export const ProjectsApp: React.FC = () => {
   const [filter, setFilter] = useState<string>('all');
   
   const projects = [
-    { name: 'Tsumugi Reader', tech: 'react', desc: 'Japanese reading app with furigana toggle', color: '#3B82C4' },
-    { name: 'Pomello CLI', tech: 'node', desc: 'Terminal pomodoro with zoned focus blocks', color: '#7A8C5C' },
-    { name: 'Quietly', tech: 'react', desc: 'A note-taking tool that respects silence', color: '#4F7C8A' },
-    { name: 'KanjiPath', tech: 'design', desc: 'Stroke-order learning visualization', color: '#B85450' },
-    { name: 'Ledger Light', tech: 'node', desc: 'Personal finance, single-file SQLite', color: '#C99A2E' },
-    { name: 'Paper SDK', tech: 'design', desc: 'Component kit for editorial SaaS', color: '#7E5876' },
+    { name: 'Song Phương Website', tech: 'react', desc: 'E-commerce platform built with React, TypeScript & Tailwind CSS', color: '#3B82C4' },
+    { name: 'Portfolio OS', tech: 'react', desc: 'macOS-style interactive portfolio built in React + Vite', color: '#4F7C8A' },
+    { name: 'SP Admin Dashboard', tech: 'react', desc: 'Product & order management dashboard with role-based access', color: '#7A8C5C' },
+    { name: 'Score Tracker App', tech: 'node', desc: 'Grade management web app for university coursework', color: '#C99A2E' },
+    { name: 'Brand Identity Kit', tech: 'design', desc: 'Logo, color system & print assets for local businesses', color: '#7E5876' },
+    { name: 'Store Inventory CLI', tech: 'node', desc: 'Terminal-based tool to track product stock and pricing', color: '#B85450' },
   ];
 
   const tabs = [

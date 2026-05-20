@@ -36,6 +36,7 @@ interface OSState {
   focusedId: AppID | null;
   activeAppName: string;
   iosOpenAppId: string | null;
+  language: 'en' | 'vn';
 
   openApp: (id: AppID, defs: AppDefinition[]) => void;
   closeWindow: (id: AppID) => void;
@@ -47,6 +48,7 @@ interface OSState {
   setOpenMenu: (menu: string | null) => void;
   setIsMobile: (val: boolean) => void;
   setIosOpenAppId: (id: string | null) => void;
+  setLanguage: (lang: 'en' | 'vn') => void;
 }
 
 export const useOSStore = create<OSState>((set, get) => {
@@ -69,6 +71,7 @@ export const useOSStore = create<OSState>((set, get) => {
     focusedId: null,
     activeAppName: 'Finder',
     iosOpenAppId: null,
+    language: 'vn',
 
     openApp: (id, defs) =>
       set((state) => {
@@ -183,5 +186,6 @@ export const useOSStore = create<OSState>((set, get) => {
     setOpenMenu: (menu) => set({ openMenu: menu }),
     setIsMobile: (val) => set({ isMobile: val }),
     setIosOpenAppId: (id) => set({ iosOpenAppId: id }),
+    setLanguage: (lang) => set({ language: lang }),
   };
 });

@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { AppDefinition } from '../../types';
+import { AppDefinition, AppID } from '../../types';
 
 interface DockIconProps {
   app: AppDefinition;
   mouseX: number | null;
-  onOpen: (id: any) => void;
+  onOpen: (id: AppID) => void;
   isRunning: boolean;
   dockSize: number;
   magnify: number;
@@ -75,7 +75,7 @@ const DockIcon: React.FC<DockIconProps> = ({
 interface DockProps {
   apps: AppDefinition[];
   runningIds: string[];
-  onOpen: (id: any) => void;
+  onOpen: (id: AppID) => void;
   dockSize?: number;
   magnify?: number;
   autoHide?: boolean;

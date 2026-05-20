@@ -2,10 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Wallpaper } from '../desktop/Wallpaper';
 import { AppDefinition, SocialAppDefinition } from '../../types';
 
+type IosApp = Pick<AppDefinition, 'id' | 'name' | 'bg' | 'icon'>;
+
 interface MobileScreenProps {
-  apps: any[];
+  apps: IosApp[];
   socialApps: SocialAppDefinition[];
-  openApp: any;
+  openApp: AppDefinition | null | undefined;
   setOpenId: (id: string | null) => void;
 }
 

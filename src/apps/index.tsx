@@ -14,7 +14,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
         <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.1.79-.25.79-.56 0-.28-.01-1.02-.02-2-3.2.69-3.87-1.54-3.87-1.54-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11 11 0 016 0c2.2-1.49 3.18-1.18 3.18-1.18.62 1.58.23 2.75.11 3.04.74.81 1.18 1.84 1.18 3.1 0 4.42-2.69 5.4-5.25 5.68.41.36.78 1.06.78 2.13 0 1.54-.01 2.78-.01 3.16 0 .31.21.67.8.55C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/>
       </svg>
     ),
-    url: 'https://github.com/',
+    url: 'https://github.com/duonghm-sp',
   },
   {
     id: 'facebook', name: 'Facebook',
@@ -24,7 +24,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
         <path d="M24 12.07C24 5.4 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.05V9.41c0-3.02 1.79-4.69 4.53-4.69 1.31 0 2.69.24 2.69.24v2.97h-1.51c-1.49 0-1.96.93-1.96 1.89v2.27h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07"/>
       </svg>
     ),
-    url: 'https://facebook.com/',
+    url: 'https://facebook.com/duonghm.sp',
   },
   {
     id: 'gmail', name: 'Gmail',
@@ -35,7 +35,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
         <polygon fill="#EA4335" points="2,6 12,13 22,6 22,7.5 12,14.5 2,7.5"/>
       </svg>
     ),
-    mailto: 'mailto:hello@yourname.dev',
+    mailto: 'mailto:duonghm.work@gmail.com',
   },
   {
     id: 'phone', name: 'Phone',
@@ -95,7 +95,7 @@ export const APP_DEFS: AppDefinition[] = [
       </svg>
     ),
     initial: { w: 600, h: 480, x: 320, y: 90 },
-    mailto: 'mailto:hello@yourname.dev',
+    mailto: 'mailto:duonghm.work@gmail.com',
     Component: MailApp,
   },
   {
