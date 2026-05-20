@@ -13,7 +13,6 @@ export const App: React.FC = () => {
   const tweaks = useOSStore((state) => state.tweaks);
   const setTweak = useOSStore((state) => state.setTweak);
   const windows = useOSStore((state) => state.windows);
-  const openMenu = useOSStore((state) => state.openMenu);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
   const openApp = useOSStore((state) => state.openApp);
   const closeWindow = useOSStore((state) => state.closeWindow);

@@ -1,4 +1,3 @@
-import React from 'react';
 import { AboutApp } from './About';
 import { FinderApp } from './Finder';
 import { ProjectsApp } from './Projects';

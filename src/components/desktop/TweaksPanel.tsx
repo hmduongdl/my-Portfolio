@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { useOSStore } from '../../store/useOSStore';
 
 interface TweakSectionProps {
   title: string;

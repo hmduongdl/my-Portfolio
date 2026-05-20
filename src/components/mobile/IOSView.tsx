@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { useOSStore } from '../../store/useOSStore';
 import { Wallpaper } from '../desktop/Wallpaper';
 import { AppDefinition, SocialAppDefinition } from '../../types';
 
