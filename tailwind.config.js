@@ -1,44 +1,146 @@
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
-    "./index.html",
-    "./src/**/*.{js,ts,jsx,tsx}",
+    './index.html',
+    './src/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
+
+      /* ── Typography ──────────────────────────────────────────── */
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        sans:  ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
+        mono:  ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
       },
+
+      /* ── Paper & Ink Colour Tokens ───────────────────────────── */
       colors: {
-        // Deep Tech Dark Mode
-        'deep-bg': '#0F172A',
-        'deep-text': '#F8FAFC',
-        'deep-accent': '#38BDF8',
-        'deep-accent-alt': '#818CF8',
-        // Clean & Minimal Light Mode
-        'clean-bg': '#FFFFFF',
-        'clean-bg-alt': '#F3F4F6',
-        'clean-text': '#111827',
-        'clean-accent': '#059669',
+        paper:          'var(--bg-paper)',
+        'paper-2':      'var(--bg-paper-2)',
+        'paper-3':      'var(--bg-paper-3)',
+        ink:            'var(--ink)',
+        'ink-2':        'var(--ink-2)',
+        'ink-3':        'var(--ink-3)',
+        'ink-4':        'var(--ink-4)',
+        rule:           'var(--rule)',
+        'rule-strong':  'var(--rule-strong)',
+        primary:        'var(--primary)',
+        'primary-hover':'var(--primary-hover)',
+        'primary-soft': 'var(--primary-soft)',
+        success:        'var(--success)',
+        error:          'var(--error)',
+        warning:        'var(--warning)',
+        info:           'var(--info)',
+
+        /* macOS chrome */
+        'win-bg':       'var(--win-bg)',
+        'win-sidebar':  'var(--win-sidebar-bg)',
+        'win-titlebar': 'var(--win-titlebar-bg)',
+        'win-border':   'var(--win-border)',
+        'menubar-bg':   'var(--menubar-bg)',
+        'dock-bg':      'var(--dock-bg)',
+        'sidebar-bg':   'var(--sidebar-bg)',
+
+        /* Traffic lights */
+        'traffic-close':   'var(--traffic-close)',
+        'traffic-min':     'var(--traffic-min)',
+        'traffic-max':     'var(--traffic-max)',
+        'traffic-inactive':'var(--traffic-inactive)',
       },
+
+      /* ── Backdrop Blur — macOS depth levels ──────────────────── */
+      backdropBlur: {
+        'xs':         'var(--blur-xs)',      /* 2px  */
+        'mac-sm':     'var(--blur-sm)',      /* 8px  */
+        'mac-md':     'var(--blur-md)',      /* 16px dropdown */
+        'mac-dock':   'var(--blur-dock)',    /* 20px dock */
+        'mac-menu':   'var(--blur-menu)',    /* 28px menu bar */
+        'mac-window': 'var(--blur-window)', /* 40px window vibrancy */
+        'mac-frosted':'var(--blur-frosted)',/* 60px heavy glass */
+      },
+
+      /* ── Box Shadows ─────────────────────────────────────────── */
+      boxShadow: {
+        'win':        'var(--win-shadow)',
+        'win-focus':  'var(--win-shadow-focus)',
+        'dock':       'var(--dock-shadow)',
+        'mac-sm':     '0 2px 8px rgba(0,0,0,0.14)',
+        'mac-md':     '0 8px 24px rgba(0,0,0,0.20)',
+        'mac-lg':     '0 22px 70px rgba(0,0,0,0.40), 0 8px 24px rgba(0,0,0,0.26)',
+        'mac-xl':     '0 28px 80px rgba(0,0,0,0.52), 0 10px 30px rgba(0,0,0,0.30)',
+      },
+
+      /* ── Border Radius ───────────────────────────────────────── */
+      borderRadius: {
+        'mac':    'var(--win-radius)',      /* 10px windows */
+        'mac-lg': 'var(--win-radius-lg)',   /* 14px larger dialogs */
+        'dock':   '18px',
+      },
+
+      /* ── Spacing / Heights ───────────────────────────────────── */
+      height: {
+        'menubar':    'var(--menubar-h)',   /* 28px */
+        'titlebar':   'var(--win-titlebar-h)',
+      },
+      width: {
+        'sidebar':    'var(--sidebar-w)',   /* 200px */
+      },
+      minWidth: {
+        'sidebar':    'var(--sidebar-w)',
+      },
+
+      /* ── Z-Index Layers ──────────────────────────────────────── */
+      zIndex: {
+        'desktop':   'var(--z-desktop)',
+        'windows':   'var(--z-windows)',
+        'tweaks':    'var(--z-tweaks)',
+        'dock':      'var(--z-dock)',
+        'menubar':   'var(--z-menubar)',
+        'modal':     'var(--z-modal)',
+        'tooltip':   'var(--z-tooltip)',
+      },
+
+      /* ── Transitions ─────────────────────────────────────────── */
+      transitionTimingFunction: {
+        'calm':   'var(--ease-calm)',
+        'spring': 'var(--ease-spring)',
+        'mac-out':'var(--ease-out)',
+      },
+      transitionDuration: {
+        'fast': 'var(--dur-fast)',   /* 150ms */
+        'base': 'var(--dur-base)',   /* 240ms */
+        'slow': 'var(--dur-slow)',   /* 400ms */
+      },
+
+      /* ── Keyframe Animations ─────────────────────────────────── */
       animation: {
-        'fade-in': 'fadeIn 0.6s ease-out forwards',
-        'slide-up': 'slideUp 0.6s ease-out forwards',
-        'slide-down': 'slideDown 0.6s ease-out forwards',
+        'fade-in':     'fadeIn  0.24s var(--ease-calm) forwards',
+        'slide-up':    'slideUp 0.30s var(--ease-calm) forwards',
+        'slide-down':  'slideDown 0.30s var(--ease-calm) forwards',
+        'scale-in':    'scaleIn 0.20s var(--ease-spring) forwards',
+        'dock-bounce': 'dockBounce 0.5s var(--ease-spring)',
       },
       keyframes: {
         fadeIn: {
-          '0%': { opacity: '0', transform: 'translateY(20px)' },
+          '0%':   { opacity: '0', transform: 'translateY(10px)' },
           '100%': { opacity: '1', transform: 'translateY(0)' },
         },
         slideUp: {
-          '0%': { transform: 'translateY(100%)' },
+          '0%':   { transform: 'translateY(100%)' },
           '100%': { transform: 'translateY(0)' },
         },
         slideDown: {
-          '0%': { transform: 'translateY(-100%)' },
+          '0%':   { transform: 'translateY(-100%)' },
           '100%': { transform: 'translateY(0)' },
+        },
+        scaleIn: {
+          '0%':   { opacity: '0', transform: 'scale(0.85)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        dockBounce: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '40%':      { transform: 'translateY(-12px)' },
+          '70%':      { transform: 'translateY(-4px)' },
         },
       },
     },

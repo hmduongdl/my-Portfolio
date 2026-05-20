@@ -1,0 +1,182 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ═══════════════════════════════════════════════════════════════
+   DESIGN TOKEN SYSTEM
+   Paper & Ink Hybrid  ×  macOS Simulator
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+
+  /* ── Paper & Ink Hybrid Palette ─────────────────────────────── */
+  --bg-paper:        #FAF8F4;   /* parchment white */
+  --bg-paper-2:      #F3F0E8;   /* slightly warmer */
+  --bg-paper-3:      #EAE6DA;   /* aged paper */
+  --ink:             #1A1D2E;   /* near-black */
+  --ink-2:           #3D4252;   /* body text */
+  --ink-3:           #6B7080;   /* secondary text */
+  --ink-4:           #9CA0AC;   /* placeholder / muted */
+  --rule:            #E8E3D7;   /* divider line */
+  --rule-strong:     #D6CFBE;   /* strong divider */
+
+  /* Semantic accent */
+  --primary:         #3B82C4;
+  --primary-hover:   #2966A3;
+  --primary-soft:    #DCE8F4;
+  --success:         #7A8C5C;
+  --error:           #B85450;
+  --warning:         #C99A2E;
+  --info:            #4F7C8A;
+
+  /* ── macOS Window Chrome ────────────────────────────────────── */
+  --win-bg:            rgba(255, 255, 255, 0.82);
+  --win-sidebar-bg:    rgba(246, 246, 248, 0.72);
+  --win-titlebar-bg:   rgba(236, 236, 240, 0.75);
+  --win-titlebar-h:    28px;
+  --win-border:        rgba(0, 0, 0, 0.11);
+  --win-border-focus:  rgba(0, 0, 0, 0.18);
+  --win-shadow:        0 22px 70px rgba(0, 0, 0, 0.40),
+                       0 8px 24px  rgba(0, 0, 0, 0.26);
+  --win-shadow-focus:  0 28px 80px rgba(0, 0, 0, 0.52),
+                       0 10px 30px rgba(0, 0, 0, 0.30);
+  --win-radius:        10px;
+  --win-radius-lg:     14px;
+
+  /* ── Traffic Lights ─────────────────────────────────────────── */
+  --traffic-close:        #FF5F57;
+  --traffic-min:          #FEBC2E;
+  --traffic-max:          #28C840;
+  --traffic-close-hover:  #FF3B30;
+  --traffic-min-hover:    #FCA800;
+  --traffic-max-hover:    #1AAB29;
+  --traffic-inactive:     #D1D0D0;
+
+  /* ── Menu Bar ───────────────────────────────────────────────── */
+  --menubar-h:        28px;
+  --menubar-bg:       rgba(255, 255, 255, 0.72);
+  --menubar-text:     rgba(0, 0, 0, 0.85);
+  --menubar-text-dim: rgba(0, 0, 0, 0.55);
+
+  /* ── Dock ───────────────────────────────────────────────────── */
+  --dock-bg:          rgba(255, 255, 255, 0.22);
+  --dock-border:      rgba(255, 255, 255, 0.32);
+  --dock-shadow:      0 8px 32px rgba(0, 0, 0, 0.22),
+                      inset 0 1px 0 rgba(255, 255, 255, 0.40);
+
+  /* ── Sidebar (Finder / app panels) ─────────────────────────── */
+  --sidebar-w:        200px;
+  --sidebar-bg:       rgba(236, 236, 240, 0.65);
+  --sidebar-item-hover: rgba(0, 0, 0, 0.06);
+  --sidebar-item-active: rgba(0, 0, 0, 0.11);
+
+  /* ── Backdrop Blur Depths ───────────────────────────────────── */
+  --blur-xs:          2px;
+  --blur-sm:          8px;
+  --blur-md:          16px;    /* dropdown sheets */
+  --blur-dock:        20px;    /* dock shelf */
+  --blur-menu:        28px;    /* macOS menu bar */
+  --blur-window:      40px;    /* window vibrancy */
+  --blur-frosted:     60px;    /* heavy frosted glass */
+
+  /* ── Z-Index Layers ─────────────────────────────────────────── */
+  --z-desktop:        0;
+  --z-windows:        20;
+  --z-tweaks:         30;
+  --z-dock:           40;
+  --z-menubar:        50;
+  --z-modal:          60;
+  --z-tooltip:        70;
+
+  /* ── Typography ─────────────────────────────────────────────── */
+  --font-sans:  'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Display', system-ui, sans-serif;
+  --font-mono:  'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  /* ── Motion ─────────────────────────────────────────────────── */
+  --ease-calm:    cubic-bezier(0.2, 0, 0, 1);
+  --ease-spring:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out:     cubic-bezier(0.0, 0.0, 0.2, 1);
+  --dur-fast:     150ms;
+  --dur-base:     240ms;
+  --dur-slow:     400ms;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   BASE
+   ═══════════════════════════════════════════════════════════════ */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  user-select: none;
+}
+
+body {
+  background: #2a3a5a;
+}
+
+#root {
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   SCROLLBARS
+   ═══════════════════════════════════════════════════════════════ */
+.window-body::-webkit-scrollbar,
+.sidebar::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.window-body::-webkit-scrollbar-thumb,
+.sidebar::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.20);
+  border-radius: 6px;
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+.window-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Easing helpers */
+.transition-calm   { transition-timing-function: var(--ease-calm); }
+.transition-spring { transition-timing-function: var(--ease-spring); }
+
+/* macOS vibrancy surfaces */
+.mac-vibrancy {
+  backdrop-filter: blur(var(--blur-window)) saturate(1.8);
+  -webkit-backdrop-filter: blur(var(--blur-window)) saturate(1.8);
+}
+
+.mac-frosted {
+  backdrop-filter: blur(var(--blur-frosted)) saturate(2.0);
+  -webkit-backdrop-filter: blur(var(--blur-frosted)) saturate(2.0);
+}
+
+.mac-menu-blur {
+  backdrop-filter: blur(var(--blur-menu)) saturate(1.6);
+  -webkit-backdrop-filter: blur(var(--blur-menu)) saturate(1.6);
+}
+
+.mac-dock-blur {
+  backdrop-filter: blur(var(--blur-dock)) saturate(1.4);
+  -webkit-backdrop-filter: blur(var(--blur-dock)) saturate(1.4);
+}
