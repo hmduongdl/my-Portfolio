@@ -160,9 +160,6 @@ export const MobilePreview: React.FC<MobilePreviewProps> = ({ apps, socialApps =
 
   const W = 280;
   const H = 580;
-  const screenW = W - 14;
-  const screenH = H - 14;
-
   const iosApps = apps.map((a) => ({ id: a.id, name: a.name, bg: a.bg, icon: a.icon }));
   const openApp = openId ? apps.find((a) => a.id === openId) : null;
 
