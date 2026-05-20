@@ -9,7 +9,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   if (req.method === 'GET') {
     try {
-      const rows = await sql`SELECT * FROM products ORDER BY order_index ASC, created_at DESC`;
+      const rows = await sql`SELECT * FROM products_resolved ORDER BY order_index ASC, created_at DESC`;
       return res.status(200).json(rows);
     } catch (err) {
       console.error(err);

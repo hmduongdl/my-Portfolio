@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useOSStore } from './store/useOSStore';
+import { Tweaks } from './types';
 import { Wallpaper } from './components/desktop/Wallpaper';
 import { MenuBar } from './components/desktop/MenuBar';
 import { Dock } from './components/desktop/Dock';
@@ -146,7 +147,7 @@ export const App: React.FC = () => {
           <TweakRadio
             label="Style Theme"
             value={tweaks.windowStyle}
-            onChange={(v) => setTweak('windowStyle', v)}
+            onChange={(v) => setTweak('windowStyle', v as Tweaks['windowStyle'])}
             options={[
               { value: 'sonoma', label: 'Sonoma' },
               { value: 'bigsur', label: 'Big Sur' },

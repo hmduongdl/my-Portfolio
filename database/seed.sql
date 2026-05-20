@@ -32,6 +32,19 @@ INSERT INTO social_links (platform, label, url, visible, order_index) VALUES
   ('zalo',     'Zalo',     'https://zalo.me/',                true,  4)
 ON CONFLICT (platform) DO NOTHING;
 
+-- Products
+INSERT INTO products (name, category, price, image_url, link, glyph, color, status, visible, order_index) VALUES
+  ('SP PC INTEL Core i5-12400F',          'PC Gaming',    'Liên hệ', '', 'https://songphuong.vn', '🖥', '#3B82F6', 'Hot',  true, 0),
+  ('SP PC INTEL i5-14400F RTX 5060',      'PC Gaming',    'Liên hệ', '', 'https://songphuong.vn', '🖥', '#2563EB', 'New',  true, 1),
+  ('SP PC AMD Ryzen 3 3200G',             'Office PC',    'Liên hệ', '', 'https://songphuong.vn', '🖥', '#6B7280', NULL,   true, 2),
+  ('Acer Aspire Lite 14',                 'Laptop',       'Liên hệ', '', 'https://songphuong.vn', '💻', '#8B5CF6', 'Sale', true, 3),
+  ('Colorful iGame RTX 5060 Ti Ultra W',  'VGA',          'Liên hệ', '', 'https://songphuong.vn', '🎮', '#10B981', NULL,   true, 4),
+  ('Machenike L8 Pro',                    'Gaming Gear',  'Liên hệ', '', 'https://songphuong.vn', '🖱', '#F59E0B', NULL,   true, 5),
+  ('Machenike G3 V2 Gamepad',             'Gaming Gear',  'Liên hệ', '', 'https://songphuong.vn', '🕹', '#D97706', NULL,   true, 6),
+  ('Xiberia CZ98 Black Gradient',         'Keyboard',     'Liên hệ', '', 'https://songphuong.vn', '⌨', '#EC4899', NULL,   true, 7),
+  ('Thonet & Vander KUMPEL 2.0',          'Audio',        'Liên hệ', '', 'https://songphuong.vn', '🔊', '#06B6D4', NULL,   true, 8)
+ON CONFLICT DO NOTHING;
+
 -- ============================================================
 -- TẠO ADMIN USER:
 -- Chạy lệnh sau để sinh SQL tạo tài khoản admin:
