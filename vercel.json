@@ -5,11 +5,7 @@
       "destination": "/index.html"
     }
   ],
-  "functions": {
-    "api/**/*.ts": {
-      "runtime": "@vercel/node@3.1.0"
-    }
-  },
+
   "headers": [
     {
       "source": "/(.*)",
