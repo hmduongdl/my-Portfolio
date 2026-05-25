@@ -172,6 +172,17 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   // 2. Routing logic
   // ========================== PUBLIC ENDPOINTS ==========================
   
+  // GET /api/health
+  if (pathname === '/api/health') {
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
+    try {
+      const dbRes = await sql`SELECT NOW()`;
+      return res.status(200).json({ status: 'ok', timestamp: dbRes[0]?.now });
+    } catch (e: any) {
+      return res.status(500).json({ status: 'error', message: e.message });
+    }
+  }
+
   // GET /api/profile
   if (pathname === '/api/profile') {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
