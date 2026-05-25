@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api';
+import { ImageWithFallback } from '../components/desktop/ImageWithFallback';
 
 interface ProfileData {
   name: string;
@@ -128,9 +129,12 @@ export const ProfileEditor: React.FC = () => {
       <Section title="Avatar">
         <div className="flex items-start gap-4">
           <div className="w-20 h-20 rounded-xl overflow-hidden bg-gray-800 shrink-0 border border-gray-700">
-            {data.avatar_url
-              ? <img src={data.avatar_url} alt="avatar" className="w-full h-full object-cover" />
-              : <div className="w-full h-full flex items-center justify-center text-gray-600 text-3xl">?</div>}
+            <ImageWithFallback
+              src={data.avatar_url}
+              alt="avatar"
+              fallbackText={data.name || '?'}
+              className="w-full h-full object-cover"
+            />
           </div>
           <div className="flex-1">
             <Field label="URL ảnh" value={data.avatar_url} onChange={set('avatar_url')} mono />

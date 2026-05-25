@@ -1,4 +1,9 @@
-import type { TechItem } from '../types/profile';
+import type { ProfileData, TimelineItem } from '../services/profileService';
+
+export interface TechItem {
+  category: string;
+  name: string;
+}
 
 export const techStack: TechItem[] = [
   { category: 'Frontend', name: 'React · TypeScript · Tailwind · Vite' },
@@ -7,3 +12,49 @@ export const techStack: TechItem[] = [
   { category: 'Tools', name: 'Git · Vercel · VS Code' },
 ];
 
+export const profileVN: ProfileData = {
+  name: 'Hoàng Minh Dương',
+  title: 'Web Developer · IT Student',
+  bio: 'Sinh viên IT tại Đại học Đà Lạt & Web Developer tại Song Phương Technology.',
+  email: 'duonghm.work@gmail.com',
+  github: 'https://github.com/hmduongdl',
+  facebook: 'https://facebook.com/',
+  songphuong_url: 'https://songphuong.vn',
+  avatar: '/my-avatar.jpg'
+};
+
+export const timelineVN: TimelineItem[] = [
+  {
+    role: 'Web Developer',
+    company: 'Song Phương Technology',
+    company_url: 'https://songphuong.vn',
+    period: 'Tháng 3, 2025 - Hiện tại',
+    desc: [
+      'Thiết kế và phát triển giao diện người dùng sáng tạo cho các trang web và ứng dụng của công ty.',
+      'Quản lý hệ thống cơ sở dữ liệu và tích hợp các API dịch vụ.',
+      'Tối ưu hóa hiệu suất ứng dụng và trải nghiệm người dùng.'
+    ],
+    type: 'work'
+  },
+  {
+    role: 'Sinh viên CNTT',
+    company: 'Trường Đại học Đà Lạt',
+    company_url: 'https://dlu.edu.vn',
+    period: 'Tháng 8, 2025 - 2029',
+    desc: [
+      'Theo học ngành Công nghệ Thông tin.',
+      'Nghiên cứu các thuật toán cơ bản, cấu trúc dữ liệu và phát triển phần mềm.'
+    ],
+    type: 'education'
+  },
+  {
+    role: 'Nhà thiết kế đồ họa 2D',
+    company: 'Freelance',
+    period: 'Trước đây',
+    desc: [
+      'Thiết kế logo, nhận diện thương hiệu và ấn phẩm truyền thông cho khách hàng.',
+      'Làm việc với Photoshop, Illustrator và Figma.'
+    ],
+    type: 'freelance'
+  }
+];

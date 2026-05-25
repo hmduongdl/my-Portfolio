@@ -16,7 +16,7 @@ export const MailApp: React.FC = () => {
     setErrors(e);
     
     if (Object.keys(e).length === 0) {
-      const mailto = `mailto:duonghm.work@gmail.com?subject=${encodeURIComponent(`[Portfolio Inquiry] ${subject}`)}&body=${encodeURIComponent(`From: ${from}\n\n${body}`)}`;
+      const mailto = `mailto:hoanglong.workdl@gmail.com?subject=${encodeURIComponent(`[Portfolio Inquiry] ${subject}`)}&body=${encodeURIComponent(`From: ${from}\n\n${body}`)}`;
       window.open(mailto, '_blank');
       setSent(true);
       setTimeout(() => {
@@ -63,7 +63,7 @@ export const MailApp: React.FC = () => {
       {/* Header Fields */}
       <div className="px-3.5 py-1 border-b border-rule grid grid-cols-[60px_1fr] items-center">
         <div className="text-xs text-ink-3">To:</div>
-        <div className="py-1.5 text-[13px] font-medium text-ink">duonghm.work@gmail.com</div>
+        <div className="py-1.5 text-[13px] font-medium text-ink">hoanglong.workdl@gmail.com</div>
         
         <div className="text-xs text-ink-3 border-t border-rule py-2">From:</div>
         <input
