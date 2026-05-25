@@ -10,7 +10,7 @@ export async function signToken(payload: Record<string, unknown>): Promise<strin
   return new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
-    .setExpirationTime('7d')
+    .setExpirationTime('24h')
     .sign(secret());
 }
 
