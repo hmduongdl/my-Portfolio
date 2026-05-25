@@ -171,10 +171,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
     productService
       .getProducts(lang)
       .then((items) => {
-        if (!items || items.length === 0) {
-          throw new Error('Không có sản phẩm nào từ API');
-        }
-        setProducts(items);
+        setProducts(items || []);
       })
       .catch((err: unknown) => setError(err instanceof Error ? err.message : 'Lỗi tải dữ liệu'))
       .finally(() => setIsLoading(false));
@@ -245,16 +242,21 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
   );
 
   const EmptyPane: React.FC = () => (
-    <div className="flex flex-col items-center justify-center h-full gap-3 text-ink-3 py-12 select-none text-center">
-      <span className="text-[48px] animate-bounce select-none">🎁</span>
-      <span className="text-[13px] font-semibold text-ink-2">
-        {lang === 'vn' ? 'Không tìm thấy sản phẩm nào' : 'No products found'}
-      </span>
+    <div className="flex flex-col items-center justify-center h-full gap-4 text-ink-3 py-12 select-none text-center max-w-md mx-auto">
+      <span className="text-[72px] opacity-70 animate-bounce select-none">🎁</span>
+      <h3 className="text-[16px] font-semibold text-ink">
+        {lang === 'vn' ? 'Chưa có sản phẩm nào hiển thị' : 'No products to display'}
+      </h3>
+      <p className="text-[12px] text-ink-3 px-4 leading-normal">
+        {lang === 'vn'
+          ? 'Bạn có thể thêm sản phẩm mới từ ứng dụng System Settings bất kỳ lúc nào.'
+          : 'You can add new products from the System Settings app at any time.'}
+      </p>
       <button
         onClick={loadProducts}
-        className="mt-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-semibold rounded-lg shadow-sm active:scale-95 transition-all cursor-pointer border-none"
+        className="mt-2 px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-semibold rounded-lg shadow-sm active:scale-95 transition-all cursor-pointer border-none"
       >
-        {lang === 'vn' ? 'Tải lại' : 'Reload'}
+        {lang === 'vn' ? 'Tải lại trang' : 'Reload Page'}
       </button>
     </div>
   );
