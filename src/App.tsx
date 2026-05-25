@@ -1,18 +1,15 @@
 import React, { useEffect } from 'react';
 import { useOSStore } from './store/useOSStore';
-import { Tweaks } from './types';
 import { Wallpaper } from './components/desktop/Wallpaper';
 import { MenuBar } from './components/desktop/MenuBar';
 import { Dock } from './components/desktop/Dock';
 import { Window } from './components/desktop/Window';
-import { TweaksPanel, TweakSection, TweakRadio, TweakSlider, TweakToggle } from './components/desktop/TweaksPanel';
 import { IOSView } from './components/mobile/IOSView';
 import { MobilePreview } from './components/mobile/MobilePreview';
 import { APP_DEFS, SOCIAL_APPS } from './apps';
 
 export const App: React.FC = () => {
   const tweaks = useOSStore((state) => state.tweaks);
-  const setTweak = useOSStore((state) => state.setTweak);
   const windows = useOSStore((state) => state.windows);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
   const openApp = useOSStore((state) => state.openApp);
@@ -171,53 +168,7 @@ export const App: React.FC = () => {
         <MobilePreview apps={APP_DEFS} socialApps={SOCIAL_APPS} />
       )}
 
-      {/* Configuration Customizer panel */}
-      <TweaksPanel title="Tweaks">
-        <TweakSection title="Window style">
-          <TweakRadio
-            label="Style Theme"
-            value={tweaks.windowStyle}
-            onChange={(v) => setTweak('windowStyle', v as Tweaks['windowStyle'])}
-            options={[
-              { value: 'sonoma', label: 'Sonoma' },
-              { value: 'bigsur', label: 'Big Sur' },
-              { value: 'monterey', label: 'Monterey' },
-            ]}
-          />
-        </TweakSection>
-        <TweakSection title="Dock Preferences">
-          <TweakSlider
-            label="Size"
-            value={tweaks.dockSize}
-            onChange={(v) => setTweak('dockSize', v)}
-            min={36}
-            max={72}
-            step={2}
-            unit="px"
-          />
-          <TweakSlider
-            label="Magnification"
-            value={tweaks.dockMagnify}
-            onChange={(v) => setTweak('dockMagnify', v)}
-            min={0.5}
-            max={2}
-            step={0.05}
-            unit="x"
-          />
-          <TweakToggle
-            label="Auto-hide Dock"
-            value={tweaks.dockAutoHide}
-            onChange={(v) => setTweak('dockAutoHide', v)}
-          />
-        </TweakSection>
-        <TweakSection title="Mobile Emulation">
-          <TweakToggle
-            label="Show iPhone mockup"
-            value={tweaks.showMobilePreview}
-            onChange={(v) => setTweak('showMobilePreview', v)}
-          />
-        </TweakSection>
-      </TweaksPanel>
+
     </div>
   );
 };

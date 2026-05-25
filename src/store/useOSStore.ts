@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { WindowInstance, AppID, AppDefinition, Tweaks } from '../types';
 
-const TWEAKS_KEY = 'os-tweaks';
 const MENU_BAR_H = 28;
 
 const TWEAK_DEFAULTS: Tweaks = {
@@ -13,15 +12,11 @@ const TWEAK_DEFAULTS: Tweaks = {
 };
 
 function loadTweaks(): Tweaks {
-  try {
-    const raw = localStorage.getItem(TWEAKS_KEY);
-    if (raw) return { ...TWEAK_DEFAULTS, ...JSON.parse(raw) };
-  } catch { /* ignore */ }
   return { ...TWEAK_DEFAULTS };
 }
 
-function persistTweaks(t: Tweaks): void {
-  try { localStorage.setItem(TWEAKS_KEY, JSON.stringify(t)); } catch { /* ignore */ }
+function persistTweaks(_t: Tweaks): void {
+  // Persisting disabled to keep tweaks permanent
 }
 
 function topZ(windows: WindowInstance[]): number {
