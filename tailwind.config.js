@@ -6,15 +6,145 @@ export default {
   ],
   theme: {
     extend: {
+      fontSize: {
+        "window-title": [
+                "13px",
+                {
+                        "lineHeight": "16px",
+                        "letterSpacing": "-0.01em",
+                        "fontWeight": "700"
+                }
+        ],
+        "section-header": [
+                "13px",
+                {
+                        "lineHeight": "20px",
+                        "fontWeight": "700"
+                }
+        ],
+        "headline-lg-mobile": [
+                "17px",
+                {
+                        "lineHeight": "22px",
+                        "fontWeight": "700"
+                }
+        ],
+        "sidebar-item-active": [
+                "13px",
+                {
+                        "lineHeight": "18px",
+                        "fontWeight": "600"
+                }
+        ],
+        "body-bold": [
+                "13px",
+                {
+                        "lineHeight": "18px",
+                        "fontWeight": "600"
+                }
+        ],
+        "caption": [
+                "11px",
+                {
+                        "lineHeight": "14px",
+                        "fontWeight": "400"
+                }
+        ],
+        "body": [
+                "13px",
+                {
+                        "lineHeight": "18px",
+                        "fontWeight": "400"
+                }
+        ],
+        "headline-lg": [
+                "19px",
+                {
+                        "lineHeight": "24px",
+                        "fontWeight": "700"
+                }
+        ],
+        "sidebar-item": [
+                "13px",
+                {
+                        "lineHeight": "18px",
+                        "fontWeight": "400"
+                }
+        ]
+},
+      spacing: {
+        'gutter': '16px',
+        'window-padding': '24px',
+        'sidebar-width': '260px',
+        'group-spacing': '32px',
+        'item-gap': '8px',
+        'control-inner-padding': '12px',
+      },
 
       /* ── Typography ──────────────────────────────────────────── */
       fontFamily: {
+        'window-title': ['Inter'],
+        'section-header': ['Inter'],
+        'headline-lg-mobile': ['Inter'],
+        'sidebar-item-active': ['Inter'],
+        'body-bold': ['Inter'],
+        'caption': ['Inter'],
+        'body': ['Inter'],
+        'headline-lg': ['Inter'],
+        'sidebar-item': ['Inter'],
         sans:  ['var(--font-sans)', 'Inter', 'system-ui', 'sans-serif'],
         mono:  ['var(--font-mono)', 'JetBrains Mono', 'monospace'],
       },
 
       /* ── Paper & Ink Colour Tokens ───────────────────────────── */
       colors: {
+        'on-secondary-fixed': '#1a1b1f',
+        'primary-fixed-dim': '#adc6ff',
+        'on-tertiary-container': '#fdfcfd',
+        'primary-fixed': '#d8e2ff',
+        'on-surface-variant': '#414755',
+        'secondary-fixed': '#e3e2e7',
+        'inverse-on-surface': '#f0f1f1',
+        'inverse-surface': '#2f3131',
+        'on-primary-container': '#fefcff',
+        'surface-container-low': '#f3f3f4',
+        'background': '#f9f9f9',
+        'tertiary-fixed': '#e2e2e3',
+        'on-primary-fixed': '#001a41',
+        'on-secondary': '#ffffff',
+        'on-primary': '#ffffff',
+        'secondary-container': '#e0dfe4',
+        'on-surface': '#1a1c1c',
+        'inverse-primary': '#adc6ff',
+        'on-primary-fixed-variant': '#004493',
+        'on-tertiary': '#ffffff',
+        'surface-tint': '#005bc1',
+        'on-secondary-fixed-variant': '#46464b',
+        'surface': '#f9f9f9',
+        'surface-container-highest': '#e2e2e2',
+        'outline-variant': '#c1c6d7',
+        'error': '#ba1a1a',
+        'on-tertiary-fixed': '#1a1c1d',
+        'on-secondary-container': '#626267',
+        'tertiary-container': '#737576',
+        'secondary': '#5d5e63',
+        'surface-container-high': '#e8e8e8',
+        'surface-dim': '#dadada',
+        'on-error-container': '#93000a',
+        'error-container': '#ffdad6',
+        'on-error': '#ffffff',
+        'on-tertiary-fixed-variant': '#454748',
+        'surface-container': '#eeeeee',
+        'on-background': '#1a1c1c',
+        'surface-variant': '#e2e2e2',
+        'tertiary-fixed-dim': '#c6c6c7',
+        'surface-bright': '#f9f9f9',
+        'tertiary': '#5b5c5d',
+        'secondary-fixed-dim': '#c6c6cb',
+        'primary': '#0058bc',
+        'outline': '#717786',
+        'surface-container-lowest': '#ffffff',
+        'primary-container': '#0070eb',
         paper:          'var(--bg-paper)',
         'paper-2':      'var(--bg-paper-2)',
         'paper-3':      'var(--bg-paper-3)',
@@ -72,6 +202,10 @@ export default {
 
       /* ── Border Radius ───────────────────────────────────────── */
       borderRadius: {
+        'DEFAULT': '0.25rem',
+        'lg': '0.5rem',
+        'xl': '0.75rem',
+        'full': '9999px',
         'mac':    'var(--win-radius)',      /* 10px windows */
         'mac-lg': 'var(--win-radius-lg)',   /* 14px larger dialogs */
         'dock':   '18px',

@@ -27,6 +27,10 @@ dist-ssr
 src/components/Admin/PrivateAdmin.ts
 ADMIN_CREDENTIALS.md
 
+# Stitch macOS build
+stitch_macos_portfolio_admin_settings/
+stitch_macos_portfolio_admin_settings.zip
+
 # Ignore all markdown files except README and ROADMAP
 *.md
 !README.md

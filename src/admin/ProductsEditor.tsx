@@ -27,320 +27,650 @@ const CATEGORIES = ['PC Gaming', 'Office PC', 'Laptop', 'VGA', 'Gaming Gear', 'K
 const STATUSES = ['', 'New', 'Hot', 'Sale'];
 
 const EMPTY_FORM: Omit<Product, 'id'> = {
-  name: '', category: 'PC Gaming', tag: null, price: null, old_price: null,
-  discount: null, image_url: null, link: null, color: '#3B82F6', glyph: '📦',
-  status: null, override_name: null, override_price: null, override_image_url: null,
-  override_status: null, override_tag: null, visible: true, order_index: 0,
+  name: '',
+  category: 'PC Gaming',
+  tag: null,
+  price: null,
+  old_price: null,
+  discount: null,
+  image_url: null,
+  link: null,
+  color: '#3B82F6',
+  glyph: '📦',
+  status: null,
+  override_name: null,
+  override_price: null,
+  override_image_url: null,
+  override_status: null,
+  override_tag: null,
+  visible: true,
+  order_index: 0,
 };
 
-const Input: React.FC<{
-  label: string; value: string; onChange: (v: string) => void;
-  placeholder?: string; mono?: boolean; type?: string;
-}> = ({ label, value, onChange, placeholder, mono, type = 'text' }) => (
-  <div>
-    <label className="text-xs text-gray-500 block mb-1">{label}</label>
-    <input
-      type={type}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className={`w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 transition-colors ${mono ? 'font-mono' : ''}`}
-    />
-  </div>
-);
-
-const Select: React.FC<{
-  label: string; value: string; onChange: (v: string) => void; options: string[];
-}> = ({ label, value, onChange, options }) => (
-  <div>
-    <label className="text-xs text-gray-500 block mb-1">{label}</label>
-    <select
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      className="w-full bg-gray-800 border border-gray-700 text-white rounded-lg px-3 py-2 text-sm outline-none focus:border-blue-500 transition-colors"
-    >
-      {options.map((o) => <option key={o} value={o}>{o || '— None —'}</option>)}
-    </select>
-  </div>
-);
+type ActionStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export const ProductsEditor: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
-  const [editId, setEditId] = useState<number | null>(null);
-  const [isNew, setIsNew] = useState(false);
-  const [form, setForm] = useState<Omit<Product, 'id'>>(EMPTY_FORM);
-  const [saving, setSaving] = useState(false);
-  const [deleteId, setDeleteId] = useState<number | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [editingProduct, setEditingProduct] = useState<Product | Omit<Product, 'id'> | null>(null);
+  const [status, setStatus] = useState<ActionStatus>('idle');
+  const [actionMessage, setActionMessage] = useState('');
 
-  const load = () => {
+  const loadProducts = async () => {
     setLoading(true);
-    api.get<Product[]>('/products')
-      .then((d) => setProducts(d ?? []))
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    try {
+      // Fetch all products from our secure admin endpoint
+      const data = await api.get<Product[]>('/admin/products');
+      setProducts(data ?? []);
+    } catch (e) {
+      console.error('Failed to load products:', e);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(load, []);
+  useEffect(() => {
+    loadProducts();
+  }, []);
 
-  const openEdit = (p: Product) => {
-    setIsNew(false);
-    setEditId(p.id);
-    setForm({ ...p });
+  const showStatus = (type: ActionStatus, msg: string) => {
+    setStatus(type);
+    setActionMessage(msg);
+    if (type === 'saved' || type === 'error') {
+      setTimeout(() => {
+        setStatus('idle');
+        setActionMessage('');
+      }, 2500);
+    }
   };
-
-  const openNew = () => {
-    setIsNew(true);
-    setEditId(null);
-    setForm({ ...EMPTY_FORM });
-  };
-
-  const closeModal = () => { setEditId(null); setIsNew(false); };
-
-  const setF = (k: keyof typeof form) => (v: string | boolean | number | null) =>
-    setForm((f) => ({ ...f, [k]: v }));
 
   const handleSave = async () => {
-    if (!form.name || !form.category) return;
-    setSaving(true);
+    if (!editingProduct) return;
+    if (!editingProduct.name || !editingProduct.category) {
+      showStatus('error', 'Name and category are required');
+      return;
+    }
+
+    showStatus('saving', 'Saving changes...');
     try {
-      if (isNew) {
-        await api.post('/products', form);
+      if ('id' in editingProduct) {
+        // Update product via admin endpoint
+        await api.put('/admin/products', editingProduct);
       } else {
-        await api.put(`/products/${editId}`, form);
+        // Create product via admin endpoint
+        await api.post('/admin/products', editingProduct);
       }
-      closeModal();
-      load();
+      showStatus('saved', '✓ Saved successfully');
+      setEditingProduct(null);
+      await loadProducts();
     } catch (err) {
-      alert(`Lỗi: ${String(err)}`);
-    } finally {
-      setSaving(false);
+      console.error(err);
+      showStatus('error', `✗ Failed: ${String(err)}`);
     }
   };
 
   const handleDelete = async (id: number) => {
-    if (!window.confirm('Xoá sản phẩm này?')) return;
-    setDeleteId(id);
+    if (!window.confirm('Delete this product?')) return;
+    showStatus('saving', 'Deleting product...');
     try {
-      await api.del(`/products/${id}`);
-      setProducts((ps) => ps.filter((p) => p.id !== id));
+      await fetch('/api/admin/products', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({ id })
+      });
+      showStatus('saved', '✓ Deleted successfully');
+      await loadProducts();
     } catch (err) {
-      alert(`Lỗi: ${String(err)}`);
-    } finally {
-      setDeleteId(null);
+      console.error(err);
+      showStatus('error', `✗ Delete failed: ${String(err)}`);
     }
   };
 
-  const showModal = isNew || editId !== null;
+  const handleToggleVisible = async (p: Product) => {
+    const updatedVisible = !p.visible;
+    
+    // Optimistic UI update
+    setProducts(prev => prev.map(item => item.id === p.id ? { ...item, visible: updatedVisible } : item));
+    
+    try {
+      await api.put('/admin/products', {
+        ...p,
+        visible: updatedVisible
+      });
+    } catch (err) {
+      console.error(err);
+      // Revert on failure
+      setProducts(prev => prev.map(item => item.id === p.id ? { ...item, visible: p.visible } : item));
+      alert(`Failed to update visibility: ${String(err)}`);
+    }
+  };
+
+  // Filter products by search query
+  const filteredProducts = products.filter(p => {
+    const query = searchQuery.toLowerCase();
+    const nameMatch = p.name.toLowerCase().includes(query) || (p.override_name && p.override_name.toLowerCase().includes(query));
+    const catMatch = p.category.toLowerCase().includes(query);
+    return nameMatch || catMatch;
+  });
+
+  const getResolvedPrice = (p: Product) => {
+    return p.override_price ?? p.price ?? '—';
+  };
+
+  const getResolvedStatus = (p: Product) => {
+    return p.override_status ?? p.status;
+  };
 
   return (
-    <div className="p-6">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <div className="p-window-padding space-y-6">
+      
+      {/* Header Actions Area */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-white">Products</h1>
-          <p className="text-gray-500 text-sm mt-0.5">
-            {products.length} sản phẩm · Hỗ trợ override giá, ảnh, tên
-          </p>
+          <h2 className="text-[19px] font-bold text-on-surface">Inventory</h2>
+          <p className="text-[13px] text-on-surface-variant">Manage your catalog of high-performance tech products.</p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-lg transition-colors"
-        >
-          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M8 2v12M2 8h12"/>
-          </svg>
-          Thêm sản phẩm
-        </button>
+        
+        <div className="flex items-center gap-3">
+          {/* Search bar */}
+          <div className="relative w-64 group">
+            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50 group-focus-within:text-primary transition-colors text-[18px]">search</span>
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-surface-container-low border border-outline-variant/60 rounded-md py-1 pl-9 pr-3 text-[13px] text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+            />
+          </div>
+
+          <button
+            onClick={() => setEditingProduct({ ...EMPTY_FORM, order_index: products.length })}
+            className="bg-primary hover:bg-primary-container text-on-primary px-4 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-95 shrink-0"
+          >
+            <span className="material-symbols-outlined text-[16px]">add</span>
+            Add Product
+          </button>
+        </div>
       </div>
 
-      {/* Table */}
-      {loading ? (
-        <div className="flex items-center gap-2 text-gray-500 py-8">
-          <div className="w-4 h-4 border-2 border-gray-600 border-t-blue-500 rounded-full animate-spin" />
-          Đang tải...
-        </div>
-      ) : (
-        <div className="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden">
+      {/* Main Inventory Table Container */}
+      <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+        {loading ? (
+          <div className="flex items-center justify-center py-12 gap-2.5 text-on-surface-variant text-[13px]">
+            <div className="w-4 h-4 border-2 border-outline-variant border-t-primary rounded-full animate-spin" />
+            Loading products catalog...
+          </div>
+        ) : filteredProducts.length === 0 ? (
+          <div className="py-12 text-center text-on-surface-variant text-[13px]">
+            {searchQuery ? 'No products matches your search.' : 'No products found. Click "Add Product" to get started.'}
+          </div>
+        ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="w-full text-left border-collapse">
               <thead>
-                <tr className="border-b border-gray-800">
-                  {['Sản phẩm', 'Danh mục', 'Giá', 'Status', 'Hiển thị', ''].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs text-gray-500 font-medium">{h}</th>
-                  ))}
+                <tr className="bg-surface-container border-b border-outline-variant">
+                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant w-[80px]">Image</th>
+                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant">Name</th>
+                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant">Category</th>
+                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant">Price</th>
+                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant">Status</th>
+                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant w-[100px] text-center">Visible</th>
+                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant text-right w-[120px]">Actions</th>
                 </tr>
               </thead>
-              <tbody>
-                {products.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-4 py-10 text-center text-gray-600">
-                      Chưa có sản phẩm. Nhấn "Thêm sản phẩm" để bắt đầu.
-                    </td>
-                  </tr>
-                ) : products.map((p) => (
-                  <tr key={p.id} className="border-b border-gray-800/50 hover:bg-gray-800/30 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-2.5">
-                        {p.image_url && (
-                          <img
-                            src={p.override_image_url ?? p.image_url}
-                            alt=""
-                            className="w-9 h-9 rounded-lg object-cover bg-gray-800 shrink-0"
-                          />
-                        )}
-                        <div className="min-w-0">
-                          <p className="text-white font-medium truncate max-w-[200px]">
-                            {p.override_name ?? p.name}
-                          </p>
-                          {p.override_name && (
-                            <p className="text-xs text-orange-400 truncate max-w-[200px]">
-                              ↳ override: {p.name}
-                            </p>
+              <tbody className="divide-y divide-outline-variant/30">
+                {filteredProducts.map((p) => {
+                  const resolvedImage = p.override_image_url ?? p.image_url;
+                  const resolvedStatus = getResolvedStatus(p);
+                  const resolvedPrice = getResolvedPrice(p);
+
+                  return (
+                    <tr key={p.id} className="hover:bg-surface-container-low/50 transition-colors group">
+                      <td className="px-6 py-3">
+                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-outline-variant/50 bg-white p-1 flex items-center justify-center shrink-0">
+                          {resolvedImage ? (
+                            <img className="w-full h-full object-contain" src={resolvedImage} alt={p.name} />
+                          ) : (
+                            <span className="text-[20px]">{p.glyph || '📦'}</span>
                           )}
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3 text-gray-400">{p.category}</td>
-                    <td className="px-4 py-3">
-                      <span className="text-white">{p.override_price ?? p.price ?? '—'}</span>
-                      {p.override_price && (
-                        <span className="text-xs text-orange-400 block">↳ override</span>
-                      )}
-                    </td>
-                    <td className="px-4 py-3">
-                      {(p.override_status ?? p.status) ? (
-                        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                          (p.override_status ?? p.status) === 'Hot' ? 'bg-red-900/50 text-red-400' :
-                          (p.override_status ?? p.status) === 'New' ? 'bg-green-900/50 text-green-400' :
-                          'bg-yellow-900/50 text-yellow-400'
-                        }`}>
-                          {p.override_status ?? p.status}
+                      </td>
+                      <td className="px-6 py-3">
+                        <div className="flex flex-col min-w-0 max-w-[280px]">
+                          <span className="font-body-bold text-body-bold text-on-surface truncate">
+                            {p.override_name ?? p.name}
+                          </span>
+                          {p.override_name && (
+                            <span className="text-[11px] text-orange-500 font-medium truncate flex items-center gap-0.5">
+                              <span className="material-symbols-outlined text-[12px]">edit_note</span>
+                              Base: {p.name}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-3">
+                        <span className="font-body text-body text-on-surface-variant">
+                          {p.category}
                         </span>
-                      ) : <span className="text-gray-700">—</span>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs ${p.visible ? 'text-green-400' : 'text-gray-600'}`}>
-                        {p.visible ? '● Hiện' : '○ Ẩn'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <div className="flex items-center gap-1.5">
+                      </td>
+                      <td className="px-6 py-3">
+                        <div className="flex flex-col">
+                          <span className="font-body text-body text-on-surface font-medium">
+                            {resolvedPrice}
+                          </span>
+                          {p.override_price && (
+                            <span className="text-[10px] text-orange-500 font-medium flex items-center gap-0.5">
+                              Base: {p.price}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="px-6 py-3">
+                        {resolvedStatus ? (
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                            resolvedStatus === 'Hot' ? 'bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-400' :
+                            resolvedStatus === 'New' ? 'bg-green-50 text-green-700 dark:bg-green-900/30 dark:text-green-400' :
+                            'bg-yellow-50 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                          }`}>
+                            {resolvedStatus}
+                          </span>
+                        ) : (
+                          <span className="text-on-surface-variant/40">—</span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-center">
                         <button
-                          onClick={() => openEdit(p)}
-                          className="px-2.5 py-1 bg-gray-800 hover:bg-gray-700 text-gray-300 text-xs rounded-md transition-colors"
+                          type="button"
+                          onClick={() => handleToggleVisible(p)}
+                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
+                            p.visible ? 'bg-[#30D158]' : 'bg-[#E3E3E3] dark:bg-surface-container-highest'
+                          }`}
                         >
-                          Sửa
+                          <span
+                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                              p.visible ? 'translate-x-4' : 'translate-x-0'
+                            }`}
+                          />
                         </button>
-                        <button
-                          onClick={() => handleDelete(p.id)}
-                          disabled={deleteId === p.id}
-                          className="px-2.5 py-1 bg-red-900/40 hover:bg-red-900/70 text-red-400 text-xs rounded-md transition-colors disabled:opacity-40"
-                        >
-                          Xoá
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                      <td className="px-6 py-3 text-right">
+                        <div className="flex justify-end gap-1.5 opacity-60 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => setEditingProduct({ ...p })}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high text-primary transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">edit</span>
+                          </button>
+                          <button
+                            onClick={() => handleDelete(p.id)}
+                            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-error transition-colors"
+                          >
+                            <span className="material-symbols-outlined text-[18px]">delete</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
+        )}
+      </div>
+
+      {/* Floating Action Status Bar */}
+      {status !== 'idle' && (
+        <div className="fixed bottom-6 right-6 z-50 bg-surface border border-outline-variant rounded-xl p-3 shadow-mac-md flex items-center gap-3 animate-fade-in">
+          {status === 'saving' && (
+            <div className="w-4 h-4 border-2 border-outline-variant border-t-primary rounded-full animate-spin" />
+          )}
+          <span className={`text-[13px] font-semibold ${
+            status === 'saved' ? 'text-green-600' :
+            status === 'error' ? 'text-error' :
+            'text-on-surface'
+          }`}>
+            {actionMessage}
+          </span>
         </div>
       )}
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4" onClick={closeModal}>
-          <div
-            className="bg-gray-900 border border-gray-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800">
-              <h2 className="text-white font-semibold">
-                {isNew ? 'Thêm sản phẩm mới' : 'Chỉnh sửa sản phẩm'}
-              </h2>
-              <button onClick={closeModal} className="text-gray-500 hover:text-white transition-colors">
-                <svg viewBox="0 0 16 16" width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M2 2l12 12M14 2L2 14"/>
-                </svg>
+      {/* Redesigned macOS-style Modal Popup */}
+      {editingProduct && (
+        <div className="fixed inset-0 bg-on-surface/25 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-surface border border-outline-variant rounded-xl w-full max-w-[700px] h-[640px] shadow-[0_20px_50px_rgba(0,0,0,0.2),_0_0_0_1px_rgba(0,0,0,0.05)] flex flex-col relative overflow-hidden">
+            
+            {/* Modal Titlebar */}
+            <header className="flex justify-between items-center w-full px-6 h-12 bg-surface border-b border-outline-variant/60 shrink-0">
+              <h3 className="font-window-title text-window-title text-on-surface">
+                {'id' in editingProduct ? 'Edit Product Details' : 'Add New Product'}
+              </h3>
+              <button 
+                onClick={() => setEditingProduct(null)} 
+                className="w-6 h-6 flex items-center justify-center rounded hover:bg-surface-container-high transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">close</span>
               </button>
-            </div>
+            </header>
 
-            <div className="p-6 space-y-4">
-              {/* Base data */}
-              <p className="text-xs text-gray-500 font-medium uppercase tracking-wider">Dữ liệu gốc</p>
-              <div className="grid grid-cols-2 gap-3">
-                <div className="col-span-2">
-                  <Input label="Tên sản phẩm *" value={form.name} onChange={setF('name')} />
+            {/* Scrollable Modal Content */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 pb-24">
+              
+              {/* Basic Information Section */}
+              <div className="space-y-2">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Basic Information</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm divide-y divide-outline-variant/30 overflow-hidden">
+                  
+                  {/* Name */}
+                  <div className="flex items-center px-4 py-3 gap-4">
+                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Product Name *</label>
+                    <input 
+                      type="text"
+                      value={editingProduct.name}
+                      onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                      placeholder="e.g. SP PC INTEL i5 12400F"
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                    />
+                  </div>
+
+                  {/* Category */}
+                  <div className="flex items-center px-4 py-3 gap-4">
+                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Category *</label>
+                    <select 
+                      value={editingProduct.category}
+                      onChange={e => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 cursor-pointer appearance-none outline-none"
+                    >
+                      {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                    </select>
+                    <span className="material-symbols-outlined text-outline-variant text-[18px] pointer-events-none pr-1">unfold_more</span>
+                  </div>
+
+                  {/* Price & Old Price */}
+                  <div className="flex divide-x divide-outline-variant/30">
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Base Price</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.price ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, price: e.target.value || null })}
+                        placeholder="e.g. 15.390.000"
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                      />
+                    </div>
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Old Price</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.old_price ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, old_price: e.target.value || null })}
+                        placeholder="e.g. 16.399.000"
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Discount & Status */}
+                  <div className="flex divide-x divide-outline-variant/30">
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Discount (%)</label>
+                      <input 
+                        type="number"
+                        value={editingProduct.discount ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, discount: e.target.value ? Number(e.target.value) : null })}
+                        placeholder="e.g. 6"
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                      />
+                    </div>
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Status</label>
+                      <select 
+                        value={editingProduct.status ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, status: e.target.value || null })}
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 cursor-pointer appearance-none outline-none"
+                      >
+                        {STATUSES.map(s => <option key={s} value={s}>{s || '— None —'}</option>)}
+                      </select>
+                      <span className="material-symbols-outlined text-outline-variant text-[18px] pointer-events-none pr-1">unfold_more</span>
+                    </div>
+                  </div>
+
+                  {/* Tag & Glyph */}
+                  <div className="flex divide-x divide-outline-variant/30">
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Tag</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.tag ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, tag: e.target.value || null })}
+                        placeholder="e.g. Sales"
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                      />
+                    </div>
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Glyph Icon</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.glyph}
+                        onChange={e => setEditingProduct({ ...editingProduct, glyph: e.target.value })}
+                        placeholder="e.g. 🖥"
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Accent Color & Order Index */}
+                  <div className="flex divide-x divide-outline-variant/30">
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Accent Color</label>
+                      <div className="flex items-center gap-2 flex-1">
+                        <input 
+                          type="color"
+                          value={editingProduct.color}
+                          onChange={e => setEditingProduct({ ...editingProduct, color: e.target.value })}
+                          className="w-6 h-6 rounded border border-outline-variant/40 overflow-hidden cursor-pointer shrink-0 bg-transparent"
+                        />
+                        <input 
+                          type="text"
+                          value={editingProduct.color}
+                          onChange={e => setEditingProduct({ ...editingProduct, color: e.target.value })}
+                          className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 font-mono outline-none"
+                        />
+                      </div>
+                    </div>
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Order Index</label>
+                      <input 
+                        type="number"
+                        value={editingProduct.order_index}
+                        onChange={e => setEditingProduct({ ...editingProduct, order_index: Number(e.target.value) || 0 })}
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Link */}
+                  <div className="flex items-center px-4 py-3 gap-4">
+                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Product Link</label>
+                    <input 
+                      type="text"
+                      value={editingProduct.link ?? ''}
+                      onChange={e => setEditingProduct({ ...editingProduct, link: e.target.value || null })}
+                      placeholder="e.g. https://songphuong.vn/product/..."
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                    />
+                  </div>
+
                 </div>
-                <Select label="Danh mục *" value={form.category} onChange={setF('category')} options={CATEGORIES} />
-                <Select label="Status" value={form.status ?? ''} onChange={(v) => setF('status')(v || null)} options={STATUSES} />
-                <Input label="Giá" value={form.price ?? ''} onChange={(v) => setF('price')(v || null)} placeholder="VD: 12.990.000đ" />
-                <Input label="Giá gốc" value={form.old_price ?? ''} onChange={(v) => setF('old_price')(v || null)} placeholder="VD: 14.990.000đ" />
-                <Input label="Tag" value={form.tag ?? ''} onChange={(v) => setF('tag')(v || null)} placeholder="Hot, New, Sale..." />
-                <Input label="Glyph (emoji icon)" value={form.glyph} onChange={setF('glyph')} placeholder="📦" />
-                <div className="col-span-2">
-                  <Input label="URL ảnh" value={form.image_url ?? ''} onChange={(v) => setF('image_url')(v || null)} mono placeholder="https://..." />
+              </div>
+
+              {/* Product Visuals */}
+              <div className="space-y-2">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Product Visuals</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm divide-y divide-outline-variant/30 overflow-hidden">
+                  <div className="flex items-center px-4 py-3 gap-4">
+                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Image URL</label>
+                    <input 
+                      type="text"
+                      value={editingProduct.image_url ?? ''}
+                      onChange={e => setEditingProduct({ ...editingProduct, image_url: e.target.value || null })}
+                      placeholder="e.g. https://songphuong.vn/Content/uploads/..."
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none font-mono"
+                    />
+                  </div>
+                  {editingProduct.image_url && (
+                    <div className="p-4 flex justify-center bg-surface-container-low/30">
+                      <img src={editingProduct.image_url} alt="Base Preview" className="max-h-24 object-contain rounded-lg border border-outline-variant/40 bg-white p-1" />
+                    </div>
+                  )}
                 </div>
-                <div className="col-span-2">
-                  <Input label="Link sản phẩm" value={form.link ?? ''} onChange={(v) => setF('link')(v || null)} mono placeholder="https://songphuong.vn/..." />
+              </div>
+
+              {/* Overrides Section */}
+              <div className="space-y-2">
+                <h4 className="text-[11px] font-bold text-orange-600 px-1 uppercase tracking-wider flex items-center gap-1">
+                  <span className="material-symbols-outlined text-[15px]">edit_note</span>
+                  Overrides (Optional)
+                </h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm divide-y divide-outline-variant/30 overflow-hidden">
+                  
+                  {/* Override Name */}
+                  <div className="flex items-center px-4 py-3 gap-4">
+                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Override Name</label>
+                    <input 
+                      type="text"
+                      value={editingProduct.override_name ?? ''}
+                      onChange={e => setEditingProduct({ ...editingProduct, override_name: e.target.value || null })}
+                      placeholder="Ghi đè tên hiển thị"
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                    />
+                  </div>
+
+                  {/* Override Price & Override Status */}
+                  <div className="flex divide-x divide-outline-variant/30">
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Override Price</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.override_price ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, override_price: e.target.value || null })}
+                        placeholder="Ghi đè giá hiển thị"
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                      />
+                    </div>
+                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
+                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Override Status</label>
+                      <select 
+                        value={editingProduct.override_status ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, override_status: e.target.value || null })}
+                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 cursor-pointer appearance-none outline-none"
+                      >
+                        {STATUSES.map(s => <option key={s} value={s}>{s || '— None —'}</option>)}
+                      </select>
+                      <span className="material-symbols-outlined text-outline-variant text-[18px] pointer-events-none pr-1">unfold_more</span>
+                    </div>
+                  </div>
+
+                  {/* Override Tag */}
+                  <div className="flex items-center px-4 py-3 gap-4">
+                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Override Tag</label>
+                    <input 
+                      type="text"
+                      value={editingProduct.override_tag ?? ''}
+                      onChange={e => setEditingProduct({ ...editingProduct, override_tag: e.target.value || null })}
+                      placeholder="Ghi đè tag hiển thị"
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                    />
+                  </div>
+
+                  {/* Override Image URL */}
+                  <div className="flex items-center px-4 py-3 gap-4">
+                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Override Image</label>
+                    <input 
+                      type="text"
+                      value={editingProduct.override_image_url ?? ''}
+                      onChange={e => setEditingProduct({ ...editingProduct, override_image_url: e.target.value || null })}
+                      placeholder="Ghi đè URL ảnh"
+                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none font-mono"
+                    />
+                  </div>
+                  {editingProduct.override_image_url && (
+                    <div className="p-4 flex justify-center bg-surface-container-low/30">
+                      <img src={editingProduct.override_image_url} alt="Override Preview" className="max-h-24 object-contain rounded-lg border border-outline-variant/40 bg-white p-1" />
+                    </div>
+                  )}
                 </div>
-                <div className="flex items-center gap-3">
-                  <input
-                    type="color"
-                    value={form.color}
-                    onChange={(e) => setF('color')(e.target.value)}
-                    className="w-10 h-9 rounded-lg border border-gray-700 bg-gray-800 cursor-pointer"
-                  />
-                  <label className="text-xs text-gray-500">Accent color</label>
-                </div>
-                <div className="flex items-center gap-3">
-                  <label className="text-xs text-gray-500">Hiển thị</label>
+              </div>
+
+              {/* Display Switch Section */}
+              <div className="space-y-2">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Availability & Visibility</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-semibold text-on-surface">Visible on Homepage</span>
+                    <span className="text-[11px] text-on-surface-variant">Toggle whether this product is displayed in the Finder app catalog.</span>
+                  </div>
                   <button
                     type="button"
-                    onClick={() => setF('visible')(!form.visible)}
-                    className={`relative w-10 rounded-full transition-colors ${form.visible ? 'bg-blue-600' : 'bg-gray-700'}`}
-                    style={{ height: '22px' }}
+                    onClick={() => setEditingProduct({ ...editingProduct, visible: !editingProduct.visible })}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
+                      editingProduct.visible ? 'bg-[#30D158]' : 'bg-[#E3E3E3] dark:bg-surface-container-highest'
+                    }`}
                   >
-                    <span className={`absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all ${form.visible ? 'left-[22px]' : 'left-0.5'}`} />
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        editingProduct.visible ? 'translate-x-4' : 'translate-x-0'
+                      }`}
+                    />
                   </button>
                 </div>
               </div>
 
-              {/* Override section */}
-              <div className="border-t border-gray-800 pt-4">
-                <p className="text-xs text-orange-400 font-medium uppercase tracking-wider mb-3">
-                  Override (ghi đè — để trống = dùng giá trị gốc)
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="col-span-2">
-                    <Input label="Tên override" value={form.override_name ?? ''} onChange={(v) => setF('override_name')(v || null)} />
-                  </div>
-                  <Input label="Giá override" value={form.override_price ?? ''} onChange={(v) => setF('override_price')(v || null)} />
-                  <Select label="Status override" value={form.override_status ?? ''} onChange={(v) => setF('override_status')(v || null)} options={STATUSES} />
-                  <div className="col-span-2">
-                    <Input label="URL ảnh override" value={form.override_image_url ?? ''} onChange={(v) => setF('override_image_url')(v || null)} mono />
-                  </div>
-                </div>
-              </div>
             </div>
 
-            <div className="flex justify-end gap-2 px-6 py-4 border-t border-gray-800">
-              <button onClick={closeModal} className="px-4 py-2 text-gray-400 hover:text-white text-sm transition-colors">
-                Huỷ
-              </button>
-              <button
-                onClick={handleSave}
-                disabled={saving || !form.name || !form.category}
-                className="px-5 py-2 bg-blue-600 hover:bg-blue-500 disabled:opacity-40 text-white text-sm font-medium rounded-lg transition-colors"
+            {/* Modal Sticky Footer Actions */}
+            <footer className="absolute bottom-0 right-0 w-full h-16 bg-surface/90 backdrop-blur-md border-t border-outline-variant/60 px-6 flex items-center justify-end gap-3 z-30">
+              <button 
+                onClick={() => setEditingProduct(null)} 
+                className="px-5 py-1.5 font-semibold text-[13px] text-on-surface-variant hover:bg-surface-container-high rounded-md transition-colors border border-outline-variant/50 bg-surface-container-lowest"
               >
-                {saving ? 'Đang lưu...' : isNew ? 'Thêm sản phẩm' : 'Lưu thay đổi'}
+                Cancel
               </button>
-            </div>
+              <button 
+                onClick={handleSave}
+                disabled={status === 'saving'}
+                className="px-5 py-1.5 font-bold text-[13px] text-on-primary bg-primary hover:bg-primary-container active:scale-95 rounded-md shadow-md shadow-primary/20 transition-all disabled:opacity-50"
+              >
+                {status === 'saving' ? 'Saving...' : 'Save Changes'}
+              </button>
+            </footer>
+
           </div>
         </div>
       )}
+
+      {/* CSS Animation keyframe for modal fade-in */}
+      <style>{`
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.1);
+          border-radius: 10px;
+        }
+      `}</style>
+      
     </div>
   );
 };
