@@ -38,24 +38,40 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   if (req.method === 'GET') {
-    const rows = await sql`SELECT * FROM tbl_profile WHERE id = 1`;
+    const rows = await sql`SELECT * FROM tbl_profile WHERE id = 1 LIMIT 1`;
     const row = rows[0];
     if (!row) {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    // Map to Frontend DTO structure
+    // Map to Frontend DTO structure (both camelCase and compatibility fields)
     const data = {
       name: String(row.name || ''),
       title: lang === 'en' ? String(row.title_en || row.title_vn || '') : String(row.title_vn || row.title_en || ''),
       bio: lang === 'en' ? String(row.bio_en || row.bio_vn || '') : String(row.bio_vn || row.bio_en || ''),
       email: String(row.email || ''),
+      phone: String(row.phone || ''),
       github: String(row.github_url || ''),
       facebook: String(row.facebook_url || ''),
+      zalo: String(row.zalo_url || ''),
+      songPhuongUrl: String(row.songphuong_url || ''),
+      avatarUrl: String(row.avatar_url || ''),
+      titleEn: String(row.title_en || ''),
+      titleVn: String(row.title_vn || ''),
+      bioEn: String(row.bio_en || ''),
+      bioVn: String(row.bio_vn || ''),
+      
+      // Compatibility with legacy/admin code
       songphuong_url: String(row.songphuong_url || ''),
-      avatar: String(row.avatar_url || ''),
-      phone: String(row.phone || ''),
-      zalo: String(row.zalo_url || '')
+      avatar_url: String(row.avatar_url || ''),
+      github_url: String(row.github_url || ''),
+      facebook_url: String(row.facebook_url || ''),
+      zalo_url: String(row.zalo_url || ''),
+      title_en: String(row.title_en || ''),
+      title_vn: String(row.title_vn || ''),
+      bio_en: String(row.bio_en || ''),
+      bio_vn: String(row.bio_vn || ''),
+      avatar: String(row.avatar_url || '')
     };
 
     return res.status(200).json(data);
@@ -67,16 +83,26 @@ async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const b = (req.body ?? {}) as Record<string, string>;
-    const { name, title_en, title_vn, bio_en, bio_vn, avatar_url, email, phone,
-            github_url, facebook_url, zalo_url, songphuong_url } = b;
+    const name = b.name ?? '';
+    const title_en = b.title_en ?? b.titleEn ?? '';
+    const title_vn = b.title_vn ?? b.titleVn ?? '';
+    const bio_en = b.bio_en ?? b.bioEn ?? '';
+    const bio_vn = b.bio_vn ?? b.bioVn ?? '';
+    const avatar_url = b.avatar_url ?? b.avatarUrl ?? b.avatar ?? '';
+    const email = b.email ?? '';
+    const phone = b.phone ?? '';
+    const github_url = b.github_url ?? b.githubUrl ?? b.github ?? '';
+    const facebook_url = b.facebook_url ?? b.facebookUrl ?? b.facebook ?? '';
+    const zalo_url = b.zalo_url ?? b.zaloUrl ?? b.zalo ?? '';
+    const songphuong_url = b.songphuong_url ?? b.songPhuongUrl ?? '';
 
     const rows = await sql`
       INSERT INTO tbl_profile (id, name, title_en, title_vn, bio_en, bio_vn, avatar_url,
         email, phone, github_url, facebook_url, zalo_url, songphuong_url)
-      VALUES (1, ${name ?? ''}, ${title_en ?? ''}, ${title_vn ?? ''},
-        ${bio_en ?? ''}, ${bio_vn ?? ''}, ${avatar_url ?? ''},
-        ${email ?? ''}, ${phone ?? ''}, ${github_url ?? ''},
-        ${facebook_url ?? ''}, ${zalo_url ?? ''}, ${songphuong_url ?? ''})
+      VALUES (1, ${name}, ${title_en}, ${title_vn},
+        ${bio_en}, ${bio_vn}, ${avatar_url},
+        ${email}, ${phone}, ${github_url},
+        ${facebook_url}, ${zalo_url}, ${songphuong_url})
       ON CONFLICT (id) DO UPDATE SET
         name           = EXCLUDED.name,
         title_en       = EXCLUDED.title_en,
@@ -94,7 +120,37 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       RETURNING *
     `;
 
-    return res.status(200).json(rows[0]);
+    const row = rows[0];
+    const data = {
+      name: String(row.name || ''),
+      title: lang === 'en' ? String(row.title_en || row.title_vn || '') : String(row.title_vn || row.title_en || ''),
+      bio: lang === 'en' ? String(row.bio_en || row.bio_vn || '') : String(row.bio_vn || row.bio_en || ''),
+      email: String(row.email || ''),
+      phone: String(row.phone || ''),
+      github: String(row.github_url || ''),
+      facebook: String(row.facebook_url || ''),
+      zalo: String(row.zalo_url || ''),
+      songPhuongUrl: String(row.songphuong_url || ''),
+      avatarUrl: String(row.avatar_url || ''),
+      titleEn: String(row.title_en || ''),
+      titleVn: String(row.title_vn || ''),
+      bioEn: String(row.bio_en || ''),
+      bioVn: String(row.bio_vn || ''),
+      
+      // Compatibility
+      songphuong_url: String(row.songphuong_url || ''),
+      avatar_url: String(row.avatar_url || ''),
+      github_url: String(row.github_url || ''),
+      facebook_url: String(row.facebook_url || ''),
+      zalo_url: String(row.zalo_url || ''),
+      title_en: String(row.title_en || ''),
+      title_vn: String(row.title_vn || ''),
+      bio_en: String(row.bio_en || ''),
+      bio_vn: String(row.bio_vn || ''),
+      avatar: String(row.avatar_url || '')
+    };
+
+    return res.status(200).json(data);
   }
 
   return res.status(405).json({ error: 'Method not allowed' });

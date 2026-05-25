@@ -6,9 +6,11 @@ interface ProductRow {
   category: string;
   tag: string | null;
   price: string | null;
-  old_price: string | null;
+  oldPrice?: string | null;
+  old_price?: string | null;
   discount: number | null;
-  image_url: string | null;
+  imageUrl?: string | null;
+  image_url?: string | null;
   link: string | null;
   color: string;
   glyph: string;
@@ -24,13 +26,15 @@ function parsePrice(raw: string | null): number {
 }
 
 function rowToProduct(row: ProductRow): Product {
+  const oldPriceVal = row.oldPrice !== undefined && row.oldPrice !== null ? row.oldPrice : row.old_price;
+  const imageUrlVal = row.imageUrl !== undefined && row.imageUrl !== null ? row.imageUrl : row.image_url;
   return {
     id: String(row.id),
     name: row.name,
     category: row.category as ProductCategory,
     price: parsePrice(row.price),
-    old_price: row.old_price ? parsePrice(row.old_price) : undefined,
-    image_url: row.image_url ?? '',
+    old_price: oldPriceVal ? parsePrice(oldPriceVal) : undefined,
+    image_url: imageUrlVal ?? '',
     product_url: row.link ?? '',
     glyph: row.glyph || undefined,
     status: (row.status as Product['status']) ?? null,

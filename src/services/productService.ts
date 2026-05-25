@@ -7,8 +7,10 @@ interface ApiProduct {
   name: string;
   category: string;
   price: string | null;
-  old_price: string | null;
-  image_url: string | null;
+  oldPrice?: string | null;
+  old_price?: string | null;
+  imageUrl?: string | null;
+  image_url?: string | null;
   link: string | null;
   glyph: string | null;
   status: string | null;
@@ -22,13 +24,15 @@ function parsePrice(raw: string | null): number {
 }
 
 function toProduct(raw: ApiProduct): Product {
+  const oldPriceVal = raw.oldPrice !== undefined && raw.oldPrice !== null ? raw.oldPrice : raw.old_price;
+  const imageUrlVal = raw.imageUrl !== undefined && raw.imageUrl !== null ? raw.imageUrl : raw.image_url;
   return {
     id: raw.id,
     name: raw.name,
     category: raw.category as ProductCategory,
     price: parsePrice(raw.price),
-    old_price: raw.old_price ? parsePrice(raw.old_price) : undefined,
-    image_url: raw.image_url ?? '',
+    old_price: oldPriceVal ? parsePrice(oldPriceVal) : undefined,
+    image_url: imageUrlVal ?? '',
     product_url: raw.link ?? '',
     glyph: raw.glyph ?? undefined,
     status: (raw.status as Product['status']) ?? null,

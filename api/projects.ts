@@ -126,7 +126,7 @@ async function handler(req: VercelRequest, res: VercelResponse) {
   const rows = await sql`
     SELECT * FROM tbl_projects
     WHERE visible = true
-    ORDER BY order_index ASC, id ASC
+    ORDER BY order_index ASC
   `;
 
   // Map to Frontend DTO
@@ -138,8 +138,15 @@ async function handler(req: VercelRequest, res: VercelResponse) {
       color: String(row.color || '#2563EB'),
       tags: parseTags(row.tags),
       description: lang === 'en' ? String(row.desc_en || row.desc_vn || '') : String(row.desc_vn || row.desc_en || ''),
+      demoUrl: row.demo_url ? String(row.demo_url) : null,
+      githubUrl: row.github_url ? String(row.github_url) : null,
+
+      // Compatibility fields
       demo_url: row.demo_url ? String(row.demo_url) : null,
       github_url: row.github_url ? String(row.github_url) : null,
+      order_index: Number(row.order_index ?? 0),
+      orderIndex: Number(row.order_index ?? 0),
+      visible: row.visible !== false
     };
   });
 

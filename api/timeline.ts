@@ -129,18 +129,32 @@ async function handler(req: VercelRequest, res: VercelResponse) {
 
   const rows = await sql`
     SELECT * FROM tbl_timeline
-    WHERE visible = true
-    ORDER BY order_index ASC, id ASC
+    ORDER BY id DESC
   `;
 
   const timeline = rows.map((row: any) => {
+    const descVn = parseJsonArray(row.desc_vn);
+    const descEn = parseJsonArray(row.desc_en);
     return {
+      id: Number(row.id),
       role: lang === 'en' ? String(row.role_en || row.role_vn || '') : String(row.role_vn || row.role_en || ''),
       company: String(row.company || ''),
-      company_url: row.company_url ? String(row.company_url) : undefined,
+      companyUrl: row.company_url ? String(row.company_url) : undefined,
+      company_url: row.company_url ? String(row.company_url) : undefined, // compatibility
       period: lang === 'en' ? String(row.period_en || row.period_vn || '') : String(row.period_vn || row.period_en || ''),
-      desc: lang === 'en' ? parseJsonArray(row.desc_en) : parseJsonArray(row.desc_vn),
+      desc: lang === 'en' ? descEn : descVn,
       type: String(row.type || 'work') as 'work' | 'education' | 'freelance',
+      visible: row.visible !== false,
+      orderIndex: Number(row.order_index ?? 0),
+      order_index: Number(row.order_index ?? 0), // compatibility
+      
+      // Parsed fields
+      desc_vn: descVn,
+      desc_en: descEn,
+      role_vn: String(row.role_vn || ''),
+      role_en: String(row.role_en || ''),
+      period_vn: String(row.period_vn || ''),
+      period_en: String(row.period_en || '')
     };
   });
 

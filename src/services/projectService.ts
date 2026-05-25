@@ -9,11 +9,15 @@ interface ApiProject {
   color: string;
   tags: string[];
   description: string;
-  demo_url: string | null;
-  github_url: string | null;
+  demoUrl?: string | null;
+  demo_url?: string | null;
+  githubUrl?: string | null;
+  github_url?: string | null;
 }
 
 function toProject(raw: ApiProject): Project {
+  const demoUrlVal = raw.demoUrl !== undefined ? raw.demoUrl : raw.demo_url;
+  const githubUrlVal = raw.githubUrl !== undefined ? raw.githubUrl : raw.github_url;
   return {
     id: raw.id,
     name: raw.name,
@@ -21,8 +25,8 @@ function toProject(raw: ApiProject): Project {
     color: raw.color,
     tags: raw.tags,
     desc: raw.description,
-    demoUrl: raw.demo_url ?? undefined,
-    githubUrl: raw.github_url ?? undefined,
+    demoUrl: demoUrlVal ?? undefined,
+    githubUrl: githubUrlVal ?? undefined,
   };
 }
 

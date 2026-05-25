@@ -253,102 +253,120 @@ async function main() {
   console.log('- Đang nạp/cập nhật danh sách sản phẩm Song Phương...');
   const productsData = [
     {
-      name: 'SP PC INTEL Core i5-12400F',
+      name: 'SP PC INTEL i5 12400F (i5 12400F/ B760/ Ram 8GB/ RTX 3050/ SSD 256GB/ 500W/ DOS)',
       category: 'PC Gaming',
-      price: 'Liên hệ',
-      image_url: '/img/products/SP-PC-G01.jpg',
-      link: 'https://songphuong.vn',
+      price: '15.390.000',
+      old_price: '16.399.000',
+      discount: 6,
+      image_url: 'https://songphuong.vn/Content/uploads/2023/05/SP-PC-INTEL-i5-12400F-1-2.webp',
+      link: 'https://songphuong.vn/product/sp-pc-intel-i5-12400f/',
       glyph: '🖥',
       color: '#3B82F6',
       status: 'Hot',
       order: 0
     },
     {
-      name: 'SP PC INTEL i5-14400F RTX 5060',
+      name: 'SP PC INTEL i5 14400F RTX 5060 (i5 14400F/ B760/ Ram 16GB/ RTX 5060/ SSD 256GB/ 650W/ DOS)',
       category: 'PC Gaming',
-      price: 'Liên hệ',
-      image_url: '/img/products/SP-PC-G01.jpg',
-      link: 'https://songphuong.vn',
+      price: '23.790.000',
+      old_price: '24.610.000',
+      discount: 3,
+      image_url: 'https://songphuong.vn/Content/uploads/2025/11/SP-PC-INTEL-i5-14400F-RTX-5060-1.jpg',
+      link: 'https://songphuong.vn/product/sp-pc-intel-i5-14400f-rtx-5060/',
       glyph: '🖥',
       color: '#2563EB',
       status: 'New',
       order: 1
     },
     {
-      name: 'SP PC AMD Ryzen 3 3200G',
+      name: 'SP PC AMD 3200G (Ryzen 3 3200G/ B450/ Ram 8GB DDR4/ SSD 256GB/ 250W/ DOS)',
       category: 'Office PC',
-      price: 'Liên hệ',
-      image_url: '/img/products/SP-PC-O02.jpg',
-      link: 'https://songphuong.vn',
+      price: '6.890.000',
+      old_price: '7.319.000',
+      discount: 6,
+      image_url: 'https://songphuong.vn/Content/uploads/2023/07/SP-PC-AMD-3000G.jpg',
+      link: 'https://songphuong.vn/product/sp-pc-amd-3200g/',
       glyph: '🖥',
       color: '#6B7280',
       status: null,
       order: 2
     },
     {
-      name: 'Acer Aspire Lite 14',
+      name: 'Laptop Acer Aspire Lite 14 N23G2 – AL14-52M-32KV (Intel Core i3-1305U, RAM 8GB, SSD 256GB, 14 Inch WUXGA, Win11 Home, NX.J38SV.003)',
       category: 'Laptop',
-      price: 'Liên hệ',
-      image_url: '/img/products/LAP-AC01.webp',
-      link: 'https://songphuong.vn',
+      price: '11.390.000',
+      old_price: '',
+      discount: 0,
+      image_url: 'https://songphuong.vn/Content/uploads/2025/08/Laptop-Acer-Aspire-Lite-14-AL14-52M-32KV-2.webp',
+      link: 'https://songphuong.vn/product/laptop-acer-aspire-lite-14-n23g2/',
       glyph: '💻',
       color: '#8B5CF6',
       status: 'Sale',
       order: 3
     },
     {
-      name: 'Colorful iGame RTX 5060 Ti Ultra W',
+      name: 'VGA Colorful iGame GeForce RTX 5060 TI Ultra W DUO OC 16GB',
       category: 'VGA',
-      price: 'Liên hệ',
-      image_url: '/img/products/RTX 4060 Ti.jpg',
-      link: 'https://songphuong.vn',
+      price: '15.090.000',
+      old_price: '16.490.000',
+      discount: 8,
+      image_url: 'https://songphuong.vn/Content/uploads/2025/04/VGA-Colorful-iGame-GeForce-RTX-5060-TI-Ultra-W-DUO-OC-16GB.jpg',
+      link: 'https://songphuong.vn/product/vga-colorful-rtx-5060-ti-ultra-w-duo-oc-16gb/',
       glyph: '🎮',
       color: '#10B981',
       status: null,
       order: 4
     },
     {
-      name: 'Machenike L8 Pro',
+      name: 'Chuột Machenike L8 Pro Tri-Mode (White/Black, Wireless, 26000 DPI, RGB, Kèm Dock Sạc)',
       category: 'Gaming Gear',
-      price: 'Liên hệ',
-      image_url: '/img/products/GEAR-M01.jpg',
-      link: 'https://songphuong.vn',
+      price: '1.390.000',
+      old_price: '1.690.000',
+      discount: 18,
+      image_url: 'https://songphuong.vn/Content/uploads/2025/06/L8-Pro-Tri-Modes-5.webp',
+      link: 'https://songphuong.vn/product/chuot-machenike-l8-pro-tri-mode/',
       glyph: '🖱',
       color: '#F59E0B',
-      status: null,
+      status: 'Hot',
       order: 5
     },
     {
-      name: 'Machenike G3 V2 Gamepad',
+      name: 'Tay Cầm Chơi Game Machenike G3 V2 Tri-mode (Black, Có dây, 2.4G Wireless, Bluetooth 5.0, RGB)',
       category: 'Gaming Gear',
-      price: 'Liên hệ',
-      image_url: '/img/products/GEAR-C01.jpg',
-      link: 'https://songphuong.vn',
+      price: '729.000',
+      old_price: '890.000',
+      discount: 18,
+      image_url: 'https://songphuong.vn/Content/uploads/2025/04/MACHENIKE-G3-V2-Tri-mode-1.jpg',
+      link: 'https://songphuong.vn/product/tay-cam-choi-game-machenike-g3-v2-black/',
       glyph: '🕹',
       color: '#D97706',
-      status: null,
+      status: 'Hot',
       order: 6
     },
     {
-      name: 'Xiberia CZ98 Black Gradient',
+      name: 'Bàn phím cơ Xiberia CZ98 Black Gradient (Hotswap/Magnetic switch/Led RGB/Waterproof)',
       category: 'Keyboard',
-      price: 'Liên hệ',
-      image_url: 'https://songphuong.vn',
-      link: 'https://songphuong.vn',
+      price: '1.690.000',
+      old_price: '1.950.000',
+      discount: 13,
+      image_url: 'https://songphuong.vn/Content/uploads/2025/06/Ban-phim-co-Xiberia-CZ98-Black-Gradient-2.webp',
+      link: 'https://songphuong.vn/product/ban-phim-co-xiberia-cz98-black-gradient/',
       glyph: '⌨',
       color: '#EC4899',
-      status: null,
+      status: 'New',
       order: 7
     },
     {
-      name: 'Thonet & Vander KUMPEL 2.0',
+      name: 'Loa Bluetooth Thonet & Vander KUMPEL 2.0 (Đen/Trắng)',
       category: 'Audio',
-      price: 'Liên hệ',
-      image_url: 'https://songphuong.vn',
-      link: 'https://songphuong.vn',
+      price: '2.690.000',
+      old_price: '3.580.000',
+      discount: 25,
+      image_url: 'https://songphuong.vn/Content/uploads/2025/06/KUMPEL-2.0-2.webp',
+      link: 'https://songphuong.vn/product/loa-bluetooth-thonet-vander-kumpel-2-0/',
       glyph: '🔊',
       color: '#06B6D4',
-      status: null,
+      status: 'Sale',
       order: 8
     }
   ];
@@ -358,8 +376,8 @@ async function main() {
 
   for (const p of productsData) {
     await sql`
-      INSERT INTO tbl_products (name, category, price, image_url, link, glyph, color, status, visible, order_index)
-      VALUES (${p.name}, ${p.category}, ${p.price}, ${p.image_url}, ${p.link}, ${p.glyph}, ${p.color}, ${p.status}, true, ${p.order})
+      INSERT INTO tbl_products (name, category, price, old_price, discount, image_url, link, glyph, color, status, visible, order_index)
+      VALUES (${p.name}, ${p.category}, ${p.price}, ${p.old_price || null}, ${p.discount || null}, ${p.image_url}, ${p.link}, ${p.glyph}, ${p.color}, ${p.status}, true, ${p.order})
     `;
   }
 
