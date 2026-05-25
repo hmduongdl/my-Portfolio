@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { api } from './api';
 import { LoginPage } from './LoginPage';
 import { AdminSettings } from './AdminSettings';
-import { SocialEditor } from './SocialEditor';
+import { SettingsEditor } from './SettingsEditor';
 import { ProductsEditor } from './ProductsEditor';
+import { ProjectsEditor } from './ProjectsEditor';
 
 type Tab = 'profile' | 'products' | 'projects' | 'settings';
 
@@ -23,8 +24,8 @@ export const AdminApp: React.FC = () => {
   const navItems: { id: Tab; label: string; icon: string; iconBg: string; iconColor: string; content: React.ReactNode }[] = [
     { id: 'profile', label: 'Profile & Timeline', icon: 'person', iconBg: 'bg-primary dark:bg-primary-container', iconColor: 'text-on-primary dark:text-on-primary-container', content: <AdminSettings /> },
     { id: 'products', label: 'Products', icon: 'shopping_bag', iconBg: 'bg-[#64D2FF]', iconColor: 'text-white', content: <ProductsEditor /> },
-    { id: 'projects', label: 'Projects', icon: 'folder', iconBg: 'bg-[#FF9F0A]', iconColor: 'text-white', content: <div className="p-8"><h1 className="text-xl">Projects Editor (TBD)</h1></div> },
-    { id: 'settings', label: 'Settings', icon: 'settings', iconBg: 'bg-[#8E8E93]', iconColor: 'text-white', content: <SocialEditor /> },
+    { id: 'projects', label: 'Projects', icon: 'folder', iconBg: 'bg-[#FF9F0A]', iconColor: 'text-white', content: <ProjectsEditor /> },
+    { id: 'settings', label: 'System & SEO', icon: 'settings', iconBg: 'bg-[#8E8E93]', iconColor: 'text-white', content: <SettingsEditor /> },
   ];
 
   const currentTab = navItems.find(item => item.id === tab);

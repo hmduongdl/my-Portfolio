@@ -31,9 +31,9 @@ function toProduct(raw: ApiProduct): Product {
     name: raw.name,
     category: raw.category as ProductCategory,
     price: parsePrice(raw.price),
-    old_price: oldPriceVal ? parsePrice(oldPriceVal) : undefined,
-    image_url: imageUrlVal ?? '',
-    product_url: raw.link ?? '',
+    oldPrice: oldPriceVal ? parsePrice(oldPriceVal) : undefined,
+    imageUrl: imageUrlVal ?? '',
+    link: raw.link ?? '',
     glyph: raw.glyph ?? undefined,
     status: (raw.status as Product['status']) ?? null,
   };

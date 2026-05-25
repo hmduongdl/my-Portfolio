@@ -45,8 +45,8 @@ const calcDiscount = (price: number, oldPrice: number) =>
   Math.round(((oldPrice - price) / oldPrice) * 100);
 
 const openProduct = (product: Product) => {
-  const url = product.product_url
-    ? product.product_url
+  const url = product.link
+    ? product.link
     : `https://songphuong.vn/?s=${encodeURIComponent(product.name)}`;
   window.open(url, '_blank', 'noopener,noreferrer');
 };
@@ -80,8 +80,8 @@ const SkeletonCard: React.FC<{ compact?: boolean }> = ({ compact }) => {
 // ─── ProductCard ──────────────────────────────────────────────────────────────
 
 const ProductCard: React.FC<{ product: Product; compact?: boolean }> = ({ product, compact }) => {
-  const hasDiscount = product.old_price != null && product.old_price > product.price;
-  const discountPct = hasDiscount ? calcDiscount(product.price, product.old_price!) : 0;
+  const hasDiscount = product.oldPrice != null && product.oldPrice > product.price;
+  const discountPct = hasDiscount ? calcDiscount(product.price, product.oldPrice!) : 0;
 
   if (compact) {
     return (
@@ -90,9 +90,9 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean }> = ({ produc
         className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg bg-paper-2 border border-rule cursor-pointer hover:border-blue-400 hover:shadow-sm transition-all"
       >
         <div className="relative w-[60px] h-[60px] flex-shrink-0">
-          {product.image_url ? (
+          {product.imageUrl ? (
             <img
-              src={product.image_url}
+              src={product.imageUrl}
               alt={product.name}
               className="w-full h-full rounded-xl object-contain p-1 bg-white"
               onError={handleImgError}
@@ -123,9 +123,9 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean }> = ({ produc
       className="flex flex-col items-center gap-2 cursor-pointer p-2 rounded-lg transition-all duration-200 hover:bg-blue-500/10 group"
     >
       <div className="relative w-[92px] h-[92px] flex-shrink-0">
-        {product.image_url ? (
+        {product.imageUrl ? (
           <img
-            src={product.image_url}
+            src={product.imageUrl}
             alt={product.name}
             className="w-full h-full rounded-2xl object-contain p-2 bg-white shadow-[0_4px_12px_rgba(0,0,0,0.10)]"
             onError={handleImgError}
@@ -148,7 +148,7 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean }> = ({ produc
       <div className="flex flex-col items-center gap-0.5">
         <div className="text-[12px] font-semibold text-blue-600 dark:text-blue-400">{formatVND(product.price)}</div>
         {hasDiscount && (
-          <div className="text-[11px] text-ink-3 line-through">{formatVND(product.old_price!)}</div>
+          <div className="text-[11px] text-ink-3 line-through">{formatVND(product.oldPrice!)}</div>
         )}
       </div>
     </div>
@@ -244,6 +244,21 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
     </div>
   );
 
+  const EmptyPane: React.FC = () => (
+    <div className="flex flex-col items-center justify-center h-full gap-3 text-ink-3 py-12 select-none text-center">
+      <span className="text-[48px] animate-bounce select-none">🎁</span>
+      <span className="text-[13px] font-semibold text-ink-2">
+        {lang === 'vn' ? 'Không tìm thấy sản phẩm nào' : 'No products found'}
+      </span>
+      <button
+        onClick={loadProducts}
+        className="mt-2 px-4 py-1.5 bg-blue-500 hover:bg-blue-600 text-white text-[12px] font-semibold rounded-lg shadow-sm active:scale-95 transition-all cursor-pointer border-none"
+      >
+        {lang === 'vn' ? 'Tải lại' : 'Reload'}
+      </button>
+    </div>
+  );
+
   // ── Compact layout ────────────────────────────────────────────────────────
 
   if (compact) {
@@ -271,12 +286,15 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
         <div className="flex-1 overflow-auto p-3.5">
           {error ? (
             <ErrorPane />
+          ) : isLoading ? (
+            <div className="grid grid-cols-2 gap-3.5">
+              {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} compact />)}
+            </div>
+          ) : filtered.length === 0 ? (
+            <EmptyPane />
           ) : (
             <div className="grid grid-cols-2 gap-3.5">
-              {isLoading
-                ? Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} compact />)
-                : filtered.map((p) => <ProductCard key={p.id} product={p} compact />)
-              }
+              {filtered.map((p) => <ProductCard key={p.id} product={p} compact />)}
             </div>
           )}
         </div>
@@ -368,7 +386,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
               {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
             </div>
           ) : filtered.length === 0 ? (
-            <div className="flex items-center justify-center h-full text-ink-3 text-sm">Không có sản phẩm</div>
+            <EmptyPane />
           ) : (
             <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-6">
               {filtered.map((p) => <ProductCard key={p.id} product={p} />)}

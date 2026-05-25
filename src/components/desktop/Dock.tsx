@@ -1,72 +1,44 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppDefinition, AppID } from '../../types';
 
 interface DockIconProps {
   app: AppDefinition;
-  mouseX: number | null;
   onOpen: (id: AppID) => void;
   isRunning: boolean;
-  dockSize: number;
-  magnify: number;
 }
 
 const DockIcon: React.FC<DockIconProps> = ({
   app,
-  mouseX,
   onOpen,
   isRunning,
-  dockSize,
-  magnify,
 }) => {
-  const ref = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState<number>(1);
-
-  useEffect(() => {
-    if (!ref.current || mouseX === null) {
-      setScale(1);
-      return;
-    }
-    const rect = ref.current.getBoundingClientRect();
-    const center = rect.left + rect.width / 2;
-    const dist = Math.abs(mouseX - center);
-    const range = 110;
-    if (dist > range) {
-      setScale(1);
-      return;
-    }
-    const t = 1 - dist / range;
-    setScale(1 + (magnify - 1) * t);
-  }, [mouseX, magnify]);
-
   return (
     <div
-      className="dock-item relative"
+      className="group relative flex items-center justify-center w-[36px] h-[36px] md:w-[40px] md:h-[40px]"
       onClick={() => onOpen(app.id)}
-      ref={ref}
-      style={{ width: dockSize, height: dockSize }}
     >
+      {/* Tooltip */}
       <div
-        className="dock-tooltip absolute left-1/2 -translate-x-1/2 bg-paper-2/92 backdrop-blur-md text-ink text-[12px] font-medium px-2.5 py-1 rounded-md border border-black/15 shadow-[0_4px_12px_rgba(0,0,0,0.15)] opacity-0 pointer-events-none transition-all duration-120 hover-tooltip whitespace-nowrap"
-        style={{ bottom: dockSize * scale + 10 }}
+        className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 bg-paper-2/92 backdrop-blur-md text-ink text-[12px] font-medium px-2.5 py-1 rounded-md border border-black/15 shadow-[0_4px_12px_rgba(0,0,0,0.15)] opacity-0 pointer-events-none transition-all duration-150 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 whitespace-nowrap z-[910]"
       >
         {app.name}
       </div>
+
+      {/* Icon Wrapper */}
       <div
-        className="dock-icon absolute bottom-0 left-1/2 -translate-x-1/2 rounded-xl flex items-center justify-center shadow-[0_2px_6px_rgba(0,0,0,0.2),0_0_0_0.5px_rgba(0,0,0,0.1)] overflow-hidden transition-all ease-calm duration-180 cursor-pointer"
+        className="w-full h-full rounded-xl flex items-center justify-center shadow-[0_2px_6px_rgba(0,0,0,0.2),0_0_0_0.5px_rgba(0,0,0,0.1)] overflow-hidden cursor-pointer transform hover:scale-[1.15] hover:-translate-y-[6px] transition-transform duration-250 ease-[cubic-bezier(0.16,1,0.3,1)]"
         style={{
-          width: dockSize * scale,
-          height: dockSize * scale,
           background: app.bg || '#fff',
         }}
       >
         {app.icon}
       </div>
+
+      {/* Active Running Indicator Dot */}
       <div
-        className="dock-running w-1 h-1 rounded-full bg-black/60 absolute left-1/2 -translate-x-1/2 transition-opacity duration-200"
-        style={{
-          opacity: isRunning ? 1 : 0,
-          bottom: -8,
-        }}
+        className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black/80 dark:bg-white/80 transition-all duration-200 ${
+          isRunning ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
+        }`}
       />
     </div>
   );
@@ -85,11 +57,10 @@ export const Dock: React.FC<DockProps> = ({
   apps,
   runningIds,
   onOpen,
-  dockSize = 52,
-  magnify = 1.55,
+  dockSize: _dockSize = 52,
+  magnify: _magnify = 1.55,
   autoHide = false,
 }) => {
-  const [mouseX, setMouseX] = useState<number | null>(null);
   const [hidden, setHidden] = useState<boolean>(autoHide);
 
   useEffect(() => {
@@ -103,6 +74,10 @@ export const Dock: React.FC<DockProps> = ({
     window.addEventListener('mousemove', handleMouseMove);
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [autoHide]);
+
+  const systemAppIds = ['finder', 'about', 'projects', 'welcome'];
+  const systemApps = apps.filter((app) => systemAppIds.includes(app.id));
+  const otherApps = apps.filter((app) => !systemAppIds.includes(app.id));
 
   return (
     <>
@@ -118,21 +93,28 @@ export const Dock: React.FC<DockProps> = ({
         }`}
       >
         <div
-          className="dock flex items-end gap-1.5 p-1.5 bg-white/32 backdrop-blur-mac-dock border border-white/40 rounded-[22px] shadow-[0_0_0_0.5px_rgba(0,0,0,0.18),0_16px_40px_rgba(0,0,0,0.25),inset_0_1px_0_rgba(255,255,255,0.5)] pointer-events-auto box-content"
-          style={{ height: dockSize + 12 }}
+          className="dock flex items-center gap-3 md:gap-4 p-1.5 h-[48px] md:h-[54px] bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/15 dark:border-white/5 shadow-2xl rounded-2xl pointer-events-auto"
           onMouseEnter={() => setHidden(false)}
-          onMouseMove={(e) => setMouseX(e.clientX)}
-          onMouseLeave={() => setMouseX(null)}
         >
-          {apps.map((app) => (
+          {systemApps.map((app) => (
             <DockIcon
               key={app.id}
               app={app}
-              mouseX={mouseX}
               onOpen={onOpen}
               isRunning={runningIds.includes(app.id)}
-              dockSize={dockSize}
-              magnify={magnify}
+            />
+          ))}
+
+          {systemApps.length > 0 && otherApps.length > 0 && (
+            <div className="w-[1px] h-6 md:h-8 bg-white/20 self-center" />
+          )}
+
+          {otherApps.map((app) => (
+            <DockIcon
+              key={app.id}
+              app={app}
+              onOpen={onOpen}
+              isRunning={runningIds.includes(app.id)}
             />
           ))}
         </div>

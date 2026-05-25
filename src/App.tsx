@@ -39,6 +39,41 @@ export const App: React.FC = () => {
     return () => document.removeEventListener('click', handleOutsideClick);
   }, [setOpenMenu]);
 
+  // Load and apply SEO Metadata dynamically from Neon DB settings
+  useEffect(() => {
+    const fetchSEO = async () => {
+      try {
+        const res = await fetch('/api/seo');
+        if (!res.ok) return;
+        const seo = await res.json();
+        
+        if (seo.seo_title) {
+          document.title = seo.seo_title;
+          document.querySelector('meta[property="og:title"]')?.setAttribute('content', seo.seo_title);
+          document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', seo.seo_title);
+        }
+        if (seo.seo_description) {
+          document.querySelector('meta[name="description"]')?.setAttribute('content', seo.seo_description);
+          document.querySelector('meta[property="og:description"]')?.setAttribute('content', seo.seo_description);
+          document.querySelector('meta[name="twitter:description"]')?.setAttribute('content', seo.seo_description);
+        }
+        if (seo.seo_keywords) {
+          document.querySelector('meta[name="keywords"]')?.setAttribute('content', seo.seo_keywords);
+        }
+        if (seo.og_image) {
+          document.querySelector('meta[property="og:image"]')?.setAttribute('content', seo.og_image);
+          document.querySelector('meta[name="twitter:image"]')?.setAttribute('content', seo.og_image);
+        }
+        if (seo.twitter_card) {
+          document.querySelector('meta[name="twitter:card"]')?.setAttribute('content', seo.twitter_card);
+        }
+      } catch (e) {
+        console.error('Failed to load SEO metadata:', e);
+      }
+    };
+    fetchSEO();
+  }, []);
+
   // Vibe check diagnostics for SQL-backed endpoints on application mount
   useEffect(() => {
     const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');

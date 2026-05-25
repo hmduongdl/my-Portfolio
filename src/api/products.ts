@@ -33,9 +33,9 @@ function rowToProduct(row: ProductRow): Product {
     name: row.name,
     category: row.category as ProductCategory,
     price: parsePrice(row.price),
-    old_price: oldPriceVal ? parsePrice(oldPriceVal) : undefined,
-    image_url: imageUrlVal ?? '',
-    product_url: row.link ?? '',
+    oldPrice: oldPriceVal ? parsePrice(oldPriceVal) : undefined,
+    imageUrl: imageUrlVal ?? '',
+    link: row.link ?? '',
     glyph: row.glyph || undefined,
     status: (row.status as Product['status']) ?? null,
   };

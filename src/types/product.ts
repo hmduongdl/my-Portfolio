@@ -5,9 +5,12 @@ export interface Product {
   name: string;
   category: ProductCategory;
   price: number;        // Giá bán thực tế nhận từ SQL
-  old_price?: number;   // Giá gốc từ SQL để hiển thị giảm giá (nullable)
-  image_url: string;    // URL ảnh sản phẩm
-  product_url: string;  // Link dẫn tới chi tiết sản phẩm trên songphuong.vn
+  oldPrice?: number;    // Chuyển từ old_price -> oldPrice
+  imageUrl: string;     // Chuyển từ image_url -> imageUrl
+  link: string;         // Chuyển từ product_url -> link
   glyph?: string;       // Icon emoji đại diện cho danh mục (nếu có)
   status?: 'New' | 'Hot' | 'Sale' | null;
+  discount?: number | null;
+  color?: string;
+  visible?: boolean;
 }
