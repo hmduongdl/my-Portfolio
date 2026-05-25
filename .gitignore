@@ -26,3 +26,8 @@ dist-ssr
 
 src/components/Admin/PrivateAdmin.ts
 ADMIN_CREDENTIALS.md
+
+# Ignore all markdown files except README and ROADMAP
+*.md
+!README.md
+!ROADMAP.md
