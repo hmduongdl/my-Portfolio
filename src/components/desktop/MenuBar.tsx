@@ -13,8 +13,16 @@ const AppleLogo: React.FC = () => (
 export const MenuBar: React.FC = () => {
   const [time, setTime] = useState<Date>(new Date());
   const focusedId = useOSStore((state) => state.focusedId);
-  const activeAppDef = APP_DEFS.find((a) => a.id === focusedId);
-  const displayAppName = activeAppDef ? activeAppDef.name : 'Finder';
+  const displayAppName = (() => {
+    if (!focusedId) return 'Finder';
+    const id = focusedId.toLowerCase();
+    if (id === 'about' || id === 'aboutme') return 'About Me';
+    if (id === 'finder' || id === 'products') return 'Finder';
+    if (id === 'projects') return 'Projects';
+    if (id === 'settings' || id === 'admin') return 'System Settings';
+    const activeAppDef = APP_DEFS.find((a) => a.id === focusedId);
+    return activeAppDef ? activeAppDef.name : 'Finder';
+  })();
   const openMenu = useOSStore((state) => state.openMenu);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
   const openApp = useOSStore((state) => state.openApp);

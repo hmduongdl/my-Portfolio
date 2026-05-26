@@ -188,13 +188,17 @@ export const AdminSettings: React.FC = () => {
   }
 
   return (
-    <div className="p-5 max-w-[600px] mx-auto space-y-6 pb-24 relative">
+    <div className="p-6 max-w-5xl mx-auto pb-24 relative">
 
       {/* Toast */}
       {toast && <Toast {...toast} />}
 
-      {/* ── Avatar & Name Card ─────────────────────────────────── */}
-      <section className="space-y-1.5">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        
+        {/* LEFT COLUMN */}
+        <div className="space-y-6">
+          {/* ── Avatar & Name Card ─────────────────────────────────── */}
+          <section className="space-y-1.5">
         <SectionLabel>Hồ sơ cá nhân</SectionLabel>
         <SettingsCard>
           {/* Avatar preview row */}
@@ -280,9 +284,12 @@ export const AdminSettings: React.FC = () => {
           </SettingsRow>
         </SettingsCard>
       </section>
+      </div>
 
-      {/* ── Bio ────────────────────────────────────────────────── */}
-      <section className="space-y-1.5">
+      {/* RIGHT COLUMN */}
+      <div className="space-y-6">
+          {/* ── Bio ────────────────────────────────────────────────── */}
+          <section className="space-y-1.5">
         <SectionLabel>Giới thiệu bản thân</SectionLabel>
         <div className="space-y-3">
           <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm p-4 space-y-3">
@@ -346,6 +353,9 @@ export const AdminSettings: React.FC = () => {
           </SettingsRow>
         </SettingsCard>
       </section>
+
+        </div>
+      </div>
 
       {/* ── Action Bar ─────────────────────────────────────────── */}
       <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 px-6 py-3 flex items-center justify-between z-40">

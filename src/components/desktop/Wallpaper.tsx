@@ -35,6 +35,7 @@ export const Wallpaper: React.FC = () => {
           src={wallpaperUrl} 
           alt="Wallpaper" 
           className="absolute inset-0 w-full h-full object-cover"
+          style={{ objectFit: 'cover' }}
         />
       )}
       {wallpaperType === 'video' && (
@@ -45,6 +46,7 @@ export const Wallpaper: React.FC = () => {
           loop 
           playsInline
           className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[-1] scale-[1.2]"
+          style={{ objectFit: 'cover' }}
         />
       )}
       {wallpaperType === 'time-shifting' && (
@@ -52,6 +54,7 @@ export const Wallpaper: React.FC = () => {
           src={timeShiftUrl} 
           alt="Time Shifting Wallpaper" 
           className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
+          style={{ objectFit: 'cover' }}
         />
       )}
     </div>

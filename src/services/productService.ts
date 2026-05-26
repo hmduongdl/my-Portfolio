@@ -24,12 +24,24 @@ function parsePrice(raw: string | number | null | undefined): number {
   return isNaN(n) ? 0 : n;
 }
 
+function parsePriceOrString(raw: string | number | null | undefined): number | string {
+  if (raw === undefined || raw === null) return 0;
+  if (typeof raw === 'number') return raw;
+  const clean = raw.trim();
+  const digits = clean.replace(/\D/g, '');
+  if (digits === '') {
+    return clean;
+  }
+  const n = parseInt(digits, 10);
+  return isNaN(n) ? 0 : n;
+}
+
 function toProduct(raw: ApiProduct): Product {
   return {
     id: raw.id,
     name: raw.name,
     category: raw.category as ProductCategory,
-    price: parsePrice(raw.price),
+    price: parsePriceOrString(raw.price),
     oldPrice: raw.oldPrice ? parsePrice(raw.oldPrice) : undefined,
     discount: raw.discount !== undefined && raw.discount !== null ? Number(raw.discount) : null,
     imageUrl: raw.imageUrl ?? '',

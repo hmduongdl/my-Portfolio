@@ -16,14 +16,14 @@ const TrafficLights: React.FC<TrafficLightsProps> = ({ onClose, onMin, onMax, is
   return (
     <div className="traffic-lights flex gap-2 items-center group-hover:visible">
       <div
-        className={`traffic-light traffic-close ${isMobile ? 'w-3.5 h-3.5' : 'w-3 h-3'} rounded-full flex items-center justify-center cursor-pointer border border-black/15 bg-[#FF5F57] relative`}
+        className={`traffic-light traffic-close ${isMobile ? 'w-5 h-5' : 'w-3 h-3'} rounded-full flex items-center justify-center cursor-pointer border border-black/15 bg-[#FF5F57] relative`}
         onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
       >
-        <svg viewBox="0 0 6 6" className="w-[6px] h-[6px] opacity-0 hover:opacity-100 text-black/65 absolute">
-          <path d="M1 1l4 4M5 1l-4 4" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+        <svg viewBox="0 0 6 6" className={`w-[8px] h-[8px] ${isMobile ? 'opacity-100' : 'opacity-0 hover:opacity-100'} text-black/65 absolute`}>
+          <path d="M1 1l4 4M5 1l-4 4" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
         </svg>
       </div>
       {!isMobile && (
@@ -94,16 +94,18 @@ export const Window: React.FC<WindowProps> = ({
   return (
     <div
       ref={winRef}
-      className={`window absolute flex flex-col rounded-lg overflow-hidden select-none bg-paper shadow-[0_0_0_0.5px_rgba(0,0,0,0.3),0_22px_60px_rgba(0,0,0,0.35),0_8px_20px_rgba(0,0,0,0.18)] transition-[transform,opacity,box-shadow,filter] ease-calm duration-200 ${
+      className={`window absolute flex flex-col overflow-hidden select-none bg-paper shadow-[0_0_0_0.5px_rgba(0,0,0,0.3),0_22px_60px_rgba(0,0,0,0.35),0_8px_20px_rgba(0,0,0,0.18)] transition-[transform,opacity,box-shadow,filter] ease-calm duration-200 ${
+        isMobile ? 'rounded-none' : 'rounded-lg'
+      } ${
         focused ? '' : 'unfocused shadow-[0_0_0_0.5px_rgba(0,0,0,0.2),0_12px_30px_rgba(0,0,0,0.18)]'
       } ${win.minimized ? 'minimized scale-0 translate-y-[400px] opacity-0 pointer-events-none' : ''} ${
         isDragging ? 'scale-[1.01] shadow-[0_30px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(100,255,218,0.15)] opacity-95' : ''
       } style-${windowStyle}`}
       style={isMobile ? {
-        left: '2%',
-        top: '36px',
-        width: '96%',
-        height: 'calc(100vh - 100px)',
+        left: '0px',
+        top: '26px',
+        width: '100%',
+        height: 'calc(100vh - 80px)',
         zIndex: win.z,
       } : {
         left: win.x,

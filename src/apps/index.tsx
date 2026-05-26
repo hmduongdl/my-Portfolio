@@ -66,7 +66,7 @@ export const APP_DEFS: AppDefinition[] = [
   {
     id: 'about',
     name: 'About Me',
-    title: 'About This Mac',
+    title: 'About Me',
     bg: '#ffffff',
     icon: (
       <img src={aboutIcon} alt="About" className="w-full h-full object-contain pointer-events-none" />

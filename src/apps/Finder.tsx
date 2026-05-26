@@ -39,8 +39,28 @@ const TAG_ITEMS: { id: TagType; label: string; dot: string }[] = [
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 const formatVND = (price: number) => {
-  if (price === 0) return 'Liên Hệ';
-  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+  const formatted = new Intl.NumberFormat('vi-VN').format(price);
+  return `${formatted} đ`;
+};
+
+const getCategoryTranslation = (cat: string) => {
+  const translations: Record<string, string> = {
+    'all': 'Tất cả sản phẩm',
+    'All Products': 'Tất cả sản phẩm',
+    'pc-laptop': 'PC & Laptop',
+    'PC & Laptop': 'PC & Laptop',
+    'gaming-gear': 'Gaming Gear',
+    'audio': 'Thiết bị Âm thanh',
+    'Audio & More': 'Thiết bị Âm thanh',
+    'PC Gaming': 'PC Gaming cấu hình cao',
+    'Office PC': 'Máy tính Văn phòng',
+    'Laptop': 'Laptop Acer / Asus',
+    'VGA': 'VGA',
+    'Gaming Gear': 'Gaming Gear',
+    'Keyboard': 'Bàn phím cơ',
+    'Audio': 'Thiết bị Âm thanh',
+  };
+  return translations[cat] || cat;
 };
 
 const calcDiscount = (price: number, oldPrice: number) =>
@@ -59,13 +79,25 @@ const handleImgError = (e: React.SyntheticEvent<HTMLImageElement, Event>) => {
 
 // ─── SkeletonCard ─────────────────────────────────────────────────────────────
 
-const SkeletonCard: React.FC<{ compact?: boolean }> = ({ compact }) => {
+const SkeletonCard: React.FC<{ compact?: boolean; viewMode?: 'grid' | 'list' }> = ({ compact, viewMode = 'grid' }) => {
   if (compact) {
     return (
       <div className="flex flex-col items-center gap-1.5 p-2.5 rounded-lg bg-paper-2 border border-rule animate-pulse">
         <div className="w-[60px] h-[60px] rounded-xl bg-gray-200 dark:bg-gray-700" />
         <div className="w-14 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700" />
         <div className="w-10 h-2 rounded-full bg-gray-200 dark:bg-gray-700" />
+      </div>
+    );
+  }
+  if (viewMode === 'list') {
+    return (
+      <div className="flex items-center gap-4 p-3 border-b border-rule last:border-0 animate-pulse">
+        <div className="w-16 h-16 rounded-xl bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
+        <div className="flex-1 space-y-2">
+          <div className="w-1/3 h-3.5 rounded-full bg-gray-200 dark:bg-gray-700" />
+          <div className="w-1/4 h-2.5 rounded-full bg-gray-200 dark:bg-gray-700" />
+        </div>
+        <div className="w-24 h-3.5 rounded-full bg-gray-200 dark:bg-gray-700 flex-shrink-0" />
       </div>
     );
   }
@@ -81,9 +113,14 @@ const SkeletonCard: React.FC<{ compact?: boolean }> = ({ compact }) => {
 
 // ─── ProductCard ──────────────────────────────────────────────────────────────
 
-const ProductCard: React.FC<{ product: Product; compact?: boolean }> = ({ product, compact }) => {
-  const hasDiscount = product.oldPrice != null && product.oldPrice > product.price;
-  const discountPct = hasDiscount ? calcDiscount(product.price, product.oldPrice!) : 0;
+const ProductCard: React.FC<{ product: Product; compact?: boolean; viewMode?: 'grid' | 'list' }> = ({ product, compact, viewMode = 'grid' }) => {
+  const isStringPrice = typeof product.price === 'string' || isNaN(Number(product.price)) || (typeof product.price === 'number' && product.price === 0);
+  const priceText = isStringPrice 
+    ? (typeof product.price === 'string' && product.price.trim() !== '' && product.price.trim() !== '0' ? product.price : 'Liên hệ')
+    : formatVND(Number(product.price));
+  const priceColor = isStringPrice ? 'text-emerald-500 dark:text-emerald-400 font-semibold' : 'text-blue-600 dark:text-blue-400';
+  const hasDiscount = !isStringPrice && product.oldPrice != null && product.oldPrice > Number(product.price);
+  const discountPct = hasDiscount ? calcDiscount(Number(product.price), product.oldPrice!) : 0;
 
   if (compact) {
     return (
@@ -114,7 +151,47 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean }> = ({ produc
           )}
         </div>
         <div className="text-xs font-medium text-center leading-tight line-clamp-2 text-ink">{product.name}</div>
-        <div className="text-[10px] font-semibold text-blue-600 dark:text-blue-400">{formatVND(product.price)}</div>
+        <div className={`text-[10px] font-semibold ${priceColor}`}>{priceText}</div>
+      </div>
+    );
+  }
+
+  if (viewMode === 'list') {
+    return (
+      <div
+        onClick={() => openProduct(product)}
+        className="flex items-center gap-4 cursor-pointer p-3 rounded-lg transition-all duration-200 hover:bg-blue-500/10 group border-b border-rule last:border-0"
+      >
+        <div className="relative w-16 h-16 flex-shrink-0">
+          {product.imageUrl ? (
+            <img
+              src={product.imageUrl}
+              alt={product.name}
+              className="w-full h-full rounded-xl object-contain p-1 bg-white shadow-sm"
+              onError={handleImgError}
+            />
+          ) : (
+            <div
+              className="w-full h-full rounded-xl flex items-center justify-center text-white text-[24px] font-light shadow-sm"
+              style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[product.category]}, ${CATEGORY_COLORS[product.category]}cc)` }}
+            >
+              {product.glyph ?? '📦'}
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-[14px] font-semibold text-ink leading-tight truncate">{product.name}</div>
+          <div className="text-[11px] text-ink-3 mt-1 flex items-center gap-2">
+            <span className="px-1.5 py-0.5 rounded-md bg-paper-2 border border-rule">{product.category}</span>
+            {hasDiscount && <span className="text-orange-500 font-medium">-{discountPct}% OFF</span>}
+          </div>
+        </div>
+        <div className="flex flex-col items-end gap-0.5 min-w-[120px]">
+          <div className={`text-[14px] font-bold ${priceColor}`}>{priceText}</div>
+          {hasDiscount && (
+            <div className="text-[11px] text-ink-3 line-through">{formatVND(product.oldPrice!)}</div>
+          )}
+        </div>
       </div>
     );
   }
@@ -148,7 +225,7 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean }> = ({ produc
       </div>
       <div className="text-[13px] font-medium text-center text-ink leading-tight line-clamp-2">{product.name}</div>
       <div className="flex flex-col items-center gap-0.5">
-        <div className="text-[12px] font-semibold text-blue-600 dark:text-blue-400">{formatVND(product.price)}</div>
+        <div className={`text-[12px] font-semibold ${priceColor}`}>{priceText}</div>
         {hasDiscount && (
           <div className="text-[11px] text-ink-3 line-through">{formatVND(product.oldPrice!)}</div>
         )}
@@ -166,6 +243,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeTag, setActiveTag] = useState<TagType | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const loadProducts = () => {
     setIsLoading(true);
@@ -230,11 +308,16 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
 
   // Build breadcrumb path for current view
   const getBreadcrumb = useMemo(() => {
-    if (activeTag) {
-      return `Song Phương Products > Tag: ${TAG_ITEMS.find((t) => t.id === activeTag)?.label}`;
-    }
+    const prefix = 'Macintosh HD  >  Song Phương Products';
     const groupLabel = SIDEBAR_GROUPS.find((g) => g.id === activeCategory)?.label ?? activeCategory;
-    return activeCategory === 'all' ? 'Song Phương Products' : `Song Phương Products > ${groupLabel}`;
+    const translatedCat = getCategoryTranslation(activeCategory === 'all' ? 'all' : groupLabel);
+    
+    if (activeTag) {
+      const tagLabel = TAG_ITEMS.find((t) => t.id === activeTag)?.label || activeTag;
+      return `${prefix}  >  ${translatedCat}  >  Tag: ${tagLabel}`;
+    }
+    
+    return `${prefix}  >  ${translatedCat}`;
   }, [activeCategory, activeTag]);
 
   // ── Error state ───────────────────────────────────────────────────────────
@@ -385,8 +468,20 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
             className="ml-4 px-2.5 py-1 rounded-md border border-rule-strong bg-white text-[12px] text-ink placeholder:text-ink-3 outline-none focus:border-blue-400 w-40 transition-colors"
           />
           <div className="ml-auto flex gap-1.5">
-            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">⊞</button>
-            <button className="px-2 py-1 border border-rule-strong bg-white hover:bg-paper-2 text-[13px] rounded-md font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer">≡</button>
+            <button 
+              onClick={() => setViewMode('grid')}
+              className={`px-2 py-1 border rounded-md font-medium text-[13px] shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer transition-colors ${viewMode === 'grid' ? 'bg-blue-500 text-white border-blue-600' : 'bg-white border-rule-strong hover:bg-paper-2 text-ink-2'}`}
+              title="Grid View"
+            >
+              ⊞
+            </button>
+            <button 
+              onClick={() => setViewMode('list')}
+              className={`px-2 py-1 border rounded-md font-medium text-[13px] shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer transition-colors ${viewMode === 'list' ? 'bg-blue-500 text-white border-blue-600' : 'bg-white border-rule-strong hover:bg-paper-2 text-ink-2'}`}
+              title="List View"
+            >
+              ≡
+            </button>
           </div>
         </div>
 
@@ -395,14 +490,14 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
           {error ? (
             <ErrorPane />
           ) : isLoading ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-6">
-              {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+            <div className={viewMode === 'grid' ? "grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-6" : "flex flex-col"}>
+              {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} viewMode={viewMode} />)}
             </div>
           ) : filtered.length === 0 ? (
             <EmptyPane />
           ) : (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-6">
-              {filtered.map((p) => <ProductCard key={p.id} product={p} />)}
+            <div className={viewMode === 'grid' ? "grid grid-cols-[repeat(auto-fill,minmax(150px,1fr))] gap-6" : "flex flex-col bg-white dark:bg-black/20 rounded-xl border border-rule overflow-hidden"}>
+              {filtered.map((p) => <ProductCard key={p.id} product={p} viewMode={viewMode} />)}
             </div>
           )}
         </div>

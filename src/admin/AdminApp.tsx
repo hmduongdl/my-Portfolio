@@ -36,16 +36,25 @@ export const AdminApp: React.FC = () => {
       {/* Background layer for full app if needed, currently gradient handles it */}
       
       {/* Mac Window */}
-      <div className="w-[980px] h-[720px] max-w-full max-h-full rounded-xl bg-white shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex overflow-hidden ring-1 ring-black/5">
+      <div className="w-[75vw] min-w-[1024px] max-w-[1200px] h-[70vh] min-h-[600px] max-h-[640px] rounded-xl bg-white dark:bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden ring-1 ring-black/5">
         
-        {/* Sidebar */}
-        <aside className="w-[260px] h-full bg-surface-container-low/80 backdrop-blur-[40px] flex flex-col p-4 gap-2 border-r border-outline-variant relative shrink-0">
-          {/* Traffic Lights */}
-          <div className="flex gap-2 mb-6 px-2">
-            <div className="w-3 h-3 rounded-full bg-[#FF5F57] hover:bg-red-500 cursor-pointer transition-colors shadow-inner" onClick={() => window.location.href = '/'} title="Close Admin"></div>
-            <div className="w-3 h-3 rounded-full bg-[#FFBD2E] hover:bg-yellow-400 cursor-pointer transition-colors shadow-inner"></div>
-            <div className="w-3 h-3 rounded-full bg-[#28C840] hover:bg-green-500 cursor-pointer transition-colors shadow-inner"></div>
+        {/* Top Header */}
+        <header className="h-12 border-b border-black/5 dark:border-white/5 px-4 flex items-center justify-between bg-neutral-100 dark:bg-zinc-800 shrink-0">
+          <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+            Song Phương Admin Panel
           </div>
+          <button 
+            onClick={() => window.location.href = '/'}
+            className="px-3 py-1.5 bg-neutral-500/10 hover:bg-neutral-500/20 dark:bg-white/5 dark:hover:bg-white/10 text-neutral-700 dark:text-neutral-300 border border-neutral-500/15 dark:border-white/10 backdrop-blur-md text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <span>🔙</span> Quay lại trang chủ
+          </button>
+        </header>
+
+        {/* Content Wrapper */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* Sidebar */}
+          <aside className="w-[260px] h-full bg-surface-container-low/80 backdrop-blur-[40px] flex flex-col p-4 gap-2 border-r border-outline-variant relative shrink-0">
 
           {/* Search Bar */}
           <div className="relative px-2 mb-4">
@@ -116,6 +125,7 @@ export const AdminApp: React.FC = () => {
             {currentTab?.content}
           </div>
         </main>
+        </div>
       </div>
 
       {/* Add Material Symbols font to the document if not present */}
