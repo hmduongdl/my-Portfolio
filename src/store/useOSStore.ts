@@ -81,6 +81,8 @@ interface OSState {
   setIsMobile: (val: boolean) => void;
   setIosOpenAppId: (id: string | null) => void;
   setLanguage: (lang: 'en' | 'vn') => void;
+  isSystemReady: boolean;
+  setSystemReady: (ready: boolean) => void;
   fetchSocials: () => Promise<void>;
 }
 
@@ -105,6 +107,8 @@ export const useOSStore = create<OSState>((set, get) => {
     activeAppName: 'Finder',
     iosOpenAppId: null,
     language: 'vn',
+    isSystemReady: false,
+    setSystemReady: (ready) => set({ isSystemReady: ready }),
 
     openApp: (id, defs) =>
       set((state) => {
@@ -133,17 +137,45 @@ export const useOSStore = create<OSState>((set, get) => {
         const baseH = init?.h ?? 480;
         
         // Tự động scale kích thước cửa sổ trên màn hình lớn (ví dụ 2K, 4K)
-        // Hệ số chuẩn lấy 1440px làm gốc, scale tối đa 2 lần.
         const scale = typeof window !== 'undefined' ? Math.min(2, Math.max(1, window.innerWidth / 1440)) : 1;
         const w = Math.round(baseW * scale);
         const h = Math.round(baseH * scale);
+
+        // Thuật toán Cascading Offset (Chống chồng đè)
+        const defaultX = init?.x ?? Math.round(Math.max(0, (window.innerWidth - w) / 2));
+        const defaultY = init?.y ?? Math.round(Math.max(MENU_BAR_H, (window.innerHeight - h) / 2));
+        const offset = 26; // pixels lệch
+        
+        // Đếm số lượng cửa sổ đang hiển thị (không bị ẩn/thu nhỏ)
+        const openWindows = state.windows.filter(w => !w.minimized);
+        const windowCount = openWindows.length;
+        
+        let newX = defaultX + (windowCount * offset);
+        let newY = defaultY + (windowCount * offset);
+
+        // Wrap-around boundary check: 
+        // Nếu cửa sổ bị trôi quá nửa màn hình, reset lại chu kỳ thác nước
+        if (typeof window !== 'undefined') {
+          if (newX > window.innerWidth * 0.45 || newY > window.innerHeight * 0.5) {
+            // Tính toán số chu kỳ cascade để reset nhưng vẫn giữ một chút lệch
+            const cycleCount = Math.floor(Math.max(
+              (newX - defaultX) / (window.innerWidth * 0.45),
+              (newY - defaultY) / (window.innerHeight * 0.5)
+            ));
+            const resetMultiplier = windowCount - (cycleCount * Math.floor((window.innerHeight * 0.5) / offset));
+            
+            newX = defaultX + (Math.max(0, resetMultiplier) * offset);
+            newY = defaultY + (Math.max(0, resetMultiplier) * offset);
+          }
+        }
+
         const newWindow: WindowInstance = {
           id,
           title: appTitle,
           w,
           h,
-          x: init?.x ?? Math.round(Math.max(0, (window.innerWidth - w) / 2)),
-          y: init?.y ?? Math.round(Math.max(MENU_BAR_H, (window.innerHeight - h) / 2)),
+          x: newX,
+          y: newY,
           z: nextZ,
           minimized: false,
           minW: 320,

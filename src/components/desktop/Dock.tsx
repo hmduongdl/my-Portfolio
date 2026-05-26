@@ -4,15 +4,17 @@ import { useOSStore } from '../../store/useOSStore';
 import { SOCIAL_APPS } from '../../apps';
 
 interface DockIconProps {
+    id?: string;
     name: string;
     icon: React.ReactNode;
     onClick: () => void;
     isRunning?: boolean;
 }
 
-const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = false }) => {
+const DockIcon: React.FC<DockIconProps> = ({ id, name, icon, onClick, isRunning = false }) => {
     return (
         <div
+            id={id}
             className="group relative flex items-center justify-center w-[48px] h-[48px] md:w-[44px] md:h-[44px] flex-shrink-0 p-0 bg-transparent border-none shadow-none"
             onClick={onClick}
             role="button"
@@ -79,6 +81,7 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                 {apps.map((app) => (
                     <DockIcon
                         key={app.id}
+                        id={`dock-icon-${app.id}`}
                         name={app.name}
                         icon={app.icon}
                         onClick={() => onOpen(app.id)}
@@ -93,6 +96,7 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                 {SOCIAL_APPS.map((app) => (
                     <DockIcon
                         key={app.id}
+                        id={`dock-icon-${app.id}`}
                         name={app.name}
                         icon={app.icon}
                         onClick={() => handleSocialClick(app)}

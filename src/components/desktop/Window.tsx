@@ -86,6 +86,51 @@ export const Window: React.FC<WindowProps> = ({
   const isMobile = useOSStore((state) => state.isMobile);
   const winRef = useRef<HTMLDivElement>(null);
   const { isDragging, startDrag, startResize } = useWindowDragResize(win, onChange, onFocus);
+  
+  const [isOpening, setIsOpening] = React.useState(true);
+  const [isMinimizing, setIsMinimizing] = React.useState(false);
+  const [originOffset, setOriginOffset] = React.useState({ x: 0, y: 400 }); // fallback
+
+  // Extract Dock icon coordinates
+  const calculateDockOffset = React.useCallback(() => {
+    if (isMobile) return { x: 0, y: 0 };
+    const iconEl = document.getElementById(`dock-icon-${win.id}`);
+    if (iconEl && winRef.current) {
+      const iconRect = iconEl.getBoundingClientRect();
+      const winRect = winRef.current.getBoundingClientRect();
+      
+      const iconCenterX = iconRect.left + iconRect.width / 2;
+      const iconCenterY = iconRect.top + iconRect.height / 2;
+      
+      const winCenterX = winRect.left + winRect.width / 2;
+      const winCenterY = winRect.top + winRect.height / 2;
+      
+      // Calculate offset distance from window center to dock icon center
+      return {
+        x: iconCenterX - winCenterX,
+        y: iconCenterY - winCenterY
+      };
+    }
+    return { x: 0, y: window.innerHeight };
+  }, [win.id, isMobile]);
+
+  React.useEffect(() => {
+    if (isOpening) {
+      setOriginOffset(calculateDockOffset());
+      const t = setTimeout(() => setIsOpening(false), 400);
+      return () => clearTimeout(t);
+    }
+  }, [isOpening, calculateDockOffset]);
+
+  const handleMinimize = () => {
+    if (isMinimizing) return;
+    setOriginOffset(calculateDockOffset()); // Recalculate just before minimizing
+    setIsMinimizing(true);
+    setTimeout(() => {
+      setIsMinimizing(false);
+      onMin();
+    }, 380);
+  };
 
   // Retrieve content from app list based on win.id
   const appDef = APP_DEFS.find((a) => a.id === win.id);
@@ -98,7 +143,13 @@ export const Window: React.FC<WindowProps> = ({
         isMobile ? 'rounded-none' : 'rounded-lg'
       } ${
         focused ? '' : 'unfocused shadow-[0_0_0_0.5px_rgba(0,0,0,0.2),0_12px_30px_rgba(0,0,0,0.18)]'
-      } ${win.minimized ? 'minimized scale-0 translate-y-[400px] opacity-0 pointer-events-none' : ''} ${
+      } ${
+        win.minimized ? 'minimized scale-0 translate-y-[400px] opacity-0 pointer-events-none' : ''
+      } ${
+        isOpening && !isMobile ? 'window-fly-up' : ''
+      } ${
+        isMinimizing && !isMobile ? 'window-genie-minimize' : ''
+      } ${
         isDragging ? 'scale-[1.01] shadow-[0_30px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(100,255,218,0.15)] opacity-95' : ''
       } style-${windowStyle}`}
       style={isMobile ? {
@@ -113,7 +164,9 @@ export const Window: React.FC<WindowProps> = ({
         width: win.w,
         height: win.h,
         zIndex: win.z,
-      }}
+        '--origin-x-offset': `${originOffset.x}px`,
+        '--origin-y-offset': `${originOffset.y}px`,
+      } as React.CSSProperties}
       onMouseDown={onFocus}
     >
       {/* Titlebar */}
@@ -123,7 +176,7 @@ export const Window: React.FC<WindowProps> = ({
         } ${isDragging && !isMobile ? 'dragging cursor-grabbing' : ''}`}
         onMouseDown={isMobile ? undefined : startDrag}
       >
-        <TrafficLights onClose={onClose} onMin={onMin} onMax={onMax} isResizable={win.isResizable} isMobile={isMobile} />
+        <TrafficLights onClose={onClose} onMin={handleMinimize} onMax={onMax} isResizable={win.isResizable} isMobile={isMobile} />
         <div className="window-title absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[13px] font-semibold text-ink-2 tracking-tight pointer-events-none select-none">
           {win.title}
         </div>

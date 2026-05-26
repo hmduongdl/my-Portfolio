@@ -133,6 +133,36 @@ body {
 /* ═══════════════════════════════════════════════════════════════
    SCROLLBARS
    ═══════════════════════════════════════════════════════════════ */
+
+/* MacOS Fly-up Animation */
+@keyframes window-fly-up {
+  0% {
+    transform: translate(var(--origin-x-offset, 0), var(--origin-y-offset, 200px)) scale(0.05);
+    opacity: 0;
+    border-radius: 50%;
+  }
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+    border-radius: 12px;
+  }
+}
+
+.window-fly-up {
+  animation: window-fly-up 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transform-origin: center center;
+}
+
+/* MacOS Genie Warp Effect for Minimize */
+.window-genie-minimize {
+  /* scale-x gets slightly squeezed, scale-y flattens towards dock, translating down */
+  transform: translate(var(--origin-x-offset, 0), var(--origin-y-offset, 400px)) scaleX(0.1) scaleY(0.02) !important;
+  opacity: 0 !important;
+  transition: transform 0.38s cubic-bezier(0.25, 0.46, 0.45, 0.94), opacity 0.32s cubic-bezier(0.25, 0.46, 0.45, 0.94) !important;
+  transform-origin: bottom center !important;
+}
+
+/* Hide scrollbars completely across the app */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
