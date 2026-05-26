@@ -145,7 +145,7 @@ export const App: React.FC = () => {
           onDoubleClick={() => openApp('finder', APP_DEFS)}
           className="desktop-icon flex flex-col items-center gap-1 w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
         >
-          <div className="desktop-icon-art w-12 h-12 rounded-md bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center overflow-hidden">
+            <div className="desktop-icon-art w-12 h-12 rounded-md bg-transparent flex items-center justify-center overflow-hidden">
             <img src={finderIcon} alt="Finder icon" className="w-full h-full object-contain" />
           </div>
           <div className="desktop-icon-label text-white text-[12px] font-medium text-center leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
@@ -158,7 +158,7 @@ export const App: React.FC = () => {
           onDoubleClick={() => openApp('welcome', APP_DEFS)}
           className="desktop-icon flex flex-col items-center gap-1 w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
         >
-          <div className="desktop-icon-art w-12 h-12 rounded-md bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center overflow-hidden">
+            <div className="desktop-icon-art w-12 h-12 rounded-md bg-transparent flex items-center justify-center overflow-hidden">
             <img src={notesIcon} alt="Notes icon" className="w-full h-full object-contain" />
           </div>
           <div className="desktop-icon-label text-white text-[12px] font-medium text-center leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
