@@ -35,17 +35,17 @@ export const AdminApp: React.FC = () => {
   const currentTab = navItems.find(item => item.id === tab);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-background font-['Inter'] overflow-hidden relative">
-      <div className="flex-1 w-full h-full bg-white dark:bg-zinc-900 flex flex-col overflow-hidden">
+    <div className="admin-dark h-screen w-screen flex flex-col bg-background text-on-surface font-['Inter'] overflow-hidden relative">
+      <div className="flex-1 w-full h-full bg-background flex flex-col overflow-hidden">
         
         {/* Top Header */}
-        <header className="h-12 border-b border-black/5 dark:border-white/5 px-4 flex items-center justify-between bg-neutral-100 dark:bg-zinc-800 shrink-0">
-          <div className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+        <header className="h-12 border-b border-outline-variant px-4 flex items-center justify-between bg-surface/95 shrink-0">
+          <div className="text-sm font-semibold text-on-surface">
             Song Phương Admin Panel
           </div>
           <button 
             onClick={() => window.location.href = '/'}
-            className="px-3 py-1.5 bg-neutral-500/10 hover:bg-neutral-500/20 dark:bg-white/5 dark:hover:bg-white/10 text-neutral-700 dark:text-neutral-300 border border-neutral-500/15 dark:border-white/10 backdrop-blur-md text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+            className="px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant border border-outline-variant backdrop-blur-md text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
           >
             <span>🔙</span> Quay lại trang chủ
           </button>

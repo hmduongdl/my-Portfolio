@@ -29,6 +29,35 @@
   --warning:         #C99A2E;
   --info:            #4F7C8A;
 
+  /* ── Admin semantic surfaces (light defaults) ───────────────── */
+  --md-background: #f9f9f9;
+  --md-surface: #f9f9f9;
+  --md-surface-bright: #f9f9f9;
+  --md-surface-dim: #dadada;
+  --md-surface-container-lowest: #ffffff;
+  --md-surface-container-low: #f3f3f4;
+  --md-surface-container: #eeeeee;
+  --md-surface-container-high: #e8e8e8;
+  --md-surface-container-highest: #e2e2e2;
+  --md-surface-variant: #e2e2e2;
+  --md-on-background: #1a1c1c;
+  --md-on-surface: #1a1c1c;
+  --md-on-surface-variant: #414755;
+  --md-outline: #717786;
+  --md-outline-variant: #c1c6d7;
+  --md-primary: #0a84ff;
+  --md-on-primary: #ffffff;
+  --md-primary-container: #0a84ff;
+  --md-on-primary-container: #ffffff;
+  --md-secondary: #5d5e63;
+  --md-secondary-container: #e0dfe4;
+  --md-on-secondary: #ffffff;
+  --md-on-secondary-container: #626267;
+  --md-error: #ba1a1a;
+  --md-on-error: #ffffff;
+  --md-error-container: #ffdad6;
+  --md-on-error-container: #93000a;
+
   /* ── macOS Window Chrome ────────────────────────────────────── */
   --win-bg:            rgba(255, 255, 255, 0.82);
   --win-sidebar-bg:    rgba(246, 246, 248, 0.72);
@@ -99,6 +128,41 @@
   --dur-fast:     150ms;
   --dur-base:     240ms;
   --dur-slow:     400ms;
+}
+
+.admin-dark {
+  color-scheme: dark;
+  --primary: #0a84ff;
+  --primary-hover: #409cff;
+  --primary-soft: rgba(10, 132, 255, 0.14);
+  --error: #ff453a;
+  --md-background: #09090b;
+  --md-surface: #111113;
+  --md-surface-bright: #18181b;
+  --md-surface-dim: #050506;
+  --md-surface-container-lowest: #141416;
+  --md-surface-container-low: #18181b;
+  --md-surface-container: #1f1f23;
+  --md-surface-container-high: #27272a;
+  --md-surface-container-highest: #303035;
+  --md-surface-variant: #27272a;
+  --md-on-background: #f4f4f5;
+  --md-on-surface: #f4f4f5;
+  --md-on-surface-variant: #a1a1aa;
+  --md-outline: #52525b;
+  --md-outline-variant: rgba(255, 255, 255, 0.12);
+  --md-primary: #0a84ff;
+  --md-on-primary: #ffffff;
+  --md-primary-container: rgba(10, 132, 255, 0.18);
+  --md-on-primary-container: #dbeafe;
+  --md-secondary: #a1a1aa;
+  --md-secondary-container: rgba(255, 255, 255, 0.08);
+  --md-on-secondary: #111113;
+  --md-on-secondary-container: #e4e4e7;
+  --md-error: #ff453a;
+  --md-on-error: #ffffff;
+  --md-error-container: rgba(255, 69, 58, 0.16);
+  --md-on-error-container: #fecaca;
 }
 
 /* ═══════════════════════════════════════════════════════════════
