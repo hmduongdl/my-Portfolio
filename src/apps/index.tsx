@@ -5,7 +5,7 @@ import { MailApp } from './Mail';
 import { WelcomeApp } from './Welcome';
 import { ZaloApp } from './Zalo';
 import { AppDefinition, SocialAppDefinition } from '../types';
-import finderIcon from '../icons/Finder.png';
+
 import aboutIcon from '../icons/About.png';
 import notesIcon from '../icons/Notes.png';
 import projectsIcon from '../icons/Project-folder.png';
