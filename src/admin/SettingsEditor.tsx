@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api';
+import { useOSStore } from '../store/useOSStore';
 
 interface SocialLink {
   id?: number;
@@ -41,6 +42,8 @@ export const SettingsEditor: React.FC = () => {
   const [kwInput, setKwInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+
+  const { tweaks, setTweak } = useOSStore();
 
   const loadSettings = async () => {
     setLoading(true);
@@ -151,8 +154,53 @@ export const SettingsEditor: React.FC = () => {
   }
 
   return (
-    <div className="p-window-padding space-y-6 select-text">
+    <div className="p-window-padding space-y-6 select-text pb-20">
       
+      {/* Appearance & Wallpaper */}
+      <section className="space-y-2">
+        <h2 className="text-section-header font-section-header text-on-surface-variant px-1">Giao diện &amp; Hình nền</h2>
+        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm divide-y divide-outline-variant/30">
+          <div className="p-4 space-y-4">
+            <div>
+              <label className="block text-[12px] font-bold text-on-surface mb-2">Chế độ Hình nền</label>
+              <div className="flex gap-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="wallpaperType" value="image" checked={tweaks.wallpaperType === 'image'} onChange={() => setTweak('wallpaperType', 'image')} className="text-primary focus:ring-primary" />
+                  <span className="text-[13px] text-on-surface">Hình tĩnh (Image)</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="wallpaperType" value="video" checked={tweaks.wallpaperType === 'video'} onChange={() => setTweak('wallpaperType', 'video')} className="text-primary focus:ring-primary" />
+                  <span className="text-[13px] text-on-surface">Video Động</span>
+                </label>
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input type="radio" name="wallpaperType" value="time-shifting" checked={tweaks.wallpaperType === 'time-shifting'} onChange={() => setTweak('wallpaperType', 'time-shifting')} className="text-primary focus:ring-primary" />
+                  <span className="text-[13px] text-on-surface">Tự động (Sáng/Tối)</span>
+                </label>
+              </div>
+            </div>
+
+            {tweaks.wallpaperType !== 'time-shifting' && (
+              <div>
+                <label className="block text-[12px] font-bold text-on-surface mb-1">Đường dẫn Hình nền / Video</label>
+                <input
+                  type="text"
+                  value={tweaks.wallpaperUrl || ''}
+                  onChange={e => setTweak('wallpaperUrl', e.target.value)}
+                  className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-md px-3 py-1.5 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
+                  placeholder="e.g. /wallpapers/sonoma-light.jpg"
+                />
+              </div>
+            )}
+            
+            <div className="flex flex-wrap gap-2 pt-2">
+              <button onClick={() => { setTweak('wallpaperType', 'image'); setTweak('wallpaperUrl', '/wallpapers/sonoma-light.jpg'); }} className="px-3 py-1.5 text-[11px] font-bold bg-surface-container rounded-md hover:bg-surface-container-high transition-colors text-on-surface">Ảnh Sonoma Sáng</button>
+              <button onClick={() => { setTweak('wallpaperType', 'image'); setTweak('wallpaperUrl', '/wallpapers/sonoma-dark.jpg'); }} className="px-3 py-1.5 text-[11px] font-bold bg-surface-container rounded-md hover:bg-surface-container-high transition-colors text-on-surface">Ảnh Sonoma Tối</button>
+              <button onClick={() => { setTweak('wallpaperType', 'video'); setTweak('wallpaperUrl', '/bkgr.mp4'); }} className="px-3 py-1.5 text-[11px] font-bold bg-surface-container rounded-md hover:bg-surface-container-high transition-colors text-on-surface">Video Động</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Social Networks & Contacts */}
       <section className="space-y-2">
         <h2 className="text-section-header font-section-header text-on-surface-variant px-1">Cấu hình Mạng xã hội &amp; Liên hệ</h2>

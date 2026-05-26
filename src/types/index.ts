@@ -54,4 +54,6 @@ export interface Tweaks {
   dockMagnify: number;
   dockAutoHide: boolean;
   showMobilePreview: boolean;
+  wallpaperType?: 'image' | 'video' | 'time-shifting';
+  wallpaperUrl?: string;
 }

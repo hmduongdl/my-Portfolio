@@ -9,14 +9,32 @@ const TWEAK_DEFAULTS: Tweaks = {
   dockMagnify: 1.4,
   dockAutoHide: false,
   showMobilePreview: false,
+  wallpaperType: 'video',
+  wallpaperUrl: '/bkgr.mp4',
 };
 
 function loadTweaks(): Tweaks {
+  if (typeof window !== 'undefined') {
+    try {
+      const saved = localStorage.getItem('os_tweaks');
+      if (saved) {
+        return { ...TWEAK_DEFAULTS, ...JSON.parse(saved) };
+      }
+    } catch (e) {
+      console.warn('Failed to load tweaks from local storage', e);
+    }
+  }
   return { ...TWEAK_DEFAULTS };
 }
 
-function persistTweaks(_t: Tweaks): void {
-  // Persisting disabled to keep tweaks permanent
+function persistTweaks(t: Tweaks): void {
+  if (typeof window !== 'undefined') {
+    try {
+      localStorage.setItem('os_tweaks', JSON.stringify(t));
+    } catch (e) {
+      console.warn('Failed to save tweaks to local storage', e);
+    }
+  }
 }
 
 function topZ(windows: WindowInstance[]): number {
