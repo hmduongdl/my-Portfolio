@@ -13,16 +13,17 @@ const AppleLogo: React.FC = () => (
 export const MenuBar: React.FC = () => {
   const [time, setTime] = useState<Date>(new Date());
   const focusedId = useOSStore((state) => state.focusedId);
-  const displayAppName = (() => {
-    if (!focusedId) return 'Finder';
-    const id = focusedId.toLowerCase();
-    if (id === 'about' || id === 'aboutme') return 'About Me';
-    if (id === 'finder' || id === 'products') return 'Finder';
-    if (id === 'projects') return 'Projects';
+  const getActiveAppName = () => {
+    if (!focusedId) return 'Song Phương';
+    const id = focusedId.split('-')[0];
+    const activeAppDef = [...APP_DEFS, ...SOCIAL_APPS].find(app => app.id === id);
+    if (id === 'finder' || id === 'products') return 'Song Phương';
     if (id === 'settings' || id === 'admin') return 'System Settings';
-    const activeAppDef = APP_DEFS.find((a) => a.id === focusedId);
-    return activeAppDef ? activeAppDef.name : 'Finder';
-  })();
+    if (id === 'ios') return 'iPhone Simulator';
+    
+    return activeAppDef ? activeAppDef.name : 'Song Phương';
+  };
+  const displayAppName = getActiveAppName();
   const openMenu = useOSStore((state) => state.openMenu);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
   const openApp = useOSStore((state) => state.openApp);
