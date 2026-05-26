@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useOSStore } from '../store/useOSStore';
-import { techStack, profileVN, timelineVN } from '../data/profileData';
+import { techStack } from '../data/profileData';
+import { profileService, ProfileData, TimelineItem } from '../services/profileService';
 import { ImageWithFallback } from '../components/desktop/ImageWithFallback';
 
 const typeAccent: Record<string, string> = {
@@ -18,9 +19,49 @@ const dotAccent: Record<string, string> = {
 export const AboutApp: React.FC = () => {
   const language = useOSStore((state) => state.language);
 
-  // Currently using static VN data. In the future, this can be toggled via language.
-  const profile = language === 'vn' ? profileVN : profileVN;
-  const timeline = language === 'vn' ? timelineVN : timelineVN;
+  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setIsLoading(true);
+    setError(null);
+
+    Promise.all([
+      profileService.getProfile(language),
+      profileService.getTimeline(language)
+    ])
+    .then(([profileData, timelineData]) => {
+      setProfile(profileData);
+      setTimeline(timelineData);
+    })
+    .catch((err: any) => {
+      console.error("Failed to load about data:", err);
+      setError(err.message || 'Lỗi tải dữ liệu');
+    })
+    .finally(() => {
+      setIsLoading(false);
+    });
+  }, [language]);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-4 opacity-60">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="text-[13px] font-medium text-ink-3">Đang tải hồ sơ...</div>
+      </div>
+    );
+  }
+
+  if (error || !profile) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3 text-ink-3">
+        <div className="text-3xl">⚠️</div>
+        <div className="text-sm text-red-500">{error || 'Không tìm thấy hồ sơ'}</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center gap-6 px-10 py-7 select-text overflow-y-auto w-full h-full">
@@ -28,7 +69,7 @@ export const AboutApp: React.FC = () => {
       {/* ── Header: Avatar + Name + Title + Company badge ── */}
       <div className="flex flex-col items-center gap-3">
         <ImageWithFallback
-          src="/my-avatar.jpg"
+          src={profile.avatarUrl || "/my-avatar.jpg"}
           alt={profile.name}
           fallbackText={profile.name}
           className="w-[100px] h-[100px] object-cover rounded-full shadow-md aspect-square border border-gray-200/50"
@@ -40,9 +81,9 @@ export const AboutApp: React.FC = () => {
           <div className="text-[13px] text-ink-3 mt-[3px] font-medium backdrop-blur-sm">
             {profile.title}
           </div>
-          {profile.songphuong_url && (
+          {profile.songphuongUrl && (
             <a
-              href={profile.songphuong_url}
+              href={profile.songphuongUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 mt-2.5 px-2.5 py-[3px] rounded-full bg-primary/10 text-primary text-[11px] font-medium hover:bg-primary/20 transition-colors duration-120 shadow-sm"
@@ -101,9 +142,9 @@ export const AboutApp: React.FC = () => {
               <div className={`flex-1 ${i < timeline.length - 1 ? 'pb-5' : 'pb-1'}`}>
                 <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 leading-snug">
                   <span className="text-[13px] font-semibold text-ink">{item.role}</span>
-                  {item.company_url ? (
+                  {item.companyUrl ? (
                     <a
-                      href={item.company_url}
+                      href={item.companyUrl}
                       target="_blank"
                       rel="noopener noreferrer"
                       className={`text-[12px] font-medium hover:underline underline-offset-2 ${typeAccent[item.type].split(' ')[1]}`}

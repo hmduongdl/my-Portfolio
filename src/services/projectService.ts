@@ -8,25 +8,21 @@ interface ApiProject {
   category: string;
   color: string;
   tags: string[];
-  description: string;
+  desc: string;
   demoUrl?: string | null;
-  demo_url?: string | null;
   githubUrl?: string | null;
-  github_url?: string | null;
 }
 
 function toProject(raw: ApiProject): Project {
-  const demoUrlVal = raw.demoUrl !== undefined ? raw.demoUrl : raw.demo_url;
-  const githubUrlVal = raw.githubUrl !== undefined ? raw.githubUrl : raw.github_url;
   return {
     id: raw.id,
     name: raw.name,
     category: raw.category as Project['category'],
     color: raw.color,
     tags: raw.tags,
-    desc: raw.description,
-    demoUrl: demoUrlVal ?? undefined,
-    githubUrl: githubUrlVal ?? undefined,
+    desc: raw.desc,
+    demoUrl: raw.demoUrl ?? undefined,
+    githubUrl: raw.githubUrl ?? undefined,
   };
 }
 

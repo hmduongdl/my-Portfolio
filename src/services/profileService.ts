@@ -1,20 +1,28 @@
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
 export interface ProfileData {
+    id: number;
     name: string;
     title: string;
+    titleEn?: string;
+    titleVn?: string;
     bio: string;
+    bioEn?: string;
+    bioVn?: string;
+    avatarUrl?: string;
     email: string;
-    github: string;
-    facebook: string;
-    songphuong_url: string;
-    avatar?: string;
+    phone?: string;
+    githubUrl: string;
+    facebookUrl: string;
+    zaloUrl?: string;
+    songphuongUrl: string;
 }
 
 export interface TimelineItem {
+    id: number;
     role: string;
     company: string;
-    company_url?: string;
+    companyUrl?: string;
     period: string;
     desc: string[];
     type: 'work' | 'education' | 'freelance';

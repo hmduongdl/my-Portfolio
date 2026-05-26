@@ -8,11 +8,8 @@ interface ApiProduct {
   category: string;
   price: string | null;
   oldPrice?: string | null;
-  old_price?: string | null;
   imageUrl?: string | null;
-  image_url?: string | null;
   link: string | null;
-  product_url?: string | null;
   glyph: string | null;
   status: string | null;
   visible?: boolean;
@@ -28,18 +25,15 @@ function parsePrice(raw: string | number | null | undefined): number {
 }
 
 function toProduct(raw: ApiProduct): Product {
-  const oldPriceVal = raw.old_price !== undefined && raw.old_price !== null ? raw.old_price : raw.oldPrice;
-  const imageUrlVal = raw.image_url !== undefined && raw.image_url !== null ? raw.image_url : raw.imageUrl;
-  
   return {
     id: raw.id,
     name: raw.name,
     category: raw.category as ProductCategory,
     price: parsePrice(raw.price),
-    oldPrice: oldPriceVal ? parsePrice(oldPriceVal) : undefined,
+    oldPrice: raw.oldPrice ? parsePrice(raw.oldPrice) : undefined,
     discount: raw.discount !== undefined && raw.discount !== null ? Number(raw.discount) : null,
-    imageUrl: imageUrlVal ?? '',
-    link: raw.link || raw.product_url || '',
+    imageUrl: raw.imageUrl ?? '',
+    link: raw.link || '',
     color: raw.color || '#3B82F6',
     glyph: raw.glyph || '📦',
     status: (raw.status as Product['status']) ?? null,

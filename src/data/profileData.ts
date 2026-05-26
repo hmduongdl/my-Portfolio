@@ -13,21 +13,23 @@ export const techStack: TechItem[] = [
 ];
 
 export const profileVN: ProfileData = {
+  id: 1,
   name: 'Hoàng Minh Dương',
   title: 'Web Developer · IT Student',
   bio: 'Sinh viên IT tại Đại học Đà Lạt & Web Developer tại Song Phương Technology.',
   email: 'duonghm.work@gmail.com',
-  github: 'https://github.com/hmduongdl',
-  facebook: 'https://facebook.com/',
-  songphuong_url: 'https://songphuong.vn',
-  avatar: '/my-avatar.jpg'
+  githubUrl: 'https://github.com/hmduongdl',
+  facebookUrl: 'https://facebook.com/',
+  songphuongUrl: 'https://songphuong.vn',
+  avatarUrl: '/my-avatar.jpg'
 };
 
 export const timelineVN: TimelineItem[] = [
   {
+    id: 1,
     role: 'Web Developer',
     company: 'Song Phương Technology',
-    company_url: 'https://songphuong.vn',
+    companyUrl: 'https://songphuong.vn',
     period: 'Tháng 3, 2025 - Hiện tại',
     desc: [
       'Thiết kế và phát triển giao diện người dùng sáng tạo cho các trang web và ứng dụng của công ty.',
@@ -37,9 +39,10 @@ export const timelineVN: TimelineItem[] = [
     type: 'work'
   },
   {
+    id: 2,
     role: 'Sinh viên CNTT',
     company: 'Trường Đại học Đà Lạt',
-    company_url: 'https://dlu.edu.vn',
+    companyUrl: 'https://dlu.edu.vn',
     period: 'Tháng 8, 2025 - 2029',
     desc: [
       'Theo học ngành Công nghệ Thông tin.',
@@ -48,6 +51,7 @@ export const timelineVN: TimelineItem[] = [
     type: 'education'
   },
   {
+    id: 3,
     role: 'Nhà thiết kế đồ họa 2D',
     company: 'Freelance',
     period: 'Trước đây',
