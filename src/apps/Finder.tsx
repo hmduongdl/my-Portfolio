@@ -179,6 +179,15 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
 
   useEffect(() => {
     loadProducts();
+
+    const handleProductsUpdated = () => {
+      loadProducts();
+    };
+
+    window.addEventListener('products-updated', handleProductsUpdated);
+    return () => {
+      window.removeEventListener('products-updated', handleProductsUpdated);
+    };
   }, [lang]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Filtering pipeline (useMemo) ──────────────────────────────────────────

@@ -60,10 +60,11 @@ export const api = {
     }));
   },
 
-  async del(path: string): Promise<void> {
+  async del(path: string, body?: unknown): Promise<void> {
     return handle<void>(await fetch(`${BASE}${path}`, {
       method: 'DELETE',
-      headers: headers(false),
+      headers: headers(body !== undefined),
+      body: body !== undefined ? JSON.stringify(body) : undefined,
     }));
   },
 };

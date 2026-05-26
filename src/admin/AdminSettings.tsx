@@ -47,6 +47,7 @@ export const AdminSettings: React.FC = () => {
     try {
       await api.put('/admin/profile', data);
       setStatus('ok');
+      window.dispatchEvent(new Event('profile-updated'));
       setTimeout(() => setStatus('idle'), 2000);
     } catch {
       setStatus('error');
@@ -59,7 +60,13 @@ export const AdminSettings: React.FC = () => {
   }
 
   return (
-    <div className="p-6 max-w-[640px] mx-auto space-y-[32px] pb-20">
+    <div className="p-6 max-w-[640px] mx-auto space-y-[32px] pb-20 relative">
+      {status === 'ok' && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 bg-white/90 dark:bg-zinc-800/90 backdrop-blur-md px-5 py-2.5 rounded-full border border-black/5 dark:border-white/10 shadow-lg text-[13px] font-semibold text-neutral-800 dark:text-neutral-200 flex items-center gap-2 z-50 transition-all duration-300 animate-bounce">
+          <span className="text-green-500 font-bold">✓</span>
+          <span>Đã cập nhật hồ sơ cá nhân</span>
+        </div>
+      )}
       
       {/* Profile Group */}
       <div className="space-y-2">

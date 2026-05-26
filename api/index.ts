@@ -1,7 +1,7 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
-import { SignJWT } from 'jose';
+import { SignJWT, jwtVerify } from 'jose';
 import crypto from 'crypto';
 
 // ============================================================================
@@ -159,14 +159,18 @@ async function runQuery(query: string, params: any[] = []) {
   }
 }
 
-// Helper xác thực (JWT admin đơn giản)
+// Helper xác thực (JWT admin bảo mật)
 async function verifyAdminJWT(req: VercelRequest): Promise<boolean> {
   try {
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
     const token = authHeader.split(' ')[1];
-    return !!token;
-  } catch {
+    
+    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'default-secret-key-123456');
+    const { payload } = await jwtVerify(token, secret);
+    return !!payload;
+  } catch (err) {
+    console.error('[JWT Verification Failed]:', err);
     return false;
   }
 }
@@ -667,6 +671,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!b.id || !b.name || !b.category) {
         return res.status(400).json({ error: 'BAD_REQUEST', message: 'ID, Name, and Category are required' });
       }
+      const parseTags = (tags: any): string[] => {
+        if (Array.isArray(tags)) return tags;
+        if (typeof tags === 'string') return tags.split(',').map((s: string) => s.trim()).filter(Boolean);
+        return [];
+      };
+
       try {
         const rows = await runQuery(
           `INSERT INTO tbl_projects (
@@ -677,7 +687,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             b.name,
             b.category,
             b.color || '#2563EB',
-            Array.isArray(b.tags) ? b.tags : [],
+            parseTags(b.tags),
             b.desc_vn || '',
             b.desc_en || '',
             b.demo_url || null,
@@ -697,6 +707,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!b.id) {
         return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing project ID' });
       }
+
+      const parseTags = (tags: any): string[] => {
+        if (Array.isArray(tags)) return tags;
+        if (typeof tags === 'string') return tags.split(',').map((s: string) => s.trim()).filter(Boolean);
+        return [];
+      };
+
       try {
         const rows = await runQuery(
           `UPDATE tbl_projects SET
@@ -715,7 +732,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             b.name || '',
             b.category || '',
             b.color || '#2563EB',
-            Array.isArray(b.tags) ? b.tags : [],
+            parseTags(b.tags),
             b.desc_vn || '',
             b.desc_en || '',
             b.demo_url || null,
@@ -748,6 +765,36 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // --- 4. TIMELINE ---
+    if (req.method === 'GET' && path === '/admin/timeline') {
+      try {
+        const rows = await runQuery('SELECT * FROM tbl_timeline ORDER BY order_index ASC, id DESC');
+        const parsed = rows.map((t: any) => {
+          let desc_vn: string[] = [];
+          let desc_en: string[] = [];
+          try {
+            if (typeof t.desc_vn === 'string') desc_vn = JSON.parse(t.desc_vn);
+            else if (Array.isArray(t.desc_vn)) desc_vn = t.desc_vn;
+          } catch {
+            desc_vn = t.desc_vn ? [String(t.desc_vn)] : [];
+          }
+          try {
+            if (typeof t.desc_en === 'string') desc_en = JSON.parse(t.desc_en);
+            else if (Array.isArray(t.desc_en)) desc_en = t.desc_en;
+          } catch {
+            desc_en = t.desc_en ? [String(t.desc_en)] : [];
+          }
+          return {
+            ...t,
+            desc_vn,
+            desc_en
+          };
+        });
+        return res.status(200).json(parsed);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
     if (req.method === 'POST' && path === '/admin/timeline') {
       const b = req.body ?? {};
       const safeDescVn = Array.isArray(b.desc_vn) ? JSON.stringify(b.desc_vn) : b.desc_vn;

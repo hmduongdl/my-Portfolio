@@ -57,6 +57,15 @@ export const ProjectsApp: React.FC = () => {
 
   useEffect(() => {
     loadProjects();
+
+    const handleProjectsUpdated = () => {
+      loadProjects();
+    };
+
+    window.addEventListener('projects-updated', handleProjectsUpdated);
+    return () => {
+      window.removeEventListener('projects-updated', handleProjectsUpdated);
+    };
   }, [language]);
 
   const filtered = useMemo(() => {

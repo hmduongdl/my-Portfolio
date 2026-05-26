@@ -23,8 +23,6 @@ const EMPTY_ITEM: Omit<TimelineItem, 'id'> = {
   type: 'work', order_index: 0
 };
 
-const Divider = () => <div className="h-[1px] bg-outline-variant/30 mx-[12px]" />;
-
 export const TimelineEditor: React.FC = () => {
   const [items, setItems] = useState<TimelineItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -38,7 +36,7 @@ export const TimelineEditor: React.FC = () => {
   const loadTimeline = async () => {
     setLoading(true);
     try {
-      const data = await api.get<TimelineItem[]>('/timeline');
+      const data = await api.get<TimelineItem[]>('/admin/timeline');
       setItems(data);
     } catch (e) {
       console.error(e);
@@ -59,6 +57,7 @@ export const TimelineEditor: React.FC = () => {
       setStatus('ok');
       await loadTimeline();
       setEditingItem(null);
+      window.dispatchEvent(new Event('timeline-updated'));
       setTimeout(() => setStatus('idle'), 2000);
     } catch {
       setStatus('error');
@@ -67,57 +66,117 @@ export const TimelineEditor: React.FC = () => {
   };
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-4">
       <div className="flex items-center justify-between px-2">
-        <h2 className="text-[13px] leading-[20px] font-bold text-on-surface-variant">Timeline Management</h2>
+        <h2 className="text-[14px] leading-[22px] font-bold text-on-surface">Timeline Management / Quản lý mốc thời gian</h2>
         <button
           onClick={() => setEditingItem({ ...EMPTY_ITEM, order_index: items.length })}
-          className="bg-surface-container hover:bg-surface-container-high border border-outline-variant/30 text-on-surface px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors"
+          className="bg-primary hover:bg-primary-container text-on-primary px-3 py-1.5 rounded-lg text-[12px] font-semibold transition-all shadow-sm active:scale-95 flex items-center gap-1"
         >
-          + Add New
+          <span className="material-symbols-outlined text-[16px]">add</span>
+          Thêm mốc mới
         </button>
       </div>
 
       <div className="bg-surface-container-lowest border border-outline-variant rounded-xl overflow-hidden shadow-sm">
         {loading ? (
-          <div className="p-4 text-on-surface-variant text-[13px]">Loading timeline...</div>
+          <div className="p-6 text-on-surface-variant text-[13px] flex items-center justify-center gap-2">
+            <div className="w-4 h-4 border-2 border-outline-variant border-t-primary rounded-full animate-spin" />
+            Đang tải dữ liệu...
+          </div>
         ) : items.length === 0 ? (
-          <div className="p-4 text-on-surface-variant text-[13px]">No timeline items found.</div>
+          <div className="p-8 text-center text-on-surface-variant text-[13px]">
+            Chưa có mốc thời gian nào. Hãy thêm mốc mới để bắt đầu.
+          </div>
         ) : (
-          <div className="flex flex-col">
-            {items.map((item, i) => (
-              <React.Fragment key={item.id}>
-                <div className="flex items-center justify-between p-[12px] hover:bg-surface-container-low transition-colors">
-                  <div>
-                    <h3 className="text-[13px] font-semibold text-on-surface">{item.role_vn || item.role_en} <span className="text-on-surface-variant font-normal">at {item.company}</span></h3>
-                    <p className="text-[11px] text-on-surface-variant mt-0.5">{item.period_vn || item.period_en} • {item.type}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setEditingItem(item)}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high text-primary transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">edit</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (confirm('Delete this timeline item?')) {
-                          fetch('/api/admin/timeline', {
-                             method: 'DELETE',
-                             headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${localStorage.getItem('admin_token')}` },
-                             body: JSON.stringify({ id: item.id })
-                          }).then(() => loadTimeline());
-                        }
-                      }}
-                      className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-error transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-[18px]">delete</span>
-                    </button>
-                  </div>
-                </div>
-                {i < items.length - 1 && <Divider />}
-              </React.Fragment>
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-surface-container border-b border-outline-variant">
+                  <th className="px-4 py-3 font-semibold text-[12px] text-on-surface-variant">Vai trò / Role</th>
+                  <th className="px-4 py-3 font-semibold text-[12px] text-on-surface-variant">Đơn vị / Company</th>
+                  <th className="px-4 py-3 font-semibold text-[12px] text-on-surface-variant">Khoảng thời gian / Period</th>
+                  <th className="px-4 py-3 font-semibold text-[12px] text-on-surface-variant">Loại / Type</th>
+                  <th className="px-4 py-3 font-semibold text-[12px] text-on-surface-variant text-center w-[60px]">Sắp xếp</th>
+                  <th className="px-4 py-3 font-semibold text-[12px] text-on-surface-variant text-right w-[110px]">Hành động</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant/30">
+                {items.map((item) => (
+                  <tr key={item.id} className="hover:bg-surface-container-low/50 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col">
+                        <span className="text-[13px] font-semibold text-on-surface">{item.role_vn || 'Chưa đặt'}</span>
+                        <span className="text-[11px] text-on-surface-variant italic">{item.role_en}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col">
+                        {item.company_url ? (
+                          <a 
+                            href={item.company_url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className="text-[13px] font-semibold text-primary hover:underline flex items-center gap-0.5"
+                          >
+                            {item.company}
+                            <span className="material-symbols-outlined text-[12px]">open_in_new</span>
+                          </a>
+                        ) : (
+                          <span className="text-[13px] font-semibold text-on-surface">{item.company}</span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col">
+                        <span className="text-[12px] text-on-surface">{item.period_vn}</span>
+                        <span className="text-[11px] text-on-surface-variant italic">{item.period_en}</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-medium ${
+                        item.type === 'work' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300' :
+                        item.type === 'education' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                        'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300'
+                      }`}>
+                        {item.type === 'work' ? 'Work' : item.type === 'education' ? 'Education' : 'Freelance'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-center text-[12px] text-on-surface-variant">
+                      {item.order_index}
+                    </td>
+                    <td className="px-4 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
+                          onClick={() => setEditingItem(item)}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-surface-container-high text-primary transition-colors"
+                          title="Sửa / Edit"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                        <button
+                          onClick={async () => {
+                            if (confirm(`Bạn có chắc chắn muốn xóa mốc "${item.role_vn || item.role_en}" tại ${item.company}?`)) {
+                              try {
+                                await api.del('/admin/timeline', { id: item.id });
+                                await loadTimeline();
+                                window.dispatchEvent(new Event('timeline-updated'));
+                              } catch (e: any) {
+                                alert(`Lỗi khi xóa: ${e.message || e}`);
+                              }
+                            }
+                          }}
+                          className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-error transition-colors"
+                          title="Xóa / Delete"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">delete</span>
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         )}
       </div>
@@ -170,18 +229,91 @@ export const TimelineEditor: React.FC = () => {
               </div>
             </div>
 
-            <div className="space-y-4 mb-8">
+            <div className="space-y-6 mb-8 max-h-[300px] overflow-y-auto pr-2 border border-outline-variant/20 p-4 rounded-xl bg-surface-container-lowest/50">
               <div>
-                <label className="text-[11px] font-semibold text-on-surface-variant mb-1 block">Description List (VN) - Valid JSON Array</label>
-                <textarea rows={3} value={JSON.stringify(editingItem.desc_vn, null, 2)} onChange={e => {
-                  try { setEditingItem({...editingItem, desc_vn: JSON.parse(e.target.value)}); } catch { /* Ignore until valid JSON */ }
-                }} className="w-full bg-surface-container-lowest border border-outline-variant/50 text-on-surface rounded-lg px-3 py-2 text-[13px] font-mono outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none shadow-inner" />
+                <label className="text-[11px] font-bold text-on-surface-variant mb-2 block uppercase tracking-wider">Description List (VN) / Mô tả tiếng Việt</label>
+                <div className="space-y-2">
+                  {(editingItem.desc_vn || []).map((desc, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <span className="text-[13px] text-on-surface-variant shrink-0">•</span>
+                      <input
+                        type="text"
+                        value={desc}
+                        onChange={(e) => {
+                          const updated = [...(editingItem.desc_vn || [])];
+                          updated[idx] = e.target.value;
+                          setEditingItem({ ...editingItem, desc_vn: updated });
+                        }}
+                        placeholder="Mô tả công việc hoặc học tập..."
+                        className="flex-1 bg-surface-container-lowest border border-outline-variant/50 text-on-surface rounded-lg px-3 py-1.5 text-[13px] outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = (editingItem.desc_vn || []).filter((_, i) => i !== idx);
+                          setEditingItem({ ...editingItem, desc_vn: updated });
+                        }}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-error transition-colors shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...(editingItem.desc_vn || []), ''];
+                      setEditingItem({ ...editingItem, desc_vn: updated });
+                    }}
+                    className="flex items-center gap-1.5 text-primary text-[12px] font-semibold hover:text-primary-container transition-colors mt-2"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    <span>Add line / Thêm dòng mới</span>
+                  </button>
+                </div>
               </div>
-              <div>
-                <label className="text-[11px] font-semibold text-on-surface-variant mb-1 block">Description List (EN) - Valid JSON Array</label>
-                <textarea rows={3} value={JSON.stringify(editingItem.desc_en, null, 2)} onChange={e => {
-                  try { setEditingItem({...editingItem, desc_en: JSON.parse(e.target.value)}); } catch { /* Ignore until valid JSON */ }
-                }} className="w-full bg-surface-container-lowest border border-outline-variant/50 text-on-surface rounded-lg px-3 py-2 text-[13px] font-mono outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none shadow-inner" />
+
+              <div className="border-t border-outline-variant/30 pt-4">
+                <label className="text-[11px] font-bold text-on-surface-variant mb-2 block uppercase tracking-wider">Description List (EN) / Mô tả tiếng Anh</label>
+                <div className="space-y-2">
+                  {(editingItem.desc_en || []).map((desc, idx) => (
+                    <div key={idx} className="flex items-center gap-2">
+                      <span className="text-[13px] text-on-surface-variant shrink-0">•</span>
+                      <input
+                        type="text"
+                        value={desc}
+                        onChange={(e) => {
+                          const updated = [...(editingItem.desc_en || [])];
+                          updated[idx] = e.target.value;
+                          setEditingItem({ ...editingItem, desc_en: updated });
+                        }}
+                        placeholder="Description of job or study..."
+                        className="flex-1 bg-surface-container-lowest border border-outline-variant/50 text-on-surface rounded-lg px-3 py-1.5 text-[13px] outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = (editingItem.desc_en || []).filter((_, i) => i !== idx);
+                          setEditingItem({ ...editingItem, desc_en: updated });
+                        }}
+                        className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 dark:hover:bg-red-950/20 text-error transition-colors shrink-0"
+                      >
+                        <span className="material-symbols-outlined text-[18px]">delete</span>
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...(editingItem.desc_en || []), ''];
+                      setEditingItem({ ...editingItem, desc_en: updated });
+                    }}
+                    className="flex items-center gap-1.5 text-primary text-[12px] font-semibold hover:text-primary-container transition-colors mt-2"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    <span>Add line / Thêm dòng mới</span>
+                  </button>
+                </div>
               </div>
             </div>
 

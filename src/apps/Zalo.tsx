@@ -9,11 +9,20 @@ export const ZaloApp: React.FC = () => {
   const [phone, setPhone] = useState<string>('0911818016');
 
   useEffect(() => {
-    profileService.getProfile(language)
-      .then((p) => {
-        if (p && p.phone) setPhone(p.phone);
-      })
-      .catch(() => {});
+    const loadProfile = () => {
+      profileService.getProfile(language)
+        .then((p) => {
+          if (p && p.phone) setPhone(p.phone);
+        })
+        .catch(() => {});
+    };
+
+    loadProfile();
+
+    window.addEventListener('profile-updated', loadProfile);
+    return () => {
+      window.removeEventListener('profile-updated', loadProfile);
+    };
   }, [language]);
 
   // Clean phone number for URL (strip non-digits or spaces)

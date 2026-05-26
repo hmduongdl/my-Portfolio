@@ -25,24 +25,35 @@ export const AboutApp: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setIsLoading(true);
-    setError(null);
+    const loadData = () => {
+      setIsLoading(true);
+      setError(null);
 
-    Promise.all([
-      profileService.getProfile(language),
-      profileService.getTimeline(language)
-    ])
-    .then(([profileData, timelineData]) => {
-      setProfile(profileData);
-      setTimeline(timelineData);
-    })
-    .catch((err: any) => {
-      console.error("Failed to load about data:", err);
-      setError(err.message || 'Lỗi tải dữ liệu');
-    })
-    .finally(() => {
-      setIsLoading(false);
-    });
+      Promise.all([
+        profileService.getProfile(language),
+        profileService.getTimeline(language)
+      ])
+      .then(([profileData, timelineData]) => {
+        setProfile(profileData);
+        setTimeline(timelineData);
+      })
+      .catch((err: any) => {
+        console.error("Failed to load about data:", err);
+        setError(err.message || 'Lỗi tải dữ liệu');
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+    };
+
+    loadData();
+
+    window.addEventListener('profile-updated', loadData);
+    window.addEventListener('timeline-updated', loadData);
+    return () => {
+      window.removeEventListener('profile-updated', loadData);
+      window.removeEventListener('timeline-updated', loadData);
+    };
   }, [language]);
 
   if (isLoading) {

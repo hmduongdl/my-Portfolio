@@ -29,37 +29,23 @@ const THEME_COLORS = [
 
 const CATEGORIES = ['web', 'design', 'tools', 'other'];
 
-
-
 export const ProjectsEditor: React.FC = () => {
   const [projects, setProjects] = useState<Project[]>([]);
-  const [originalProjects, setOriginalProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
-  const [deletedIds, setDeletedIds] = useState<string[]>([]);
-  const [activeTabMap, setActiveTabMap] = useState<Record<string, 'vn' | 'en'>>({});
+  const [editingProject, setEditingProject] = useState<Project | null>(null);
+  const [activeDescTab, setActiveDescTab] = useState<'vn' | 'en'>('vn');
+  const [isNewProject, setIsNewProject] = useState(false);
 
   const loadProjects = async () => {
     setLoading(true);
     try {
       const data = await api.get<Project[]>('/admin/projects');
-      
-      // Parse tags as string array safely if they arrive formatted differently
       const parsedData = (data ?? []).map(p => ({
         ...p,
         tags: Array.isArray(p.tags) ? p.tags : []
       }));
-
-      setProjects(JSON.parse(JSON.stringify(parsedData)));
-      setOriginalProjects(JSON.parse(JSON.stringify(parsedData)));
-      setDeletedIds([]);
-
-      // Initialize tabs for description fields
-      const tabs: Record<string, 'vn' | 'en'> = {};
-      parsedData.forEach((p) => {
-        tabs[p.id] = 'vn';
-      });
-      setActiveTabMap(tabs);
+      setProjects(parsedData);
     } catch (e) {
       console.error(e);
     } finally {
@@ -71,14 +57,13 @@ export const ProjectsEditor: React.FC = () => {
     loadProjects();
   }, []);
 
-  const handleAddField = () => {
-    const tempId = `temp-${Date.now()}`;
+  const handleAddProject = () => {
     const newProj: Project = {
-      id: '', // Blank slug for user to fill
-      name: 'New Project',
+      id: '',
+      name: '',
       category: 'web',
       color: '#2563EB',
-      tags: ['React'],
+      tags: [],
       desc_vn: '',
       desc_en: '',
       demo_url: '',
@@ -86,105 +71,91 @@ export const ProjectsEditor: React.FC = () => {
       order_index: projects.length + 1,
       visible: true,
     };
-    
-    // Use tempId as the key in states
-    setProjects([...projects, { ...newProj, id: tempId }]);
-    setActiveTabMap(prev => ({ ...prev, [tempId]: 'vn' }));
+    setIsNewProject(true);
+    setEditingProject(newProj);
+    setActiveDescTab('vn');
   };
 
-  const handleUpdateField = (id: string, key: keyof Project, value: any) => {
-    setProjects(prev =>
-      prev.map(p => (p.id === id ? { ...p, [key]: value } : p))
-    );
+  const handleEditProject = (p: Project) => {
+    setIsNewProject(false);
+    setEditingProject({ ...p });
+    setActiveDescTab('vn');
   };
 
-  const handleDeleteField = (id: string) => {
-    if (!window.confirm('Are you sure you want to delete this project?')) return;
-    setProjects(prev => prev.filter(p => p.id !== id));
-    if (!id.startsWith('temp-')) {
-      setDeletedIds(prev => [...prev, id]);
+  const normalizeSlug = (val: string) => {
+    return val.toLowerCase().replace(/[^a-z0-9-]/g, '');
+  };
+
+  const handleSave = async () => {
+    if (!editingProject) return;
+    if (!editingProject.id || editingProject.id.trim() === '') {
+      alert('Please enter a unique ID (Slug)');
+      return;
     }
-  };
-
-  const handleDiscard = () => {
-    if (window.confirm('Discard all unsaved changes?')) {
-      loadProjects();
-    }
-  };
-
-  const handleSaveAll = async () => {
-    // Validate empty slug IDs
-    const hasEmptySlug = projects.some(p => !p.id || p.id.trim() === '');
-    if (hasEmptySlug) {
-      alert('Please fill out the unique project ID (slug) for all new projects.');
+    if (!editingProject.name || editingProject.name.trim() === '') {
+      alert('Please enter a project name');
       return;
     }
 
     setSaveStatus('saving');
     try {
-      // 1. Process deletes
-      for (const id of deletedIds) {
-        await fetch('/api/admin/projects', {
-          method: 'DELETE',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-          },
-          body: JSON.stringify({ id })
-        });
+      if (isNewProject) {
+        await api.post('/admin/projects', editingProject);
+      } else {
+        await api.put('/admin/projects', editingProject);
       }
-
-      // 2. Process inserts & updates
-      for (const p of projects) {
-        const isNew = !originalProjects.some(orig => orig.id === p.id);
-        
-        if (isNew) {
-          // If the ID was a temporary client ID, we let user rename it, but wait!
-          // We need to verify if the user left it as "temp-xxx"
-          if (p.id.startsWith('temp-')) {
-            alert('Please change the temporary slug ID to a friendly name (e.g. my-app).');
-            setSaveStatus('error');
-            return;
-          }
-          await api.post('/admin/projects', p);
-        } else {
-          await api.put('/admin/projects', p);
-        }
-      }
-
       setSaveStatus('ok');
+      setEditingProject(null);
       await loadProjects();
+      window.dispatchEvent(new Event('projects-updated'));
       setTimeout(() => setSaveStatus('idle'), 2000);
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
       setSaveStatus('error');
+      alert(`Save failed: ${String(err)}`);
       setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
 
-  const toggleTab = (id: string, tab: 'vn' | 'en') => {
-    setActiveTabMap(prev => ({ ...prev, [id]: tab }));
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this project?')) return;
+    try {
+      await fetch('/api/admin/projects', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
+        },
+        body: JSON.stringify({ id })
+      });
+      setEditingProject(null);
+      await loadProjects();
+      window.dispatchEvent(new Event('projects-updated'));
+    } catch (e) {
+      console.error(e);
+      alert('Delete failed');
+    }
   };
 
   return (
-    <div className="p-window-padding space-y-6">
+    <div className="p-window-padding space-y-6 relative">
       
-      {/* Top Header Actions */}
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-[19px] font-bold text-on-surface">Projects Portfolio</h2>
           <p className="text-[13px] text-on-surface-variant">Manage your digital projects, technology stacks, and localizations.</p>
         </div>
         <button
-          onClick={handleAddField}
-          className="bg-primary hover:bg-primary-container text-on-primary px-4 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+          onClick={handleAddProject}
+          className="bg-[#30D158] hover:bg-[#28C840] text-white px-4 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
         >
           <span className="material-symbols-outlined text-[16px]">add</span>
           Add Project
         </button>
       </div>
 
-      {/* Main List */}
+      {/* Grid of Mini Square Cards */}
       {loading ? (
         <div className="flex items-center justify-center py-12 gap-2 text-on-surface-variant text-[13px]">
           <div className="w-4 h-4 border-2 border-outline-variant border-t-primary rounded-full animate-spin" />
@@ -195,264 +166,339 @@ export const ProjectsEditor: React.FC = () => {
           No projects found. Click "Add Project" to get started.
         </div>
       ) : (
-        <div className="space-y-[32px] pb-24">
-          {projects.map((p) => {
-            const isTempId = p.id.startsWith('temp-');
-            const tab = activeTabMap[p.id] ?? 'vn';
-
-            return (
-              <section key={p.id} className="space-y-3">
-                <div className="flex items-center justify-between px-1">
-                  <h3 className="text-section-header font-section-header text-on-surface-variant uppercase">
-                    {p.name || 'NEW PROJECT'}
-                  </h3>
-                  <button
-                    onClick={() => handleDeleteField(p.id)}
-                    className="text-[11px] text-error hover:underline flex items-center gap-0.5"
-                  >
-                    <span className="material-symbols-outlined text-[14px]">delete</span>
-                    Delete
-                  </button>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 pb-20">
+          {projects.map((p) => (
+            <div 
+              key={p.id} 
+              onClick={() => handleEditProject(p)}
+              className="aspect-square rounded-xl p-4 flex flex-col justify-between cursor-pointer border hover:shadow-md transition-all scale-100 active:scale-95 group relative overflow-hidden bg-surface-container-lowest"
+              style={{ 
+                borderColor: `${p.color}30`, 
+                background: `linear-gradient(135deg, ${p.color}08 0%, ${p.color}03 100%)` 
+              }}
+            >
+              {/* Category & Slug */}
+              <div className="flex justify-between items-start gap-1">
+                <span className="text-[9px] font-bold uppercase px-2 py-0.5 rounded-full shrink-0" style={{ backgroundColor: `${p.color}15`, color: p.color }}>
+                  {p.category}
+                </span>
+                <span className="text-[9px] font-mono text-on-surface-variant/60 truncate max-w-[80px]" title={p.id}>{p.id}</span>
+              </div>
+              
+              {/* Info */}
+              <div className="space-y-1">
+                <h4 className="font-bold text-[13px] leading-tight text-on-surface group-hover:text-primary transition-colors line-clamp-2">
+                  {p.name || 'Untitled'}
+                </h4>
+                <div className="flex flex-wrap gap-1">
+                  {(p.tags || []).slice(0, 3).map((t, idx) => (
+                    <span key={idx} className="text-[9px] font-semibold text-on-surface-variant/75">#{t}</span>
+                  ))}
                 </div>
-
-                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden divide-y divide-outline-variant/30">
-                  
-                  {/* Row 1: Name, Slug (ID) & Tags Pills */}
-                  <div className="p-[12px] flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-3">
-                      <div>
-                        <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-1">Project Name</div>
-                        <input
-                          type="text"
-                          value={p.name}
-                          onChange={e => handleUpdateField(p.id, 'name', e.target.value)}
-                          className="w-full bg-transparent border-none p-0 focus:ring-0 font-bold text-on-surface text-[14px]"
-                          placeholder="Project name"
-                        />
-                      </div>
-                      <div>
-                        <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-1">Unique ID (Slug)</div>
-                        {isTempId ? (
-                          <input
-                            type="text"
-                            value={p.id.startsWith('temp-') ? '' : p.id}
-                            onChange={e => handleUpdateField(p.id, 'id', e.target.value)}
-                            className="w-full bg-transparent border-none p-0 focus:ring-0 font-mono text-[13px] text-primary"
-                            placeholder="e.g. awesome-tool"
-                          />
-                        ) : (
-                          <span className="text-[13px] font-mono text-on-surface-variant block mt-0.5 select-all">{p.id}</span>
-                        )}
-                      </div>
-                    </div>
-                    
-                    {/* Tags Pills Preview */}
-                    <div className="flex flex-wrap gap-1.5 justify-end md:max-w-[240px]">
-                      {p.tags.map((t, idx) => (
-                        <span key={idx} className="px-2 py-0.5 bg-primary/10 text-primary text-[10px] font-bold rounded-full uppercase">
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Row 2: Category & Tags Edit */}
-                  <div className="p-[12px] grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-1">Category</div>
-                      <select
-                        value={p.category}
-                        onChange={e => handleUpdateField(p.id, 'category', e.target.value)}
-                        className="bg-transparent border-none p-0 text-[13px] text-on-surface focus:ring-0 outline-none w-full cursor-pointer"
-                      >
-                        {CATEGORIES.map(c => (
-                          <option key={c} value={c}>{c}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-1">Tags (Comma separated)</div>
-                      <input
-                        type="text"
-                        value={p.tags.join(', ')}
-                        onChange={e => handleUpdateField(p.id, 'tags', e.target.value.split(',').map(s => s.trim()).filter(Boolean))}
-                        className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] text-on-surface placeholder:text-on-surface-variant/40"
-                        placeholder="React, TypeScript, CSS"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 3: Demo & GitHub URLs */}
-                  <div className="p-[12px] grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-1">Demo URL</div>
-                      <input
-                        type="text"
-                        value={p.demo_url || ''}
-                        onChange={e => handleUpdateField(p.id, 'demo_url', e.target.value || null)}
-                        className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] text-primary placeholder:text-on-surface-variant/40"
-                        placeholder="https://..."
-                      />
-                    </div>
-                    <div>
-                      <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider mb-1">GitHub URL</div>
-                      <input
-                        type="text"
-                        value={p.github_url || ''}
-                        onChange={e => handleUpdateField(p.id, 'github_url', e.target.value || null)}
-                        className="w-full bg-transparent border-none p-0 focus:ring-0 text-[13px] text-primary placeholder:text-on-surface-variant/40"
-                        placeholder="https://github.com/..."
-                      />
-                    </div>
-                  </div>
-
-                  {/* Row 4: Descriptions (Multilingual Tabs) */}
-                  <div className="p-[12px]">
-                    <div className="flex items-center justify-between mb-2">
-                      <div className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider">Description</div>
-                      <div className="bg-surface-container-high p-0.5 rounded-lg flex gap-0.5">
-                        <button
-                          onClick={() => toggleTab(p.id, 'vn')}
-                          className={`px-3 py-1 text-[11px] font-semibold rounded-[6px] transition-all ${
-                            tab === 'vn'
-                              ? 'bg-surface-container-lowest shadow-sm text-on-surface'
-                              : 'text-on-surface-variant/60 hover:text-on-surface-variant'
-                          }`}
-                        >
-                          VN
-                        </button>
-                        <button
-                          onClick={() => toggleTab(p.id, 'en')}
-                          className={`px-3 py-1 text-[11px] font-semibold rounded-[6px] transition-all ${
-                            tab === 'en'
-                              ? 'bg-surface-container-lowest shadow-sm text-on-surface'
-                              : 'text-on-surface-variant/60 hover:text-on-surface-variant'
-                          }`}
-                        >
-                          EN
-                        </button>
-                      </div>
-                    </div>
-
-                    {tab === 'vn' ? (
-                      <textarea
-                        value={p.desc_vn}
-                        onChange={e => handleUpdateField(p.id, 'desc_vn', e.target.value)}
-                        className="w-full h-16 bg-transparent border-none p-0 focus:ring-0 text-[13px] text-on-surface resize-none placeholder:text-on-surface-variant/40"
-                        placeholder="Mô tả dự án bằng tiếng Việt..."
-                      />
-                    ) : (
-                      <textarea
-                        value={p.desc_en}
-                        onChange={e => handleUpdateField(p.id, 'desc_en', e.target.value)}
-                        className="w-full h-16 bg-transparent border-none p-0 focus:ring-0 text-[13px] text-on-surface resize-none placeholder:text-on-surface-variant/40"
-                        placeholder="Project description in English..."
-                      />
-                    )}
-                  </div>
-
-                  {/* Row 5: Theme Color & Live Status & Order Index */}
-                  <div className="p-[12px] flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="flex items-center gap-3">
-                      <span className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider">Theme Color</span>
-                      <div className="flex items-center gap-2">
-                        {THEME_COLORS.map(c => {
-                          const isActive = p.color === c;
-                          return (
-                            <button
-                              key={c}
-                              onClick={() => handleUpdateField(p.id, 'color', c)}
-                              className={`w-6 h-6 rounded-full border-2 cursor-pointer transition-transform hover:scale-110 ${
-                                isActive ? 'border-primary ring-1 ring-primary/30 scale-105' : 'border-surface-container-lowest'
-                              }`}
-                              style={{ backgroundColor: c }}
-                            />
-                          );
-                        })}
-                        
-                        {/* Manual Color Picker Input */}
-                        <div className="flex items-center gap-1 border-l border-outline-variant/30 pl-2">
-                          <input
-                            type="color"
-                            value={p.color}
-                            onChange={e => handleUpdateField(p.id, 'color', e.target.value)}
-                            className="w-5 h-5 rounded border border-outline-variant cursor-pointer bg-transparent"
-                          />
-                          <input
-                            type="text"
-                            value={p.color}
-                            onChange={e => handleUpdateField(p.id, 'color', e.target.value)}
-                            className="w-16 bg-transparent border-none p-0 text-[11px] text-on-surface-variant font-mono focus:ring-0"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-6">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider">Order Index</span>
-                        <input
-                          type="number"
-                          value={p.order_index}
-                          onChange={e => handleUpdateField(p.id, 'order_index', Number(e.target.value))}
-                          className="w-12 bg-transparent border-none p-0 focus:ring-0 text-[13px] text-on-surface-variant text-center"
-                        />
-                      </div>
-
-                      <div className="flex items-center gap-3">
-                        <span className="text-[11px] font-bold text-on-surface-variant/50 uppercase tracking-wider">Live Status</span>
-                        <button
-                          type="button"
-                          onClick={() => handleUpdateField(p.id, 'visible', !p.visible)}
-                          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
-                            p.visible ? 'bg-[#30D158]' : 'bg-[#E3E3E3] dark:bg-surface-container-highest'
-                          }`}
-                        >
-                          <span
-                            className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
-                              p.visible ? 'translate-x-4' : 'translate-x-0'
-                            }`}
-                          />
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-
-                </div>
-              </section>
-            );
-          })}
+              </div>
+              
+              {/* Top Accent Strip */}
+              <div className="absolute top-0 left-0 w-full h-1" style={{ backgroundColor: p.color }} />
+            </div>
+          ))}
         </div>
       )}
 
-      {/* Footer Batch Save Controls */}
-      {!loading && projects.length > 0 && (
-        <footer className="absolute bottom-0 left-0 right-0 h-16 bg-surface/80 backdrop-blur-md flex items-center justify-end px-window-padding gap-3 border-t border-outline-variant/60 z-35">
-          <button
-            onClick={handleDiscard}
-            className="px-5 py-1.5 rounded-lg text-[13px] font-semibold text-on-surface-variant border border-outline-variant bg-surface-container-lowest hover:bg-surface-container-high transition-colors"
-          >
-            Discard
-          </button>
-          <button
-            onClick={handleSaveAll}
-            disabled={saveStatus === 'saving'}
-            className="px-6 py-1.5 rounded-lg text-[13px] font-semibold text-on-primary bg-primary shadow-md shadow-primary/20 hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-2"
-          >
-            {saveStatus === 'saving' && (
-              <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-            )}
-            {saveStatus === 'saving' ? 'Saving...' : 
-             saveStatus === 'ok' ? '✓ Saved' : 
-             saveStatus === 'error' ? '✗ Error' : 'Save Changes'}
-          </button>
-        </footer>
+      {/* Editor Modal */}
+      {editingProject && (
+        <div className="fixed inset-0 bg-on-surface/25 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fade-in">
+          <div className="bg-surface border border-outline-variant rounded-xl w-full max-w-[700px] h-[640px] shadow-[0_20px_50px_rgba(0,0,0,0.2),_0_0_0_1px_rgba(0,0,0,0.05)] flex flex-col relative overflow-hidden">
+            
+            {/* Modal Titlebar */}
+            <header className="flex justify-between items-center w-full px-6 h-12 bg-surface border-b border-outline-variant/60 shrink-0">
+              <h3 className="font-bold text-[15px] text-on-surface">
+                {isNewProject ? 'Add New Project' : 'Edit Project Details'}
+              </h3>
+              <button 
+                onClick={() => setEditingProject(null)} 
+                className="w-6 h-6 flex items-center justify-center rounded hover:bg-surface-container-high transition-colors"
+              >
+                <span className="material-symbols-outlined text-[18px] text-on-surface-variant">close</span>
+              </button>
+            </header>
+
+            {/* Scrollable Modal Content */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 pb-24">
+              
+              {/* 1. Basic Information */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Basic Info / Thông tin cơ bản</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Project Name / Tên dự án *</label>
+                      <input 
+                        type="text"
+                        value={editingProject.name}
+                        onChange={e => setEditingProject({ ...editingProject, name: e.target.value })}
+                        placeholder="e.g. Song Phương macOS Portfolio"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Slug ID / Mã ID *</label>
+                      <input 
+                        type="text"
+                        value={editingProject.id}
+                        disabled={!isNewProject}
+                        onChange={e => setEditingProject({ ...editingProject, id: normalizeSlug(e.target.value) })}
+                        placeholder="e.g. macos-portfolio"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface font-mono outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all disabled:opacity-60"
+                      />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Category / Danh mục</label>
+                      <div className="relative flex items-center">
+                        <select 
+                          value={editingProject.category}
+                          onChange={e => setEditingProject({ ...editingProject, category: e.target.value })}
+                          className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all appearance-none cursor-pointer"
+                        >
+                          {CATEGORIES.map(c => <option key={c} value={c}>{c.toUpperCase()}</option>)}
+                        </select>
+                        <span className="material-symbols-outlined text-outline-variant text-[18px] absolute right-2 pointer-events-none">unfold_more</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Tags (Technology, comma separated)</label>
+                      <input 
+                        type="text"
+                        value={editingProject.tags.join(', ')}
+                        onChange={e => setEditingProject({ ...editingProject, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) })}
+                        placeholder="React, TypeScript, Zustand"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 2. Style & Ordering */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Style & Ordering / Giao diện & Sắp xếp</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Theme Color / Màu sắc hiển thị</label>
+                      <div className="flex gap-2">
+                        {THEME_COLORS.map(c => (
+                          <button
+                            key={c}
+                            type="button"
+                            onClick={() => setEditingProject({ ...editingProject, color: c })}
+                            className={`w-6 h-6 rounded-full border-2 transition-transform hover:scale-110 shrink-0 ${
+                              editingProject.color === c ? 'border-primary scale-105' : 'border-transparent'
+                            }`}
+                            style={{ backgroundColor: c }}
+                          />
+                        ))}
+                        <input 
+                          type="color"
+                          value={editingProject.color}
+                          onChange={e => setEditingProject({ ...editingProject, color: e.target.value })}
+                          className="w-8 h-6 rounded cursor-pointer bg-transparent border-none shrink-0"
+                        />
+                        <input 
+                          type="text"
+                          value={editingProject.color}
+                          onChange={e => setEditingProject({ ...editingProject, color: e.target.value })}
+                          className="flex-1 bg-surface-container-low border border-outline-variant/50 rounded-lg px-2 text-[12px] font-mono outline-none text-on-surface h-6"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Order Index / Thứ tự</label>
+                      <input 
+                        type="number"
+                        value={editingProject.order_index}
+                        onChange={e => setEditingProject({ ...editingProject, order_index: Number(e.target.value) || 0 })}
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-1.5 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 3. Description (multilingual tabs) */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between px-1">
+                  <h4 className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider">Description / Mô tả chi tiết</h4>
+                  <div className="bg-surface-container-low p-0.5 rounded-lg flex gap-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setActiveDescTab('vn')}
+                      className={`px-3 py-0.5 text-[11px] font-semibold rounded-[6px] transition-all ${
+                        activeDescTab === 'vn'
+                          ? 'bg-surface shadow-sm text-on-surface'
+                          : 'text-on-surface-variant/60 hover:text-on-surface-variant'
+                      }`}
+                    >
+                      VN
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveDescTab('en')}
+                      className={`px-3 py-0.5 text-[11px] font-semibold rounded-[6px] transition-all ${
+                        activeDescTab === 'en'
+                          ? 'bg-surface shadow-sm text-on-surface'
+                          : 'text-on-surface-variant/60 hover:text-on-surface-variant'
+                      }`}
+                    >
+                      EN
+                    </button>
+                  </div>
+                </div>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  {activeDescTab === 'vn' ? (
+                    <textarea 
+                      value={editingProject.desc_vn}
+                      onChange={e => setEditingProject({ ...editingProject, desc_vn: e.target.value })}
+                      placeholder="Mô tả dự án chi tiết bằng tiếng Việt..."
+                      rows={4}
+                      className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2.5 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none"
+                    />
+                  ) : (
+                    <textarea 
+                      value={editingProject.desc_en}
+                      onChange={e => setEditingProject({ ...editingProject, desc_en: e.target.value })}
+                      placeholder="Detail project description in English..."
+                      rows={4}
+                      className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2.5 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all resize-none"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* 4. Links */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Links / Liên kết</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Demo Link / Đường dẫn Demo</label>
+                      <input 
+                        type="text"
+                        value={editingProject.demo_url ?? ''}
+                        onChange={e => setEditingProject({ ...editingProject, demo_url: e.target.value || null })}
+                        placeholder="https://..."
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">GitHub Link / Mã nguồn</label>
+                      <input 
+                        type="text"
+                        value={editingProject.github_url ?? ''}
+                        onChange={e => setEditingProject({ ...editingProject, github_url: e.target.value || null })}
+                        placeholder="https://github.com/..."
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* 5. Visibility Switch */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Status / Trạng thái hiển thị</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4 flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-[13px] font-semibold text-on-surface">Visible on Homepage / Hiển thị trên portfolio</span>
+                    <span className="text-[11px] text-on-surface-variant">Toggle whether this project is displayed to visitors.</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setEditingProject({ ...editingProject, visible: !editingProject.visible })}
+                    className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out outline-none ${
+                      editingProject.visible ? 'bg-[#30D158]' : 'bg-[#E3E3E3] dark:bg-surface-container-highest'
+                    }`}
+                  >
+                    <span
+                      className={`pointer-events-none inline-block h-4 w-4 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                        editingProject.visible ? 'translate-x-4' : 'translate-x-0'
+                      }`}
+                    />
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Modal Sticky Footer Actions */}
+            <footer className="absolute bottom-0 right-0 w-full h-16 bg-surface/95 backdrop-blur-md border-t border-outline-variant/60 px-6 flex items-center justify-between z-30">
+              <div>
+                {!isNewProject && (
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(editingProject.id)}
+                    className="px-4 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 font-semibold text-[13px] rounded-lg transition-colors border border-red-200/50 flex items-center gap-1.5"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                    Delete
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-3">
+                <button 
+                  onClick={() => setEditingProject(null)} 
+                  className="px-5 py-1.5 font-semibold text-[13px] text-on-surface-variant hover:bg-surface-container-high rounded-md transition-colors border border-outline-variant/50 bg-surface-container-lowest"
+                >
+                  Cancel
+                </button>
+                <button 
+                  onClick={handleSave}
+                  disabled={saveStatus === 'saving'}
+                  className="px-5 py-1.5 font-bold text-[13px] text-on-primary bg-primary hover:bg-primary-container active:scale-95 rounded-md shadow-md shadow-primary/20 transition-all disabled:opacity-50 flex items-center gap-1.5"
+                >
+                  {saveStatus === 'saving' && (
+                    <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  )}
+                  {saveStatus === 'saving' ? 'Saving...' : 
+                   saveStatus === 'ok' ? '✓ Saved' : 
+                   saveStatus === 'error' ? '✗ Error' : 'Save Changes'}
+                </button>
+              </div>
+            </footer>
+
+          </div>
+        </div>
       )}
 
-      {/* CSS Styles */}
+      {/* Styles */}
       <style>{`
-        .z-35 {
-          z-index: 35;
+        .p-window-padding {
+          padding: 24px;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(0,0,0,0.1);
+          border-radius: 10px;
+        }
+        .animate-fade-in {
+          animation: fadeIn 0.2s ease-out forwards;
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
         }
       `}</style>
       

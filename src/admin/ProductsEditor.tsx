@@ -53,6 +53,7 @@ export const ProductsEditor: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
   const [editingProduct, setEditingProduct] = useState<Product | Omit<Product, 'id'> | null>(null);
   const [status, setStatus] = useState<ActionStatus>('idle');
   const [actionMessage, setActionMessage] = useState('');
@@ -104,6 +105,7 @@ export const ProductsEditor: React.FC = () => {
       showStatus('saved', '✓ Saved successfully');
       setEditingProduct(null);
       await loadProducts();
+      window.dispatchEvent(new Event('products-updated'));
     } catch (err) {
       console.error(err);
       showStatus('error', `✗ Failed: ${String(err)}`);
@@ -124,6 +126,7 @@ export const ProductsEditor: React.FC = () => {
       });
       showStatus('saved', '✓ Deleted successfully');
       await loadProducts();
+      window.dispatchEvent(new Event('products-updated'));
     } catch (err) {
       console.error(err);
       showStatus('error', `✗ Delete failed: ${String(err)}`);
@@ -141,6 +144,7 @@ export const ProductsEditor: React.FC = () => {
         ...p,
         visible: updatedVisible
       });
+      window.dispatchEvent(new Event('products-updated'));
     } catch (err) {
       console.error(err);
       // Revert on failure
@@ -149,12 +153,15 @@ export const ProductsEditor: React.FC = () => {
     }
   };
 
-  // Filter products by search query
+  // Filter products by search query and category
   const filteredProducts = products.filter(p => {
     const query = searchQuery.toLowerCase();
     const nameMatch = p.name.toLowerCase().includes(query) || (p.override_name && p.override_name.toLowerCase().includes(query));
     const catMatch = p.category.toLowerCase().includes(query);
-    return nameMatch || catMatch;
+    const textMatch = nameMatch || catMatch;
+    
+    const categoryMatch = selectedCategory === 'All' || p.category === selectedCategory;
+    return textMatch && categoryMatch;
   });
 
   const getResolvedPrice = (p: Product) => {
@@ -169,32 +176,55 @@ export const ProductsEditor: React.FC = () => {
     <div className="p-window-padding space-y-6">
       
       {/* Header Actions Area */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-        <div>
-          <h2 className="text-[19px] font-bold text-on-surface">Inventory</h2>
-          <p className="text-[13px] text-on-surface-variant">Manage your catalog of high-performance tech products.</p>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          {/* Search bar */}
-          <div className="relative w-64 group">
-            <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50 group-focus-within:text-primary transition-colors text-[18px]">search</span>
-            <input
-              type="text"
-              placeholder="Search products..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-surface-container-low border border-outline-variant/60 rounded-md py-1 pl-9 pr-3 text-[13px] text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
-            />
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <h2 className="text-[19px] font-bold text-on-surface">Quản lý sản phẩm / Product Inventory</h2>
+            <p className="text-[13px] text-on-surface-variant">Quản lý danh mục sản phẩm cấu hình cao của Song Phương.</p>
           </div>
+          
+          <div className="flex items-center gap-3">
+            {/* Search bar */}
+            <div className="relative w-64 group">
+              <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant opacity-50 group-focus-within:text-primary transition-colors text-[18px]">search</span>
+              <input
+                type="text"
+                placeholder="Tìm kiếm sản phẩm / Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-surface-container-low border border-outline-variant/60 rounded-md py-1.5 pl-9 pr-3 text-[13px] text-on-surface focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-all"
+              />
+            </div>
 
-          <button
-            onClick={() => setEditingProduct({ ...EMPTY_FORM, order_index: products.length })}
-            className="bg-primary hover:bg-primary-container text-on-primary px-4 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-95 shrink-0"
-          >
-            <span className="material-symbols-outlined text-[16px]">add</span>
-            Add Product
-          </button>
+            <button
+              onClick={() => setEditingProduct({ ...EMPTY_FORM, order_index: products.length })}
+              className="bg-[#30D158] hover:bg-[#28C840] text-white px-4 py-1.5 rounded-lg text-[13px] font-semibold flex items-center gap-1.5 shadow-sm hover:shadow-md transition-all active:scale-95 shrink-0"
+            >
+              <span className="material-symbols-outlined text-[16px]">add</span>
+              Thêm sản phẩm
+            </button>
+          </div>
+        </div>
+
+        {/* Category Filter Switch/Pill Bar */}
+        <div className="flex items-center gap-1.5 overflow-x-auto py-1.5 no-scrollbar border-b border-outline-variant/20 pb-3">
+          {['All', ...CATEGORIES].map((cat) => {
+            const isActive = selectedCategory === cat;
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-3 py-1 rounded-full text-[12px] font-semibold transition-all shrink-0 select-none ${
+                  isActive 
+                    ? 'bg-primary text-on-primary shadow-sm' 
+                    : 'bg-surface-container-low text-on-surface-variant hover:bg-surface-container-high'
+                }`}
+              >
+                {cat === 'All' ? 'Tất cả / All' : cat}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -203,24 +233,25 @@ export const ProductsEditor: React.FC = () => {
         {loading ? (
           <div className="flex items-center justify-center py-12 gap-2.5 text-on-surface-variant text-[13px]">
             <div className="w-4 h-4 border-2 border-outline-variant border-t-primary rounded-full animate-spin" />
-            Loading products catalog...
+            Đang tải danh sách sản phẩm...
           </div>
         ) : filteredProducts.length === 0 ? (
           <div className="py-12 text-center text-on-surface-variant text-[13px]">
-            {searchQuery ? 'No products matches your search.' : 'No products found. Click "Add Product" to get started.'}
+            {searchQuery || selectedCategory !== 'All' ? 'Không tìm thấy sản phẩm phù hợp.' : 'Không có sản phẩm nào. Nhấp "Thêm sản phẩm" để bắt đầu.'}
           </div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="bg-surface-container border-b border-outline-variant">
-                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant w-[80px]">Image</th>
-                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant">Name</th>
-                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant">Category</th>
-                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant">Price</th>
-                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant">Status</th>
-                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant w-[100px] text-center">Visible</th>
-                  <th className="px-6 py-3 font-section-header text-section-header text-on-surface-variant text-right w-[120px]">Actions</th>
+                  <th className="px-6 py-3 font-semibold text-[12px] text-on-surface-variant w-[80px]">Ảnh / Image</th>
+                  <th className="px-6 py-3 font-semibold text-[12px] text-on-surface-variant">Tên / Name</th>
+                  <th className="px-6 py-3 font-semibold text-[12px] text-on-surface-variant">Danh mục / Category</th>
+                  <th className="px-6 py-3 font-semibold text-[12px] text-on-surface-variant">Giá / Price</th>
+                  <th className="px-6 py-3 font-semibold text-[12px] text-on-surface-variant">Trạng thái / Status</th>
+                  <th className="px-6 py-3 font-semibold text-[12px] text-on-surface-variant w-[90px] text-center">Sắp xếp</th>
+                  <th className="px-6 py-3 font-semibold text-[12px] text-on-surface-variant w-[100px] text-center">Hiển thị</th>
+                  <th className="px-6 py-3 font-semibold text-[12px] text-on-surface-variant text-right w-[120px]">Hành động</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-outline-variant/30">
@@ -232,9 +263,9 @@ export const ProductsEditor: React.FC = () => {
                   return (
                     <tr key={p.id} className="hover:bg-surface-container-low/50 transition-colors group">
                       <td className="px-6 py-3">
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-outline-variant/50 bg-white p-1 flex items-center justify-center shrink-0">
+                        <div className="w-10 h-10 rounded-full overflow-hidden border border-outline-variant/50 bg-white p-1 flex items-center justify-center shrink-0">
                           {resolvedImage ? (
-                            <img className="w-full h-full object-contain" src={resolvedImage} alt={p.name} />
+                            <img className="w-full h-full object-contain rounded-full" src={resolvedImage} alt={p.name} />
                           ) : (
                             <span className="text-[20px]">{p.glyph || '📦'}</span>
                           )}
@@ -282,6 +313,11 @@ export const ProductsEditor: React.FC = () => {
                         ) : (
                           <span className="text-on-surface-variant/40">—</span>
                         )}
+                      </td>
+                      <td className="px-6 py-3 text-center">
+                        <span className="font-mono text-[12px] font-semibold text-on-surface-variant bg-surface-container-high/60 px-2 py-0.5 rounded">
+                          {p.order_index}
+                        </span>
                       </td>
                       <td className="px-6 py-3 text-center">
                         <button
@@ -360,258 +396,250 @@ export const ProductsEditor: React.FC = () => {
             {/* Scrollable Modal Content */}
             <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6 pb-24">
               
-              {/* Basic Information Section */}
-              <div className="space-y-2">
-                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Basic Information</h4>
-                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm divide-y divide-outline-variant/30 overflow-hidden">
-                  
-                  {/* Name */}
-                  <div className="flex items-center px-4 py-3 gap-4">
-                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Product Name *</label>
-                    <input 
-                      type="text"
-                      value={editingProduct.name}
-                      onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                      placeholder="e.g. SP PC INTEL i5 12400F"
-                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
-                    />
-                  </div>
+              {/* Nhóm thông tin cơ bản */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Basic Information / Thông tin cơ bản</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2 flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Product Name / Tên sản phẩm *</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.name}
+                        onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
+                        placeholder="e.g. SP PC INTEL i5 12400F"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
 
-                  {/* Category */}
-                  <div className="flex items-center px-4 py-3 gap-4">
-                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Category *</label>
-                    <select 
-                      value={editingProduct.category}
-                      onChange={e => setEditingProduct({ ...editingProduct, category: e.target.value })}
-                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 cursor-pointer appearance-none outline-none"
-                    >
-                      {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </select>
-                    <span className="material-symbols-outlined text-outline-variant text-[18px] pointer-events-none pr-1">unfold_more</span>
-                  </div>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Category / Danh mục *</label>
+                      <div className="relative flex items-center">
+                        <select 
+                          value={editingProduct.category}
+                          onChange={e => setEditingProduct({ ...editingProduct, category: e.target.value })}
+                          className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all appearance-none cursor-pointer"
+                        >
+                          {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                        </select>
+                        <span className="material-symbols-outlined text-outline-variant text-[18px] absolute right-2 pointer-events-none">unfold_more</span>
+                      </div>
+                    </div>
 
-                  {/* Price & Old Price */}
-                  <div className="flex divide-x divide-outline-variant/30">
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Base Price</label>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Base Price / Giá bán</label>
                       <input 
                         type="text"
                         value={editingProduct.price ?? ''}
                         onChange={e => setEditingProduct({ ...editingProduct, price: e.target.value || null })}
                         placeholder="e.g. 15.390.000"
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Old Price</label>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Old Price / Giá gốc</label>
                       <input 
                         type="text"
                         value={editingProduct.old_price ?? ''}
                         onChange={e => setEditingProduct({ ...editingProduct, old_price: e.target.value || null })}
                         placeholder="e.g. 16.399.000"
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
-                  </div>
 
-                  {/* Discount & Status */}
-                  <div className="flex divide-x divide-outline-variant/30">
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Discount (%)</label>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Discount / Giảm giá (%)</label>
                       <input 
                         type="number"
                         value={editingProduct.discount ?? ''}
                         onChange={e => setEditingProduct({ ...editingProduct, discount: e.target.value ? Number(e.target.value) : null })}
                         placeholder="e.g. 6"
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
-                      />
-                    </div>
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Status</label>
-                      <select 
-                        value={editingProduct.status ?? ''}
-                        onChange={e => setEditingProduct({ ...editingProduct, status: e.target.value || null })}
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 cursor-pointer appearance-none outline-none"
-                      >
-                        {STATUSES.map(s => <option key={s} value={s}>{s || '— None —'}</option>)}
-                      </select>
-                      <span className="material-symbols-outlined text-outline-variant text-[18px] pointer-events-none pr-1">unfold_more</span>
-                    </div>
-                  </div>
-
-                  {/* Tag & Glyph */}
-                  <div className="flex divide-x divide-outline-variant/30">
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Tag</label>
-                      <input 
-                        type="text"
-                        value={editingProduct.tag ?? ''}
-                        onChange={e => setEditingProduct({ ...editingProduct, tag: e.target.value || null })}
-                        placeholder="e.g. Sales"
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
-                      />
-                    </div>
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Glyph Icon</label>
-                      <input 
-                        type="text"
-                        value={editingProduct.glyph}
-                        onChange={e => setEditingProduct({ ...editingProduct, glyph: e.target.value })}
-                        placeholder="e.g. 🖥"
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 outline-none"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
                   </div>
+                </div>
+              </div>
 
-                  {/* Accent Color & Order Index */}
-                  <div className="flex divide-x divide-outline-variant/30">
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Accent Color</label>
-                      <div className="flex items-center gap-2 flex-1">
+              {/* Nhóm trang trí */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Decoration & Ordering / Trang trí & Sắp xếp</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Accent Color / Màu chủ đạo</label>
+                      <div className="flex gap-2">
                         <input 
                           type="color"
                           value={editingProduct.color}
                           onChange={e => setEditingProduct({ ...editingProduct, color: e.target.value })}
-                          className="w-6 h-6 rounded border border-outline-variant/40 overflow-hidden cursor-pointer shrink-0 bg-transparent"
+                          className="w-10 h-[38px] rounded-lg border border-outline-variant/50 cursor-pointer bg-transparent shrink-0"
                         />
                         <input 
                           type="text"
                           value={editingProduct.color}
                           onChange={e => setEditingProduct({ ...editingProduct, color: e.target.value })}
-                          className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 font-mono outline-none"
+                          className="flex-1 bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface font-mono outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                         />
                       </div>
                     </div>
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Order Index</label>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Glyph Icon / Emoji</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.glyph}
+                        onChange={e => setEditingProduct({ ...editingProduct, glyph: e.target.value })}
+                        placeholder="e.g. 🖥"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Status / Trạng thái</label>
+                      <div className="relative flex items-center">
+                        <select 
+                          value={editingProduct.status ?? ''}
+                          onChange={e => setEditingProduct({ ...editingProduct, status: e.target.value || null })}
+                          className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all appearance-none cursor-pointer"
+                        >
+                          {STATUSES.map(s => <option key={s} value={s}>{s || '— None —'}</option>)}
+                        </select>
+                        <span className="material-symbols-outlined text-outline-variant text-[18px] absolute right-2 pointer-events-none">unfold_more</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Order Index / Thứ tự</label>
                       <input 
                         type="number"
                         value={editingProduct.order_index}
                         onChange={e => setEditingProduct({ ...editingProduct, order_index: Number(e.target.value) || 0 })}
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 outline-none"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
                   </div>
-
-                  {/* Link */}
-                  <div className="flex items-center px-4 py-3 gap-4">
-                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Product Link</label>
-                    <input 
-                      type="text"
-                      value={editingProduct.link ?? ''}
-                      onChange={e => setEditingProduct({ ...editingProduct, link: e.target.value || null })}
-                      placeholder="e.g. https://songphuong.vn/product/..."
-                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
-                    />
-                  </div>
-
                 </div>
               </div>
 
-              {/* Product Visuals */}
-              <div className="space-y-2">
-                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Product Visuals</h4>
-                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm divide-y divide-outline-variant/30 overflow-hidden">
-                  <div className="flex items-center px-4 py-3 gap-4">
-                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Image URL</label>
-                    <input 
-                      type="text"
-                      value={editingProduct.image_url ?? ''}
-                      onChange={e => setEditingProduct({ ...editingProduct, image_url: e.target.value || null })}
-                      placeholder="e.g. https://songphuong.vn/Content/uploads/..."
-                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none font-mono"
-                    />
-                  </div>
-                  {editingProduct.image_url && (
-                    <div className="p-4 flex justify-center bg-surface-container-low/30">
-                      <img src={editingProduct.image_url} alt="Base Preview" className="max-h-24 object-contain rounded-lg border border-outline-variant/40 bg-white p-1" />
+              {/* Nhóm liên kết */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Links & Media / Liên kết & Hình ảnh</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="grid grid-cols-1 gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Image URL / URL Ảnh sản phẩm</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.image_url ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, image_url: e.target.value || null })}
+                        placeholder="e.g. https://songphuong.vn/Content/uploads/..."
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface font-mono outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
                     </div>
-                  )}
+
+                    {editingProduct.image_url && (
+                      <div className="p-3 flex justify-center bg-surface-container-low/30 rounded-lg border border-outline-variant/30">
+                        <img src={editingProduct.image_url} alt="Base Preview" className="max-h-24 object-contain rounded-lg bg-white p-1" />
+                      </div>
+                    )}
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Product Link / Đường dẫn chi tiết</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.link ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, link: e.target.value || null })}
+                        placeholder="e.g. https://songphuong.vn/product/..."
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Overrides Section */}
-              <div className="space-y-2">
+              {/* Nhóm override */}
+              <div className="space-y-3">
                 <h4 className="text-[11px] font-bold text-orange-600 px-1 uppercase tracking-wider flex items-center gap-1">
                   <span className="material-symbols-outlined text-[15px]">edit_note</span>
-                  Overrides (Optional)
+                  Overrides / Ghi đè hiển thị nhanh (Không bắt buộc)
                 </h4>
-                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm divide-y divide-outline-variant/30 overflow-hidden">
-                  
-                  {/* Override Name */}
-                  <div className="flex items-center px-4 py-3 gap-4">
-                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Override Name</label>
-                    <input 
-                      type="text"
-                      value={editingProduct.override_name ?? ''}
-                      onChange={e => setEditingProduct({ ...editingProduct, override_name: e.target.value || null })}
-                      placeholder="Ghi đè tên hiển thị"
-                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
-                    />
-                  </div>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-2 flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Override Name / Ghi đè Tên</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.override_name ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, override_name: e.target.value || null })}
+                        placeholder="Ghi đè tên hiển thị"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
 
-                  {/* Override Price & Override Status */}
-                  <div className="flex divide-x divide-outline-variant/30">
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Override Price</label>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Override Price / Ghi đè Giá</label>
                       <input 
                         type="text"
                         value={editingProduct.override_price ?? ''}
                         onChange={e => setEditingProduct({ ...editingProduct, override_price: e.target.value || null })}
                         placeholder="Ghi đè giá hiển thị"
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
-                    <div className="flex items-center px-4 py-3 gap-4 flex-1">
-                      <label className="w-20 text-[13px] font-semibold text-on-surface shrink-0">Override Status</label>
-                      <select 
-                        value={editingProduct.override_status ?? ''}
-                        onChange={e => setEditingProduct({ ...editingProduct, override_status: e.target.value || null })}
-                        className="w-full bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 cursor-pointer appearance-none outline-none"
-                      >
-                        {STATUSES.map(s => <option key={s} value={s}>{s || '— None —'}</option>)}
-                      </select>
-                      <span className="material-symbols-outlined text-outline-variant text-[18px] pointer-events-none pr-1">unfold_more</span>
-                    </div>
-                  </div>
 
-                  {/* Override Tag */}
-                  <div className="flex items-center px-4 py-3 gap-4">
-                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Override Tag</label>
-                    <input 
-                      type="text"
-                      value={editingProduct.override_tag ?? ''}
-                      onChange={e => setEditingProduct({ ...editingProduct, override_tag: e.target.value || null })}
-                      placeholder="Ghi đè tag hiển thị"
-                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none"
-                    />
-                  </div>
-
-                  {/* Override Image URL */}
-                  <div className="flex items-center px-4 py-3 gap-4">
-                    <label className="w-28 text-[13px] font-semibold text-on-surface shrink-0">Override Image</label>
-                    <input 
-                      type="text"
-                      value={editingProduct.override_image_url ?? ''}
-                      onChange={e => setEditingProduct({ ...editingProduct, override_image_url: e.target.value || null })}
-                      placeholder="Ghi đè URL ảnh"
-                      className="flex-1 bg-transparent border-none focus:ring-0 text-[13px] text-on-surface p-0 placeholder:text-outline-variant/50 outline-none font-mono"
-                    />
-                  </div>
-                  {editingProduct.override_image_url && (
-                    <div className="p-4 flex justify-center bg-surface-container-low/30">
-                      <img src={editingProduct.override_image_url} alt="Override Preview" className="max-h-24 object-contain rounded-lg border border-outline-variant/40 bg-white p-1" />
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Override Status / Ghi đè Trạng thái</label>
+                      <div className="relative flex items-center">
+                        <select 
+                          value={editingProduct.override_status ?? ''}
+                          onChange={e => setEditingProduct({ ...editingProduct, override_status: e.target.value || null })}
+                          className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all appearance-none cursor-pointer"
+                        >
+                          {STATUSES.map(s => <option key={s} value={s}>{s || '— None —'}</option>)}
+                        </select>
+                        <span className="material-symbols-outlined text-outline-variant text-[18px] absolute right-2 pointer-events-none">unfold_more</span>
+                      </div>
                     </div>
-                  )}
+
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Override Tag / Ghi đè Tag</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.override_tag ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, override_tag: e.target.value || null })}
+                        placeholder="Ghi đè tag hiển thị"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+
+                    <div className="sm:col-span-2 flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Override Image URL / Ghi đè Ảnh</label>
+                      <input 
+                        type="text"
+                        value={editingProduct.override_image_url ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, override_image_url: e.target.value || null })}
+                        placeholder="Ghi đè URL ảnh"
+                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface font-mono outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                      />
+                    </div>
+
+                    {editingProduct.override_image_url && (
+                      <div className="sm:col-span-2 p-3 flex justify-center bg-surface-container-low/30 rounded-lg border border-outline-variant/30">
+                        <img src={editingProduct.override_image_url} alt="Override Preview" className="max-h-24 object-contain rounded-lg bg-white p-1" />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
-              {/* Display Switch Section */}
-              <div className="space-y-2">
-                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Availability & Visibility</h4>
+              {/* Nhóm hiển thị */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Availability & Visibility / Hiển thị</h4>
                 <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4 flex items-center justify-between">
                   <div className="flex flex-col">
-                    <span className="text-[13px] font-semibold text-on-surface">Visible on Homepage</span>
+                    <span className="text-[13px] font-semibold text-on-surface">Visible on Homepage / Hiển thị trang chủ</span>
                     <span className="text-[11px] text-on-surface-variant">Toggle whether this product is displayed in the Finder app catalog.</span>
                   </div>
                   <button

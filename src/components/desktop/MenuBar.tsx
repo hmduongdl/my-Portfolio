@@ -25,11 +25,20 @@ export const MenuBar: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    profileService.getProfile(language)
-      .then((p) => {
-        if (p) setProfile(p);
-      })
-      .catch(() => {});
+    const loadProfile = () => {
+      profileService.getProfile(language)
+        .then((p) => {
+          if (p) setProfile(p);
+        })
+        .catch(() => {});
+    };
+
+    loadProfile();
+
+    window.addEventListener('profile-updated', loadProfile);
+    return () => {
+      window.removeEventListener('profile-updated', loadProfile);
+    };
   }, [language]);
 
   const day = time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });

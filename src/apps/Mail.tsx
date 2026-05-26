@@ -13,11 +13,20 @@ export const MailApp: React.FC = () => {
   const [recipientEmail, setRecipientEmail] = useState<string>(profileVN.email);
 
   useEffect(() => {
-    profileService.getProfile(language)
-      .then((p) => {
-        if (p && p.email) setRecipientEmail(p.email);
-      })
-      .catch(() => {});
+    const loadProfile = () => {
+      profileService.getProfile(language)
+        .then((p) => {
+          if (p && p.email) setRecipientEmail(p.email);
+        })
+        .catch(() => {});
+    };
+
+    loadProfile();
+
+    window.addEventListener('profile-updated', loadProfile);
+    return () => {
+      window.removeEventListener('profile-updated', loadProfile);
+    };
   }, [language]);
 
   const handleSend = () => {
