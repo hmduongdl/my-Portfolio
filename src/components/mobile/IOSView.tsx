@@ -87,8 +87,7 @@ export const IOSView: React.FC<IOSViewProps> = ({
                 className="flex flex-col items-center gap-1.5 cursor-pointer"
               >
                 <div
-                  className="w-[60px] h-[60px] rounded-[14px] flex items-center justify-center shadow-[0_2px_8px_rgba(0,0,0,0.18)] overflow-hidden"
-                  style={{ background: app.bg }}
+                  className="w-[60px] h-[60px] flex items-center justify-center p-0 bg-transparent border-none shadow-none"
                 >
                   {app.icon}
                 </div>
@@ -105,8 +104,7 @@ export const IOSView: React.FC<IOSViewProps> = ({
               <div
                 key={app.id}
                 onClick={() => onOpenApp(app.id)}
-                className="w-[54px] h-[54px] rounded-[13px] flex items-center justify-center cursor-pointer overflow-hidden shadow-sm hover:scale-95 transition-transform"
-                style={{ background: app.bg }}
+                className="w-[54px] h-[54px] flex items-center justify-center cursor-pointer hover:scale-95 transition-transform p-0 bg-transparent border-none shadow-none"
               >
                 {app.icon}
               </div>

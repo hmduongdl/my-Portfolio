@@ -73,8 +73,7 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
                 className="flex flex-col items-center gap-0.5 cursor-pointer"
               >
                 <div
-                  className="w-11 h-11 rounded-[10px] flex items-center justify-center shadow-[0_2px_6px_rgba(0,0,0,0.18)] overflow-hidden scale-[0.85] origin-center hover:scale-95 transition-transform"
-                  style={{ background: app.bg }}
+                  className="w-11 h-11 flex items-center justify-center scale-[0.85] origin-center hover:scale-95 transition-transform p-0 bg-transparent border-none shadow-none"
                 >
                   {app.icon}
                 </div>
@@ -91,8 +90,7 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
               <div
                 key={app.id}
                 onClick={() => setOpenId(app.id)}
-                className="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center cursor-pointer overflow-hidden scale-[0.85] origin-center hover:scale-[0.8] transition-transform"
-                style={{ background: app.bg }}
+                className="w-[38px] h-[38px] flex items-center justify-center cursor-pointer scale-[0.85] origin-center hover:scale-[0.8] transition-transform p-0 bg-transparent border-none shadow-none"
               >
                 {app.icon}
               </div>

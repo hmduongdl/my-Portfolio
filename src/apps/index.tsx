@@ -5,7 +5,6 @@ import { MailApp } from './Mail';
 import { WelcomeApp } from './Welcome';
 import { ZaloApp } from './Zalo';
 import { AppDefinition, SocialAppDefinition } from '../types';
-import { ImageWithFallback } from '../components/desktop/ImageWithFallback';
 import finderIcon from '../icons/Finder.png';
 import aboutIcon from '../icons/About.png';
 import notesIcon from '../icons/Notes.png';
@@ -21,9 +20,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     id: 'github', name: 'GitHub',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback src={githubIcon} alt="GitHub icon" fallbackText="G" className="w-full h-full object-cover scale-[1.05]" />
-      </div>
+      <img src={githubIcon} alt="GitHub" className="w-full h-full object-contain pointer-events-none" />
     ),
     url: 'https://github.com/hmduongdl',
   },
@@ -31,9 +28,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     id: 'facebook', name: 'Facebook',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback src={facebookIcon} alt="Facebook icon" fallbackText="F" className="w-full h-full object-cover scale-[1.05]" />
-      </div>
+      <img src={facebookIcon} alt="Facebook" className="w-full h-full object-contain pointer-events-none" />
     ),
     url: 'https://facebook.com/hmd.Stewiclez',
   },
@@ -41,9 +36,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     id: 'phone', name: 'Phone',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback src={phoneIcon} alt="Phone icon" fallbackText="P" className="w-full h-full object-cover scale-[1.05]" />
-      </div>
+      <img src={phoneIcon} alt="Phone" className="w-full h-full object-contain pointer-events-none" />
     ),
     url: 'tel:0911818016',
   },
@@ -51,9 +44,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     id: 'zalo', name: 'Zalo',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback src={zaloIcon} alt="Zalo icon" fallbackText="Z" className="w-full h-full object-cover scale-[1.05]" />
-      </div>
+      <img src={zaloIcon} alt="Zalo" className="w-full h-full object-contain pointer-events-none" />
     ),
     url: 'https://zalo.me/0911818016',
   },
@@ -66,14 +57,7 @@ export const APP_DEFS: AppDefinition[] = [
     title: 'Song Phương — All Products',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback
-          src={finderIcon}
-          alt="Finder icon"
-          fallbackText="S"
-          className="w-full h-full object-cover scale-[1.05]"
-        />
-      </div>
+      <img src={finderIcon} alt="Finder" className="w-full h-full object-contain pointer-events-none" />
     ),
     initial: { w: 760, h: 480, x: 140, y: 80 },
     Component: FinderApp,
@@ -84,14 +68,7 @@ export const APP_DEFS: AppDefinition[] = [
     title: 'About This Mac',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback
-          src={aboutIcon}
-          alt="About icon"
-          fallbackText="日"
-          className="w-full h-full object-cover scale-[1.05]"
-        />
-      </div>
+      <img src={aboutIcon} alt="About" className="w-full h-full object-contain pointer-events-none" />
     ),
     initial: { w: 480, h: 580, x: 80, y: 60 },
     Component: AboutApp,
@@ -102,14 +79,7 @@ export const APP_DEFS: AppDefinition[] = [
     title: 'Projects — Mission Control',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback
-          src={projectsIcon}
-          alt="Projects icon"
-          fallbackText="▦"
-          className="w-full h-full object-cover scale-[1.05]"
-        />
-      </div>
+      <img src={projectsIcon} alt="Projects" className="w-full h-full object-contain pointer-events-none" />
     ),
     initial: { w: 820, h: 540, x: 200, y: 70 },
     Component: ProjectsApp,
@@ -120,14 +90,7 @@ export const APP_DEFS: AppDefinition[] = [
     title: 'New Message',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback
-          src={gmailIcon}
-          alt="Mail icon"
-          fallbackText="M"
-          className="w-full h-full object-cover scale-[1.05]"
-        />
-      </div>
+      <img src={gmailIcon} alt="Mail" className="w-full h-full object-contain pointer-events-none" />
     ),
     initial: { w: 600, h: 480, x: 320, y: 90 },
     mailto: 'mailto:hoanglong.workdl@gmail.com',
@@ -139,14 +102,7 @@ export const APP_DEFS: AppDefinition[] = [
     title: 'Welcome',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback
-          src={notesIcon}
-          alt="Notes icon"
-          fallbackText="≡"
-          className="w-full h-full object-cover scale-[1.05]"
-        />
-      </div>
+      <img src={notesIcon} alt="Notes" className="w-full h-full object-contain pointer-events-none" />
     ),
     initial: { w: 540, h: 480, x: 600, y: 110 },
     Component: WelcomeApp,
@@ -157,14 +113,7 @@ export const APP_DEFS: AppDefinition[] = [
     title: 'Zalo Contact',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] overflow-hidden shadow-inner border border-white/10">
-        <ImageWithFallback
-          src={zaloIcon}
-          alt="Zalo icon"
-          fallbackText="Z"
-          className="w-full h-full object-cover scale-[1.05]"
-        />
-      </div>
+      <img src={zaloIcon} alt="Zalo" className="w-full h-full object-contain pointer-events-none" />
     ),
     initial: { w: 540, h: 340, x: 250, y: 120 },
     isResizable: false,

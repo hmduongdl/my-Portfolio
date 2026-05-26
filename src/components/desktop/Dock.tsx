@@ -13,7 +13,7 @@ interface DockIconProps {
 const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = false }) => {
     return (
         <div
-            className="group relative flex items-center justify-center w-[38px] h-[38px] md:w-[46px] md:h-[46px] flex-shrink-0"
+            className="group relative flex items-center justify-center w-[38px] h-[38px] md:w-[44px] md:h-[44px] flex-shrink-0 p-0 bg-transparent border-none shadow-none"
             onClick={onClick}
             role="button"
             tabIndex={0}
@@ -25,9 +25,8 @@ const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = fa
             </div>
 
             <div
-                className="w-full h-full flex items-center justify-center overflow-visible cursor-pointer will-change-transform group-hover:scale-[1.12] group-hover:-translate-y-1 rounded-[22%]"
+                className="w-full h-full p-0 bg-transparent flex items-center justify-center overflow-visible cursor-pointer will-change-transform group-hover:scale-[1.12] group-hover:-translate-y-1"
                 style={{
-                    background: 'transparent',
                     transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
             >
