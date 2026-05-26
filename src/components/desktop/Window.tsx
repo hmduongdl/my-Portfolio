@@ -87,7 +87,7 @@ export const Window: React.FC<WindowProps> = ({
   return (
     <div
       ref={winRef}
-      className={`window absolute flex flex-col rounded-lg overflow-hidden select-none bg-paper shadow-[0_0_0_0.5px_rgba(0,0,0,0.3),0_22px_60px_rgba(0,0,0,0.35),0_8px_20px_rgba(0,0,0,0.18)] transition-all ease-calm duration-200 ${
+      className={`window absolute flex flex-col rounded-lg overflow-hidden select-none bg-paper/90 mac-vibrancy shadow-[0_0_0_0.5px_rgba(0,0,0,0.3),0_22px_60px_rgba(0,0,0,0.35),0_8px_20px_rgba(0,0,0,0.18)] transition-all ease-calm duration-200 ${
         focused ? '' : 'unfocused shadow-[0_0_0_0.5px_rgba(0,0,0,0.2),0_12px_30px_rgba(0,0,0,0.18)]'
       } ${win.minimized ? 'minimized scale-0 translate-y-[400px] opacity-0 pointer-events-none' : ''} style-${windowStyle}`}
       style={{
@@ -101,7 +101,7 @@ export const Window: React.FC<WindowProps> = ({
     >
       {/* Titlebar */}
       <div
-        className={`titlebar h-[38px] flex items-center px-3 bg-paper-2 border-b border-rule flex-shrink-0 relative select-none cursor-grab ${
+        className={`titlebar h-[38px] flex items-center px-3 bg-transparent border-b border-rule flex-shrink-0 relative select-none cursor-grab ${
           isDragging ? 'dragging cursor-grabbing' : ''
         }`}
         onMouseDown={startDrag}
@@ -113,7 +113,7 @@ export const Window: React.FC<WindowProps> = ({
       </div>
 
       {/* Window Body Container */}
-      <div className="window-body flex-1 overflow-auto bg-paper select-text">
+      <div className="window-body flex-1 overflow-auto bg-transparent select-text">
         <ContentComponent />
       </div>
 

@@ -10,16 +10,19 @@ const AboutWidget: React.FC<AboutWidgetProps> = ({ onClick }) => {
   return (
     <div
       onClick={onClick}
-      className="col-span-4 row-span-2 bg-white/92 backdrop-blur-md rounded-[22px] p-4 shadow-[0_4px_14px_rgba(0,0,0,0.18)] cursor-pointer flex gap-3.5 items-center border border-black/[0.06] select-none"
+      className="col-span-4 row-span-2 bg-white/80 backdrop-blur-xl rounded-[26px] p-4 shadow-[0_8px_24px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.6)] cursor-pointer flex gap-4 items-center border border-white/40 select-none hover:scale-[0.98] transition-transform duration-300"
     >
-      <div className="w-[76px] h-[76px] rounded-full bg-gradient-to-br from-primary-soft to-[#B5CCE6] flex items-center justify-center text-[32px] font-bold text-[#1F4E80] flex-shrink-0">
+      <div className="relative w-[76px] h-[76px] rounded-full bg-gradient-to-br from-[#E2F1FF] via-[#B5CCE6] to-[#7DA2CA] shadow-[inset_0_2px_4px_rgba(255,255,255,0.8),0_4px_12px_rgba(31,78,128,0.25)] flex items-center justify-center text-[34px] font-black text-[#1F4E80] flex-shrink-0 border border-white/60">
         SP
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-0.5">About me</div>
-        <div className="text-[17px] font-bold text-ink tracking-tight mb-1 truncate">Song Phương</div>
-        <div className="text-[12px] text-ink-2 leading-tight truncate">Product Designer · Developer</div>
-        <div className="text-[11px] text-ink-3 mt-1 truncate">Song Phương Tech · HN</div>
+      <div className="flex-1 min-w-0 flex flex-col justify-center">
+        <div className="text-[10px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">About me</div>
+        <div className="text-[19px] font-bold text-ink tracking-tight mb-0.5 truncate">Song Phương</div>
+        <div className="text-[13px] font-medium text-ink-2 leading-tight truncate">Product Designer & Dev</div>
+        <div className="text-[11px] font-medium text-ink-3 mt-1.5 flex items-center gap-1.5 truncate">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor" className="opacity-70"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          Hanoi, Vietnam
+        </div>
       </div>
     </div>
   );
@@ -115,9 +118,9 @@ export const IOSView: React.FC<IOSViewProps> = ({
 
       {/* App Opening Overlay Frame */}
       {openApp && (
-        <div className="absolute top-11 left-2 right-2 bottom-2 bg-paper rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col z-[15] animate-slide-up">
+        <div className="absolute top-11 left-2 right-2 bottom-2 bg-paper/90 mac-vibrancy rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col z-[15] animate-slide-up">
           {/* Internal Navbar */}
-          <div className="px-4 py-3.5 border-b border-rule flex items-center bg-paper-2 relative flex-shrink-0">
+          <div className="px-4 py-3.5 border-b border-rule flex items-center bg-transparent relative flex-shrink-0">
             <button
               onClick={onClose}
               className="border-none bg-transparent text-primary text-[15px] font-medium cursor-pointer p-0 select-none"
@@ -130,7 +133,7 @@ export const IOSView: React.FC<IOSViewProps> = ({
           </div>
           
           {/* Scrollable Compact Mode Sub-app Body */}
-          <div className="flex-1 overflow-auto bg-paper">
+          <div className="flex-1 overflow-auto bg-transparent">
             {React.createElement(openApp.Component, { compact: true })}
           </div>
         </div>

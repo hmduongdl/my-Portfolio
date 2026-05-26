@@ -52,16 +52,19 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
             {/* About Widget */}
             <div
               onClick={() => setOpenId('about')}
-              className="col-span-4 bg-white/92 backdrop-blur-md rounded-2xl p-2.5 shadow-[0_2px_8px_rgba(0,0,0,0.18)] cursor-pointer flex gap-2.5 items-center min-h-[80px]"
+              className="col-span-4 bg-white/80 backdrop-blur-xl rounded-[20px] p-3 shadow-[0_6px_16px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.6)] cursor-pointer flex gap-3.5 items-center min-h-[80px] border border-white/40 hover:scale-[0.98] transition-transform duration-300"
             >
-              <div className="w-[52px] h-[52px] rounded-full bg-gradient-to-br from-primary-soft to-[#B5CCE6] flex items-center justify-center text-[20px] font-bold text-[#1F4E80] flex-shrink-0">
+              <div className="relative w-[56px] h-[56px] rounded-full bg-gradient-to-br from-[#E2F1FF] via-[#B5CCE6] to-[#7DA2CA] shadow-[inset_0_2px_4px_rgba(255,255,255,0.8),0_4px_10px_rgba(31,78,128,0.25)] flex items-center justify-center text-[24px] font-black text-[#1F4E80] flex-shrink-0 border border-white/60">
                 SP
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[8px] font-semibold text-ink-3 uppercase tracking-wider">About me</div>
-                <div className="text-[12px] font-bold text-ink truncate">Song Phương</div>
-                <div className="text-[9px] text-ink-2 truncate">Product Designer · Dev</div>
-                <div className="text-[8px] text-ink-3 truncate">Song Phương · Hà Nội</div>
+              <div className="flex-1 min-w-0 flex flex-col justify-center">
+                <div className="text-[8px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">About me</div>
+                <div className="text-[14px] font-bold text-ink tracking-tight mb-0.5 truncate">Song Phương</div>
+                <div className="text-[10px] font-medium text-ink-2 leading-tight truncate">Product Designer & Dev</div>
+                <div className="text-[9px] font-medium text-ink-3 mt-1 flex items-center gap-1 truncate">
+                  <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" className="opacity-70"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                  Hanoi, Vietnam
+                </div>
               </div>
             </div>
 
@@ -101,8 +104,8 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
 
       {/* Opened Application frame inside mobile */}
       {openApp && (
-        <div className="absolute top-[38px] left-0 right-0 bottom-0 bg-paper flex flex-col z-[15] animate-slide-up">
-          <div className="px-3 py-2 border-b border-rule flex items-center bg-paper-2 relative flex-shrink-0">
+        <div className="absolute top-[38px] left-0 right-0 bottom-0 bg-paper/90 mac-vibrancy flex flex-col z-[15] animate-slide-up">
+          <div className="px-3 py-2 border-b border-rule flex items-center bg-transparent relative flex-shrink-0">
             <button
               onClick={() => setOpenId(null)}
               className="border-none bg-transparent text-primary text-[13px] font-medium cursor-pointer p-0 select-none"
@@ -113,7 +116,7 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
               {openApp.name}
             </div>
           </div>
-          <div className="flex-1 overflow-auto bg-paper text-[11px]">
+          <div className="flex-1 overflow-auto bg-transparent text-[11px]">
             {React.createElement(openApp.Component, { compact: true })}
           </div>
         </div>
