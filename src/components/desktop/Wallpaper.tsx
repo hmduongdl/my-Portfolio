@@ -54,7 +54,7 @@ export const Wallpaper: React.FC = () => {
             muted 
             loop 
             playsInline
-            className="w-full h-full object-cover absolute inset-0 pointer-events-none z-[-1] scale-[1.2]"
+            className="w-full h-full object-cover absolute inset-0 pointer-events-none z-[-1]"
           />
         )}
         {wallpaperType === 'time-shifting' && (

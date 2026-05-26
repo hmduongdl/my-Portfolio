@@ -54,11 +54,13 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
 export const APP_DEFS: AppDefinition[] = [
   {
     id: 'finder',
-    name: 'Finder',
+    name: 'Song Phương',
     title: 'Song Phương — All Products',
     bg: '#ffffff',
     icon: (
-      <img src={finderIcon} alt="Finder" className="w-full h-full object-contain pointer-events-none" />
+      <div className="w-full h-full bg-[#1853a1] rounded-[22%] flex items-center justify-center p-1.5 shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.2)] border border-[#124285]">
+        <img src="/songphuong-logo.png" alt="Song Phương" className="w-[85%] h-[85%] object-contain pointer-events-none" />
+      </div>
     ),
     initial: { w: 760, h: 480, x: 140, y: 80 },
     Component: FinderApp,

@@ -129,8 +129,14 @@ export const useOSStore = create<OSState>((set, get) => {
         }
 
         const init = appDef?.initial;
-        const w = init?.w ?? 600;
-        const h = init?.h ?? 480;
+        const baseW = init?.w ?? 600;
+        const baseH = init?.h ?? 480;
+        
+        // Tự động scale kích thước cửa sổ trên màn hình lớn (ví dụ 2K, 4K)
+        // Hệ số chuẩn lấy 1440px làm gốc, scale tối đa 2 lần.
+        const scale = typeof window !== 'undefined' ? Math.min(2, Math.max(1, window.innerWidth / 1440)) : 1;
+        const w = Math.round(baseW * scale);
+        const h = Math.round(baseH * scale);
         const newWindow: WindowInstance = {
           id,
           title: appTitle,

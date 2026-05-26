@@ -76,21 +76,7 @@ export const AboutApp: React.FC = () => {
 
   return (
     <div className="flex flex-col items-center gap-6 px-10 py-7 select-text overflow-y-auto w-full h-full about-app-container">
-      <style>{`
-        .about-app-container::-webkit-scrollbar {
-          width: 6px;
-        }
-        .about-app-container::-webkit-scrollbar-track {
-          background: transparent;
-        }
-        .about-app-container::-webkit-scrollbar-thumb {
-          background: rgba(155, 155, 155, 0.2);
-          border-radius: 20px;
-        }
-        .about-app-container::-webkit-scrollbar-thumb:hover {
-          background: rgba(155, 155, 155, 0.4);
-        }
-      `}</style>
+
 
       {/* ── Header: Avatar + Name + Title + Company badge ── */}
       <div className="flex flex-col items-center gap-3">
