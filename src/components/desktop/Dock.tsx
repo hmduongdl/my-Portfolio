@@ -6,12 +6,11 @@ import { SOCIAL_APPS } from '../../apps';
 interface DockIconProps {
     name: string;
     icon: React.ReactNode;
-    bg?: string;
     onClick: () => void;
     isRunning?: boolean;
 }
 
-const DockIcon: React.FC<DockIconProps> = ({ name, icon, bg, onClick, isRunning = false }) => {
+const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = false }) => {
     return (
         <div
             className="group relative flex items-center justify-center w-[38px] h-[38px] md:w-[46px] md:h-[46px] flex-shrink-0"
@@ -26,9 +25,9 @@ const DockIcon: React.FC<DockIconProps> = ({ name, icon, bg, onClick, isRunning 
             </div>
 
             <div
-                className="w-full h-full flex items-center justify-center overflow-hidden cursor-pointer will-change-transform rounded-[22%] border border-white/15 dark:border-white/5 shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] group-hover:scale-[1.12] group-hover:-translate-y-1"
+                className="w-full h-full flex items-center justify-center overflow-visible cursor-pointer will-change-transform group-hover:scale-[1.12] group-hover:-translate-y-1"
                 style={{
-                    background: bg || 'transparent',
+                    background: 'transparent',
                     transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
             >
@@ -77,7 +76,6 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                         key={app.id}
                         name={app.name}
                         icon={app.icon}
-                        bg={app.bg}
                         onClick={() => onOpen(app.id)}
                         isRunning={runningIds.includes(app.id)}
                     />
@@ -92,7 +90,6 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                         key={app.id}
                         name={app.name}
                         icon={app.icon}
-                        bg={app.bg}
                         onClick={() => handleSocialClick(app)}
                         isRunning={false}
                     />
