@@ -119,6 +119,33 @@ const FALLBACK_SEO = {
   twitterCard: 'summary_large_image'
 };
 
+const FALLBACK_CHATBOT_QA = [
+  {
+    id: 1,
+    question: 'Song Phương Technology làm về lĩnh vực gì và bạn làm gì ở đó?',
+    answer: 'Song Phương Technology là công ty chuyên cung cấp các giải pháp công nghệ thông tin và dịch vụ phần mềm chất lượng cao. Mình làm Web Developer tại đây từ tháng 3/2025. Công việc chính là thiết kế và phát triển giao diện người dùng sáng tạo cho các dự án, quản lý hệ thống cơ sở dữ liệu và tích hợp các API dịch vụ.',
+    order_index: 1
+  },
+  {
+    id: 2,
+    question: 'Dự án tiêu biểu nhất bạn từng phát triển là gì?',
+    answer: 'Dự án tiêu biểu nhất của mình là "Song Phương macOS Portfolio" - chính là trang web bạn đang trải nghiệm! Đây là danh mục đầu tư tương tác phong cách macOS, tích hợp hệ thống cửa sổ kéo-thả, Dock và Menu Bar do mình phát triển giao diện và logic state bằng React, TypeScript, Zustand và Tailwind.',
+    order_index: 2
+  },
+  {
+    id: 3,
+    question: 'Thông tin liên hệ của Hoàng Minh Dương là gì?',
+    answer: 'Bạn có thể liên hệ với mình qua:\n- Email: duonghm.work@gmail.com (hoặc hoanglong.workdl@gmail.com)\n- GitHub: github.com/hmduongdl\n- Website: songphuong.vn\nHoặc bạn có thể gọi hotline: 0911 818 016 để kết nối trực tiếp nhé!',
+    order_index: 3
+  },
+  {
+    id: 4,
+    question: 'Bạn đang theo học chuyên ngành gì và tại đâu?',
+    answer: 'Hiện tại, mình đang là sinh viên ngành Công nghệ Thông tin tại Trường Đại học Đà Lạt (niên khóa 2025 - 2029). Mình tập trung nghiên cứu các thuật toán cơ bản, cấu trúc dữ liệu và phát triển phần mềm.',
+    order_index: 4
+  }
+];
+
 
 // ============================================================================
 // 2. KẾT NỐI NEON SQL BẰNG PG POOL (Singleton Pattern)
@@ -486,6 +513,41 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         console.error('[API Fallback] /seo error:', e);
         res.setHeader('x-database-status', 'fallback_error');
         return res.status(200).json(FALLBACK_SEO);
+      }
+    }
+
+    // /CHATBOT
+    if (path === '/chatbot') {
+      try {
+        await runQuery(`
+          CREATE TABLE IF NOT EXISTS tbl_chatbot_qa (
+            id          SERIAL PRIMARY KEY,
+            question    TEXT NOT NULL,
+            answer      TEXT NOT NULL,
+            order_index INT DEFAULT 0,
+            created_at  TIMESTAMPTZ DEFAULT NOW(),
+            updated_at  TIMESTAMPTZ DEFAULT NOW()
+          )
+        `);
+
+        // Check if empty, seed default data
+        const checkRows = await runQuery('SELECT COUNT(*) FROM tbl_chatbot_qa');
+        if (parseInt(checkRows[0].count, 10) === 0) {
+          for (const item of FALLBACK_CHATBOT_QA) {
+            await runQuery(
+              'INSERT INTO tbl_chatbot_qa (question, answer, order_index) VALUES ($1, $2, $3)',
+              [item.question, item.answer, item.order_index]
+            );
+          }
+        }
+
+        const rows = await runQuery('SELECT * FROM tbl_chatbot_qa ORDER BY order_index ASC, id ASC');
+        res.setHeader('x-database-status', 'online');
+        return res.status(200).json(rows);
+      } catch (e) {
+        console.error('[API Fallback] /chatbot error:', e);
+        res.setHeader('x-database-status', 'fallback_error');
+        return res.status(200).json(FALLBACK_CHATBOT_QA);
       }
     }
   }
@@ -1004,6 +1066,82 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           );
         }
         return res.status(200).json({ success: true, updated: links.length });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    // --- 7. CHATBOT MANAGER ---
+    if (req.method === 'GET' && path === '/admin/chatbot') {
+      try {
+        await runQuery(`
+          CREATE TABLE IF NOT EXISTS tbl_chatbot_qa (
+            id          SERIAL PRIMARY KEY,
+            question    TEXT NOT NULL,
+            answer      TEXT NOT NULL,
+            order_index INT DEFAULT 0,
+            created_at  TIMESTAMPTZ DEFAULT NOW(),
+            updated_at  TIMESTAMPTZ DEFAULT NOW()
+          )
+        `);
+        const rows = await runQuery('SELECT * FROM tbl_chatbot_qa ORDER BY order_index ASC, id ASC');
+        return res.status(200).json(rows);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'POST' && path === '/admin/chatbot') {
+      const b = req.body ?? {};
+      if (!b.question || !b.answer) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Question and answer are required.' });
+      }
+      try {
+        const rows = await runQuery(
+          `INSERT INTO tbl_chatbot_qa (question, answer, order_index, updated_at)
+           VALUES ($1, $2, $3, NOW())
+           RETURNING *`,
+          [b.question, b.answer, b.order_index ?? 0]
+        );
+        return res.status(201).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'PUT' && path === '/admin/chatbot') {
+      const b = req.body ?? {};
+      if (!b.id || !b.question || !b.answer) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'ID, question, and answer are required.' });
+      }
+      try {
+        const rows = await runQuery(
+          `UPDATE tbl_chatbot_qa
+           SET question = $1,
+               answer = $2,
+               order_index = $3,
+               updated_at = NOW()
+           WHERE id = $4
+           RETURNING *`,
+          [b.question, b.answer, b.order_index ?? 0, b.id]
+        );
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Q&A not found.' });
+        }
+        return res.status(200).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'DELETE' && path === '/admin/chatbot') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing Q&A ID' });
+      }
+      try {
+        await runQuery('DELETE FROM tbl_chatbot_qa WHERE id = $1', [b.id]);
+        return res.status(200).json({ success: true });
       } catch (e: any) {
         return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
       }

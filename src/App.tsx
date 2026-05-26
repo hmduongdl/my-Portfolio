@@ -9,10 +9,14 @@ import { MobilePreview } from './components/mobile/MobilePreview';
 import { APP_DEFS, SOCIAL_APPS } from './apps';
 import finderIcon from './icons/Finder.png';
 import notesIcon from './icons/Notes.png';
+import { MascotChat } from './components/desktop/MascotChat';
+import { profileService } from './services/profileService';
+import { productService } from './services/productService';
+import { projectService } from './services/projectService';
+import { chatbotService } from './services/chatbotService';
 
 export const App: React.FC = () => {
   const [baseSeoTitle, setBaseSeoTitle] = useState('Song Phương');
-  const [showHotlineToast, setShowHotlineToast] = useState(false);
   const tweaks = useOSStore((state) => state.tweaks);
   const windows = useOSStore((state) => state.windows);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
@@ -62,13 +66,29 @@ export const App: React.FC = () => {
   useEffect(() => {
     const bootSystem = async () => {
       try {
-        // 1. Fetch Socials
-        await fetchSocials();
+        // Run all API fetches concurrently in parallel to maximize loading speed.
+        // Using services here ensures responses are stored in the memory caches instantly.
+        const [
+          _socialsRes,
+          seoRes,
+          _profileRes,
+          _timelineRes,
+          _projectsRes,
+          _productsRes,
+          _chatbotRes
+        ] = await Promise.allSettled([
+          fetchSocials(),
+          fetch('/api/seo').then((r) => (r.ok ? r.json() : null)),
+          profileService.getProfile('vn'),
+          profileService.getTimeline('vn'),
+          projectService.getProjects('vn'),
+          productService.getProducts('vn'),
+          chatbotService.getQAList()
+        ]);
 
-        // 2. Fetch SEO
-        const res = await fetch('/api/seo');
-        if (res.ok) {
-          const seo = await res.json();
+        // Process SEO data
+        if (seoRes.status === 'fulfilled' && seoRes.value) {
+          const seo = seoRes.value;
           if (seo.seo_title) {
             setBaseSeoTitle(seo.seo_title);
             document.querySelector('meta[property="og:title"]')?.setAttribute('content', seo.seo_title);
@@ -90,17 +110,12 @@ export const App: React.FC = () => {
             document.querySelector('meta[name="twitter:card"]')?.setAttribute('content', seo.twitter_card);
           }
         }
-
-        // 3. Diagnostics
-        const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
-        const endpoints = ['/products', '/projects', '/profile'].map((path) => `${API_BASE_URL}${path}`);
-        await Promise.allSettled(endpoints.map(url => fetch(url, { cache: 'no-store' })));
         
       } catch (e) {
         console.error('Boot sequence error:', e);
       } finally {
-        // Minimum 1.2s delay for the Apple boot aesthetic
-        setTimeout(() => setSystemReady(true), 1200);
+        // Remove the static 1.2s delay for instant ready once data has been loaded.
+        setSystemReady(true);
       }
     };
 
@@ -146,10 +161,7 @@ export const App: React.FC = () => {
     );
   }
 
-  const handleHotlineClick = () => {
-    setShowHotlineToast(true);
-    setTimeout(() => setShowHotlineToast(false), 8000);
-  };
+
 
   if (isMobile) {
     return (
@@ -171,37 +183,7 @@ export const App: React.FC = () => {
       {/* Fixed top Menu bar */}
       <MenuBar />
 
-      {/* Hotline Notification Toast (macOS style) */}
-      {showHotlineToast && (
-        <div className="fixed top-14 right-4 z-[100] w-[300px] bg-white/70 dark:bg-zinc-800/70 backdrop-blur-2xl border border-white/20 dark:border-white/10 shadow-2xl rounded-2xl p-4 flex flex-col gap-3 animate-in slide-in-from-right-8 fade-in duration-300">
-          <div className="flex flex-col gap-1 text-right">
-            <button onClick={() => setShowHotlineToast(false)} className="absolute top-3 right-3 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
-            </button>
-          </div>
-          <div className="flex items-center gap-3 mt-1">
-            <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0 border border-emerald-500/20">
-              <span className="text-xl">📱</span>
-            </div>
-            <div className="flex-1">
-              <div className="text-[14px] font-semibold text-neutral-800 dark:text-neutral-200 leading-tight">Hotline Song Phương</div>
-              <div className="text-[13px] text-neutral-500 dark:text-neutral-400 mt-0.5">0911 818 016</div>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 mt-2">
-            <a href="tel:0911818016" className="flex-1 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[12px] font-medium rounded-lg text-center transition-colors shadow-sm">Gọi điện</a>
-            <button 
-              onClick={() => { 
-                navigator.clipboard.writeText('0911818016'); 
-                setShowHotlineToast(false); 
-              }} 
-              className="flex-1 py-1.5 bg-black/5 dark:bg-white/10 hover:bg-black/10 dark:hover:bg-white/20 text-neutral-700 dark:text-neutral-300 text-[12px] font-medium rounded-lg transition-colors"
-            >
-              Sao chép
-            </button>
-          </div>
-        </div>
-      )}
+
 
       {/* Desktop shortcuts icons */}
       <div className="desktop-icons absolute top-12 left-0 right-0 md:left-auto md:right-5 grid grid-cols-2 gap-y-6 gap-x-4 px-4 py-6 justify-items-center md:flex md:flex-col md:gap-4 md:px-0 md:py-0 z-10 select-none max-w-full md:max-w-none">
@@ -256,18 +238,8 @@ export const App: React.FC = () => {
         onOpen={(id) => openApp(id, APP_DEFS)}
       />
 
-      {/* Hotline Ring Watermark Button */}
-      <div className="fixed bottom-24 right-8 z-[10] hidden md:flex flex-col items-center space-y-1">
-        <div 
-          onClick={handleHotlineClick}
-          className="relative w-[52px] h-[52px] bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.3)] rounded-full flex items-center justify-center cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300"
-        >
-          <div className="absolute inset-0 rounded-full border border-emerald-400/40 animate-ping"></div>
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" className="text-emerald-400 drop-shadow-md">
-            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
-          </svg>
-        </div>
-      </div>
+      {/* Mascot Chat Assistant (SP-Bot) Widget */}
+      <MascotChat />
 
       {/* Live iPhone bezel on desktop */}
       {tweaks.showMobilePreview && (

@@ -28,16 +28,41 @@ export interface TimelineItem {
     type: 'work' | 'education' | 'freelance';
 }
 
+const cache: Record<string, any> = {};
+
+if (typeof window !== 'undefined') {
+    window.addEventListener('profile-updated', () => {
+        delete cache.profile_vn;
+        delete cache.profile_en;
+    });
+    window.addEventListener('timeline-updated', () => {
+        delete cache.timeline_vn;
+        delete cache.timeline_en;
+    });
+}
+
 export const profileService = {
     async getProfile(lang: 'en' | 'vn' = 'vn'): Promise<ProfileData> {
+        const key = `profile_${lang}`;
+        if (cache[key]) return cache[key];
         const res = await fetch(`${API_BASE_URL}/profile?lang=${lang}`);
         if (!res.ok) throw new Error('Failed to fetch SQL profile');
-        return res.json();
+        const data = await res.json();
+        cache[key] = data;
+        return data;
     },
 
     async getTimeline(lang: 'en' | 'vn' = 'vn'): Promise<TimelineItem[]> {
+        const key = `timeline_${lang}`;
+        if (cache[key]) return cache[key];
         const res = await fetch(`${API_BASE_URL}/timeline?lang=${lang}`);
         if (!res.ok) throw new Error('Failed to fetch SQL timeline');
-        return res.json();
+        const data = await res.json();
+        cache[key] = data;
+        return data;
     },
+
+    clearCache() {
+        Object.keys(cache).forEach(k => delete cache[k]);
+    }
 };

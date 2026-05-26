@@ -1,0 +1,286 @@
+import React, { useState, useEffect, useRef } from 'react';
+import { chatbotService, ChatbotQA } from '../../services/chatbotService';
+
+interface Message {
+  sender: 'bot' | 'user';
+  text: string;
+}
+
+export const MascotChat: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [showBubble, setShowBubble] = useState(true);
+  const [qaList, setQaList] = useState<ChatbotQA[]>([]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      sender: 'bot',
+      text: 'Xin chào! Mình là SP-Bot, trợ lý ảo của anh Hoàng Minh Dương. Mình ở đây để giúp bạn tìm hiểu nhanh về kinh nghiệm, học vấn và các dự án của anh Dương. Bạn muốn hỏi gì nào?'
+    }
+  ]);
+  const [askedIds, setAskedIds] = useState<number[]>([]);
+  const [isTyping, setIsTyping] = useState(false);
+  const [isResponding, setIsResponding] = useState(false);
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Fetch Q&A List on mount
+  useEffect(() => {
+    chatbotService.getQAList()
+      .then(data => setQaList(data))
+      .catch(err => {
+        console.error('Error fetching Q&As:', err);
+        // Fallback initialized locally if API fails
+        setQaList([
+          {
+            id: 1,
+            question: 'Song Phương Technology làm về lĩnh vực gì và bạn làm gì ở đó?',
+            answer: 'Song Phương Technology là công ty chuyên cung cấp các giải pháp công nghệ thông tin và dịch vụ phần mềm chất lượng cao. Mình làm Web Developer tại đây từ tháng 3/2025. Công việc chính là thiết kế và phát triển giao diện người dùng sáng tạo cho các dự án, quản lý hệ thống cơ sở dữ liệu và tích hợp các API dịch vụ.',
+            order_index: 1
+          },
+          {
+            id: 2,
+            question: 'Dự án tiêu biểu nhất bạn từng phát triển là gì?',
+            answer: 'Dự án tiêu biểu nhất của mình là "Song Phương macOS Portfolio" - chính là trang web bạn đang trải nghiệm! Đây là danh mục đầu tư tương tác phong cách macOS, tích hợp hệ thống cửa sổ kéo-thả, Dock và Menu Bar do mình phát triển giao diện và logic state bằng React, TypeScript, Zustand và Tailwind.',
+            order_index: 2
+          },
+          {
+            id: 3,
+            question: 'Thông tin liên hệ của Hoàng Minh Dương là gì?',
+            answer: 'Bạn có thể liên hệ với mình qua:\n- Email: duonghm.work@gmail.com (hoặc hoanglong.workdl@gmail.com)\n- GitHub: github.com/hmduongdl\n- Website: songphuong.vn\nHoặc bạn có thể gọi hotline: 0911 818 016 để kết nối trực tiếp nhé!',
+            order_index: 3
+          },
+          {
+            id: 4,
+            question: 'Bạn đang theo học chuyên ngành gì và tại đâu?',
+            answer: 'Hiện tại, mình đang là sinh viên ngành Công nghệ Thông tin tại Trường Đại học Đà Lạt (niên khóa 2025 - 2029). Mình tập trung nghiên cứu các thuật toán cơ bản, cấu trúc dữ liệu và phát triển phần mềm.',
+            order_index: 4
+          }
+        ]);
+      });
+  }, []);
+
+  // Auto-scroll to bottom of messages
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isTyping]);
+
+  // Hide initial greeting bubble after 12 seconds
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowBubble(false);
+    }, 12000);
+    return () => clearTimeout(timer);
+  }, []);
+
+  // Handle Mascot click
+  const handleMascotClick = () => {
+    setIsOpen(!isOpen);
+    setShowBubble(false);
+  };
+
+  // Handle click on suggested question
+  const handleQuestionSelect = (qa: ChatbotQA) => {
+    if (isResponding) return;
+
+    setIsResponding(true);
+    // 1. Add User Message
+    setMessages(prev => [...prev, { sender: 'user', text: qa.question }]);
+    // 2. Add question to asked list
+    setAskedIds(prev => [...prev, qa.id]);
+    
+    // 3. Trigger typing simulation
+    setIsTyping(true);
+
+    // Simulated thinking delay (1.2s)
+    setTimeout(() => {
+      setIsTyping(false);
+
+      // 4. Start streaming response
+      const fullAnswer = qa.answer;
+      let streamedText = '';
+      let charIndex = 0;
+
+      // Add empty bot message that we will populate
+      setMessages(prev => [...prev, { sender: 'bot', text: '' }]);
+
+      const streamInterval = setInterval(() => {
+        if (charIndex < fullAnswer.length) {
+          streamedText += fullAnswer[charIndex];
+          setMessages(prev => {
+            const copy = [...prev];
+            if (copy[copy.length - 1]) {
+              copy[copy.length - 1].text = streamedText;
+            }
+            return copy;
+          });
+          charIndex++;
+        } else {
+          clearInterval(streamInterval);
+          setIsResponding(false); // Typing completed
+        }
+      }, 12); // Stream speed: 12ms per char
+    }, 1000);
+  };
+
+  // Reset asked list to allow asking again
+  const handleReset = () => {
+    setAskedIds([]);
+    setMessages(prev => [
+      ...prev,
+      { sender: 'user', text: 'Hỏi lại từ đầu' },
+      { sender: 'bot', text: 'Đã thiết lập lại câu hỏi gợi ý. Bạn có thể hỏi lại các câu hỏi dưới đây!' }
+    ]);
+  };
+
+  // Filter remaining suggestions (limit to 3)
+  const remainingSuggestions = qaList
+    .filter(item => !askedIds.includes(item.id))
+    .slice(0, 3);
+
+  return (
+    <div className="fixed bottom-24 right-8 z-[900] hidden md:flex flex-col items-end pointer-events-none select-none">
+      
+      {/* Speech bubble welcome notification */}
+      {showBubble && !isOpen && (
+        <div className="pointer-events-auto relative mb-3 max-w-[260px] bg-white/80 dark:bg-zinc-800/80 backdrop-blur-xl border border-white/20 dark:border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.15)] p-3.5 rounded-2xl text-xs text-neutral-800 dark:text-neutral-200 animate-in fade-in slide-in-from-bottom-2 duration-300 flex flex-col gap-1.5">
+          <button 
+            onClick={(e) => { e.stopPropagation(); setShowBubble(false); }}
+            className="absolute top-2 right-2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300"
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+          <div className="font-semibold text-emerald-500 flex items-center gap-1">
+            <span>🤖</span> Trợ lý ảo SP-Bot
+          </div>
+          <div className="leading-relaxed pr-3">
+            Tôi ở đây để hỗ trợ bạn tìm hiểu về Hoàng Minh Dương và Song Phương. Cần hỗ trợ gì cứ click nhé!
+          </div>
+          {/* Arrow */}
+          <div className="absolute right-6 -bottom-1.5 w-3 h-3 bg-white/80 dark:bg-zinc-800/80 border-r border-b border-white/20 dark:border-white/10 rotate-45 z-[-1]" />
+        </div>
+      )}
+
+      {/* Main Chatbox Window */}
+      {isOpen && (
+        <div className="pointer-events-auto mb-4 w-[350px] h-[480px] bg-white/70 dark:bg-zinc-900/70 backdrop-blur-3xl border border-white/30 dark:border-zinc-800/50 shadow-[0_12px_40px_rgba(0,0,0,0.25)] rounded-3xl flex flex-col overflow-hidden animate-in slide-in-from-bottom-6 fade-in duration-300">
+          
+          {/* Chat Header */}
+          <div className="px-4 py-3 flex items-center justify-between border-b border-black/5 dark:border-white/5 bg-white/40 dark:bg-zinc-950/20">
+            <div className="flex items-center gap-2.5">
+              <div className="relative w-9 h-9 rounded-full bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20 text-lg">
+                🤖
+                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-500 border-2 border-white dark:border-zinc-900 rounded-full animate-pulse" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[13px] font-bold text-neutral-800 dark:text-neutral-100 leading-tight">SP-Bot Assistant</span>
+                <span className="text-[10px] text-emerald-500 font-medium leading-tight">Trực tuyến</span>
+              </div>
+            </div>
+            <button 
+              onClick={() => setIsOpen(false)}
+              className="w-7 h-7 rounded-full bg-black/5 dark:bg-white/5 flex items-center justify-center hover:bg-black/10 dark:hover:bg-white/10 text-neutral-500 dark:text-neutral-300 transition-colors"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+
+          {/* Chat Messages Thread */}
+          <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3">
+            {messages.map((msg, i) => (
+              <div
+                key={i}
+                className={`flex flex-col max-w-[80%] ${
+                  msg.sender === 'user' ? 'self-end items-end' : 'self-start items-start'
+                }`}
+              >
+                <div
+                  className={`px-3.5 py-2.5 text-[13px] leading-relaxed shadow-[0_1px_2px_rgba(0,0,0,0.05)] rounded-2xl whitespace-pre-line ${
+                    msg.sender === 'user'
+                      ? 'bg-emerald-500 text-white rounded-tr-none'
+                      : 'bg-white/90 dark:bg-zinc-800/90 text-neutral-800 dark:text-neutral-200 border border-black/5 dark:border-white/5 rounded-tl-none'
+                  }`}
+                >
+                  {msg.text}
+                </div>
+              </div>
+            ))}
+
+            {/* Bouncing dots typing indicator */}
+            {isTyping && (
+              <div className="flex items-center gap-1.5 bg-white/90 dark:bg-zinc-800/90 border border-black/5 dark:border-white/5 rounded-2xl rounded-tl-none px-4 py-3 max-w-[64px] self-start shadow-[0_1px_2px_rgba(0,0,0,0.05)]">
+                <div className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                <div className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              </div>
+            )}
+            
+            <div ref={messagesEndRef} />
+          </div>
+
+          {/* Recommended suggestions Footer */}
+          <div className="p-3 border-t border-black/5 dark:border-white/5 bg-white/40 dark:bg-zinc-950/20 flex flex-col gap-2 shrink-0">
+            {remainingSuggestions.length > 0 ? (
+              <>
+                <div className="text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 px-1 uppercase tracking-wider">
+                  Gợi ý câu hỏi
+                </div>
+                <div className="flex flex-col gap-1.5">
+                  {remainingSuggestions.map((qa) => (
+                    <button
+                      key={qa.id}
+                      disabled={isResponding}
+                      onClick={() => handleQuestionSelect(qa)}
+                      className="w-full text-left px-3 py-2 bg-emerald-500/5 hover:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold rounded-xl border border-emerald-500/20 dark:border-emerald-500/10 transition-all hover:translate-x-0.5 disabled:opacity-50 disabled:pointer-events-none cursor-pointer truncate"
+                    >
+                      {qa.question}
+                    </button>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <div className="flex flex-col gap-1.5 py-1">
+                <div className="text-center text-[11px] text-neutral-400 dark:text-neutral-500 mb-1">
+                  Đã xem tất cả gợi ý.
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleReset}
+                    disabled={isResponding}
+                    className="flex-1 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1 cursor-pointer disabled:opacity-50"
+                  >
+                    🔄 Hỏi lại từ đầu
+                  </button>
+                  <a
+                    href="tel:0911818016"
+                    className="flex-1 py-2 bg-black/5 dark:bg-white/5 hover:bg-black/10 dark:hover:bg-white/10 text-neutral-700 dark:text-neutral-300 text-xs font-semibold rounded-xl transition-all flex items-center justify-center gap-1 border border-black/5 dark:border-white/5"
+                  >
+                    📞 Gọi Hotline
+                  </a>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Mascot circular floating button */}
+      <div 
+        onClick={handleMascotClick}
+        className="pointer-events-auto relative w-[54px] h-[54px] bg-white/10 dark:bg-black/40 backdrop-blur-xl border border-white/20 shadow-[0_8px_32px_rgba(0,0,0,0.25)] rounded-full flex items-center justify-center cursor-pointer hover:scale-110 active:scale-95 transition-all duration-300"
+      >
+        <div className="absolute inset-0 rounded-full border border-emerald-400/30 animate-ping" style={{ animationDuration: '2s' }}></div>
+        {/* Animated Glowing Ring */}
+        <div className={`absolute inset-0.5 rounded-full border border-emerald-400/20 ${isOpen ? 'bg-emerald-500/20' : ''}`} />
+        
+        {/* Mascot Face Icon */}
+        <span className="text-2xl drop-shadow-md transform hover:rotate-12 transition-transform">
+          🤖
+        </span>
+      </div>
+
+    </div>
+  );
+};

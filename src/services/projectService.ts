@@ -26,11 +26,28 @@ function toProject(raw: ApiProject): Project {
   };
 }
 
+const cache: Record<string, any> = {};
+
+if (typeof window !== 'undefined') {
+  window.addEventListener('projects-updated', () => {
+    delete cache.projects_vn;
+    delete cache.projects_en;
+  });
+}
+
 export const projectService = {
   async getProjects(lang: 'en' | 'vn' = 'vn'): Promise<Project[]> {
+    const key = `projects_${lang}`;
+    if (cache[key]) return cache[key];
     const response = await fetch(`${API_BASE_URL}/projects?lang=${lang}`);
     if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
     const data: ApiProject[] = await response.json();
-    return data.map(toProject);
+    const mapped = data.map(toProject);
+    cache[key] = mapped;
+    return mapped;
   },
+
+  clearCache() {
+    Object.keys(cache).forEach(k => delete cache[k]);
+  }
 };

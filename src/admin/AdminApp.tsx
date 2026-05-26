@@ -6,8 +6,9 @@ import { SettingsEditor } from './SettingsEditor';
 import { ProductsEditor } from './ProductsEditor';
 import { ProjectsEditor } from './ProjectsEditor';
 import { WidgetSettings } from './WidgetSettings';
+import { ChatbotEditor } from './ChatbotEditor';
 
-type Tab = 'profile' | 'products' | 'projects' | 'settings' | 'ui';
+type Tab = 'profile' | 'products' | 'projects' | 'settings' | 'ui' | 'chatbot';
 
 export const AdminApp: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState(api.isLoggedIn());
@@ -26,6 +27,7 @@ export const AdminApp: React.FC = () => {
     { id: 'profile', label: 'Profile & Timeline', icon: 'person', iconBg: 'bg-primary dark:bg-primary-container', iconColor: 'text-on-primary dark:text-on-primary-container', content: <AdminSettings /> },
     { id: 'products', label: 'Products', icon: 'shopping_bag', iconBg: 'bg-[#64D2FF]', iconColor: 'text-white', content: <ProductsEditor /> },
     { id: 'projects', label: 'Projects', icon: 'folder', iconBg: 'bg-[#FF9F0A]', iconColor: 'text-white', content: <ProjectsEditor /> },
+    { id: 'chatbot', label: 'Trợ lý ảo (Chatbot)', icon: 'forum', iconBg: 'bg-[#34C759]', iconColor: 'text-white', content: <ChatbotEditor /> },
     { id: 'ui', label: 'Giao diện & Widget', icon: 'palette', iconBg: 'bg-[#FF3B30]', iconColor: 'text-white', content: <WidgetSettings /> },
     { id: 'settings', label: 'System & SEO', icon: 'settings', iconBg: 'bg-[#8E8E93]', iconColor: 'text-white', content: <SettingsEditor /> },
   ];
