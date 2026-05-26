@@ -33,12 +33,8 @@ export const AdminApp: React.FC = () => {
   const currentTab = navItems.find(item => item.id === tab);
 
   return (
-    <div className="h-screen w-full flex items-center justify-center bg-gradient-to-br from-[#f5f7fa] to-[#c3cfe2] font-['Inter'] overflow-hidden relative">
-      
-      {/* Background layer for full app if needed, currently gradient handles it */}
-      
-      {/* Mac Window */}
-      <div className="w-[75vw] min-w-[1024px] max-w-[1200px] h-[70vh] min-h-[600px] max-h-[640px] rounded-xl bg-white dark:bg-zinc-900 shadow-[0_20px_50px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden ring-1 ring-black/5">
+    <div className="h-screen w-screen flex flex-col bg-background font-['Inter'] overflow-hidden relative">
+      <div className="flex-1 w-full h-full bg-white dark:bg-zinc-900 flex flex-col overflow-hidden">
         
         {/* Top Header */}
         <header className="h-12 border-b border-black/5 dark:border-white/5 px-4 flex items-center justify-between bg-neutral-100 dark:bg-zinc-800 shrink-0">

@@ -36,10 +36,7 @@ export const WelcomeApp: React.FC = () => {
           <span className="text-lg shrink-0">💬</span>
           <div><b>Zalo Contact</b>: Click để mở cửa sổ Zalo nội bộ, quét mã QR hoặc sao chép nhanh SĐT để liên hệ trực tiếp với tôi.</div>
         </li>
-        <li className="flex gap-3 text-[14px] text-ink-2 leading-[1.5]">
-          <span className="text-lg shrink-0">⚙️</span>
-          <div><b>System Settings</b>: Trang quản trị dành riêng cho quản lý nội dung. (Đăng nhập để cập nhật cơ sở dữ liệu Neon SQL thời gian thực).</div>
-        </li>
+
       </ul>
       
       <div className="p-4 bg-blue-500/10 dark:bg-blue-500/5 text-blue-700 dark:text-blue-200 border border-blue-500/20 rounded-xl text-[13px] leading-[1.6] italic">
