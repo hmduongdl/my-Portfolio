@@ -43,13 +43,9 @@ if (typeof window !== 'undefined') {
 
 export const profileService = {
     async getProfile(lang: 'en' | 'vn' = 'vn'): Promise<ProfileData> {
-        const key = `profile_${lang}`;
-        if (cache[key]) return cache[key];
-        const res = await fetch(`${API_BASE_URL}/profile?lang=${lang}`);
+        const res = await fetch(`${API_BASE_URL}/profile?lang=${lang}`, { cache: 'no-store' });
         if (!res.ok) throw new Error('Failed to fetch SQL profile');
-        const data = await res.json();
-        cache[key] = data;
-        return data;
+        return res.json();
     },
 
     async getTimeline(lang: 'en' | 'vn' = 'vn'): Promise<TimelineItem[]> {

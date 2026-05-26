@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useOSStore } from '../../store/useOSStore';
 import { APP_DEFS } from '../../apps';
 import { profileService } from '../../services/profileService';
-import { profileVN } from '../../data/profileData';
 
 const AppleLogo: React.FC = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
@@ -27,7 +26,7 @@ export const MenuBar: React.FC = () => {
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
   const openApp = useOSStore((state) => state.openApp);
   const language = useOSStore((state) => state.language);
-  const [profile, setProfile] = useState<any>(profileVN);
+  const [profile, setProfile] = useState<any>(null);
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
@@ -40,7 +39,10 @@ export const MenuBar: React.FC = () => {
         .then((p) => {
           if (p) setProfile(p);
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.error('Failed to load profile for menu actions:', err);
+          setProfile(null);
+        });
     };
 
     loadProfile();
@@ -55,12 +57,20 @@ export const MenuBar: React.FC = () => {
   const clock = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 
   const menus = ['File', 'Edit', 'View', 'Window', 'Help'];
+  const openProfileUrl = (key: 'songphuongUrl' | 'email') => {
+    if (!profile?.[key]) {
+      console.warn(`Missing database profile field: ${key}`);
+      return;
+    }
+    const url = key === 'email' ? `mailto:${profile[key]}` : profile[key];
+    window.open(url, '_blank');
+  };
 
   const appleMenu = [
     { label: 'About This Mac', action: () => openApp('about', APP_DEFS) },
     { divider: true },
-    { label: 'Website Song Phương', action: () => window.open(profile?.songphuongUrl || 'https://songphuong.vn', '_blank') },
-    { label: 'Contact Mail', action: () => window.open(`mailto:${profile?.email || 'hoanglong.workdl@gmail.com'}`, '_blank') },
+    { label: 'Website Song Phương', action: () => openProfileUrl('songphuongUrl') },
+    { label: 'Contact Mail', action: () => openProfileUrl('email') },
     { divider: true },
     { label: 'System Settings…', shortcut: '' },
     { label: 'App Store…' },

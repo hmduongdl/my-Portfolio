@@ -4,148 +4,15 @@ import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import crypto from 'crypto';
 
-// ============================================================================
-// 1. DỮ LIỆU DỰ PHÒNG (STATIC FALLBACK DATA)
-// Tự động trả về khi có lỗi kết nối Neon SQL hoặc khi bảng không tồn tại (Lỗi 500)
-// ============================================================================
-const FALLBACK_PROFILE = {
-  id: 1,
-  name: 'Hoàng Minh Dương',
-  title: 'Nhà phát triển Web · Sinh viên CNTT',
-  titleEn: 'Web Developer · IT Student',
-  titleVn: 'Nhà phát triển Web · Sinh viên CNTT',
-  bio: '',
-  bioEn: '',
-  bioVn: '',
-  avatarUrl: '/my-avatar.jpg',
-  email: 'hoanglong.workdl@gmail.com',
-  phone: '',
-  githubUrl: 'https://github.com/hmduongdl',
-  facebookUrl: 'https://facebook.com/',
-  zaloUrl: '',
-  songphuongUrl: 'https://songphuong.vn'
-};
-
-const FALLBACK_TIMELINE = [
-  {
-    id: 1,
-    role: 'Web Developer',
-    company: 'Song Phương Technology',
-    companyUrl: 'https://songphuong.vn',
-    period: 'Tháng 3, 2025 - Hiện tại',
-    desc: [
-      'Thiết kế và phát triển giao diện người dùng sáng tạo cho các trang web và ứng dụng của công ty.',
-      'Quản lý hệ thống cơ sở dữ liệu và tích hợp các API dịch vụ.',
-      'Tối ưu hóa hiệu suất ứng dụng và trải nghiệm người dùng.'
-    ],
-    type: 'work'
-  },
-  {
-    id: 2,
-    role: 'Sinh viên CNTT',
-    company: 'Trường Đại học Đà Lạt',
-    companyUrl: 'https://dlu.edu.vn',
-    period: 'Tháng 8, 2025 - 2029',
-    desc: [
-      'Theo học ngành Công nghệ Thông tin.',
-      'Nghiên cứu các thuật toán cơ bản, cấu trúc dữ liệu và phát triển phần mềm.'
-    ],
-    type: 'education'
-  },
-  {
-    id: 3,
-    role: 'Nhà thiết kế đồ họa 2D',
-    company: 'Freelance',
-    companyUrl: null,
-    period: 'Trước đây',
-    desc: [
-      'Thiết kế logo, nhận diện thương hiệu và ấn phẩm truyền thông cho khách hàng.',
-      'Làm việc với Photoshop, Illustrator và Figma.'
-    ],
-    type: 'freelance'
-  }
-];
-
-const FALLBACK_PROJECTS = [
-  {
-    id: 'portfolio-macos',
-    name: 'Song Phương macOS Portfolio',
-    category: 'web',
-    color: '#2563EB',
-    tags: ['React', 'TypeScript', 'Zustand', 'Tailwind'],
-    desc: 'Portfolio tương tác phong cách macOS, tích hợp hệ thống cửa sổ kéo-thả, Dock và thanh menu. Cá nhân xây dựng toàn bộ UI/UX & logic state cho Song Phương Technology.',
-    demoUrl: 'https://songphuong.vn',
-    githubUrl: 'https://github.com/hmduongdl'
-  },
-  {
-    id: 'ecommerce-integration',
-    name: 'E-Commerce System Integration',
-    category: 'web',
-    color: '#10B981',
-    tags: ['Node.js', 'Express', 'SQL Server', 'RESTful API'],
-    desc: 'Hệ thống tích hợp thương mại điện tử với RESTful API, quản lý sản phẩm & đơn hàng, backend SQL Server. Cá nhân thiết kế kiến trúc API và tối ưu hóa query cho Song Phương Technology.',
-    demoUrl: null,
-    githubUrl: 'https://github.com/hmduongdl'
-  },
-  {
-    id: 'brand-identity',
-    name: 'Song Phương Brand Identity & Visual Assets',
-    category: 'design',
-    color: '#F59E0B',
-    tags: ['Photoshop', 'Illustrator', 'Figma', '2D Design'],
-    desc: 'Bộ nhận diện thương hiệu đầy đủ: thiết kế logo, hệ màu, typography và tài sản kỹ thuật số/in ấn. Cá nhân thực hiện toàn bộ từ concept đến xuất file sản xuất cho Song Phương Technology.',
-    demoUrl: null,
-    githubUrl: null
-  },
-  {
-    id: 'auto-backup-tool',
-    name: 'Auto Backup Tool & Database Syncer',
-    category: 'tools',
-    color: '#EF4444',
-    tags: ['Python', 'CronJob', 'SQL Shell'],
-    desc: 'Công cụ sao lưu tự động và đồng bộ cơ sở dữ liệu, chạy theo lịch với CronJob. Cá nhân viết script và thiết lập pipeline đồng bộ dev–production.',
-    demoUrl: null,
-    githubUrl: 'https://github.com/hmduongdl'
-  }
-];
-
-const FALLBACK_PRODUCTS: any[] = [];
-
-const FALLBACK_SEO = {
+// SEO defaults are used only when optional SEO keys are missing in tbl_settings.
+// Public app data endpoints now fail visibly instead of serving static mock data.
+const DEFAULT_SEO = {
   title: 'Hoàng Minh Dương — Portfolio | Web Developer tại Song Phương Technology',
   description: 'Hoàng Minh Dương — Sinh viên IT Đại học Đà Lạt, Web Developer thực chiến tại Song Phương Technology, Freelance Designer. Chuyên React, TypeScript, Node.js và thiết kế UI/UX hiện đại.',
   keywords: 'Hoàng Minh Dương, Web Developer, Front End Developer, React, TypeScript, Node.js, Song Phương Technology, Đại học Đà Lạt, Freelance Designer, Portfolio',
   ogImage: 'https://hmduongdl.github.io/Minimalist-Design-Portfolio/songphuong-logo.png',
   twitterCard: 'summary_large_image'
 };
-
-const FALLBACK_CHATBOT_QA = [
-  {
-    id: 1,
-    question: 'Song Phương Technology làm về lĩnh vực gì và bạn làm gì ở đó?',
-    answer: 'Song Phương Technology là công ty chuyên cung cấp các giải pháp công nghệ thông tin và dịch vụ phần mềm chất lượng cao. Mình làm Web Developer tại đây từ tháng 3/2025. Công việc chính là thiết kế và phát triển giao diện người dùng sáng tạo cho các dự án, quản lý hệ thống cơ sở dữ liệu và tích hợp các API dịch vụ.',
-    order_index: 1
-  },
-  {
-    id: 2,
-    question: 'Dự án tiêu biểu nhất bạn từng phát triển là gì?',
-    answer: 'Dự án tiêu biểu nhất của mình là "Song Phương macOS Portfolio" - chính là trang web bạn đang trải nghiệm! Đây là danh mục đầu tư tương tác phong cách macOS, tích hợp hệ thống cửa sổ kéo-thả, Dock và Menu Bar do mình phát triển giao diện và logic state bằng React, TypeScript, Zustand và Tailwind.',
-    order_index: 2
-  },
-  {
-    id: 3,
-    question: 'Thông tin liên hệ của Hoàng Minh Dương là gì?',
-    answer: 'Bạn có thể liên hệ với mình qua:\n- Email: hoanglong.workdl@gmail.com\n- GitHub: github.com/hmduongdl\n- Website: songphuong.vn\nHoặc bạn có thể gọi hotline: 0911 818 016 để kết nối trực tiếp nhé!',
-    order_index: 3
-  },
-  {
-    id: 4,
-    question: 'Bạn đang theo học chuyên ngành gì và tại đâu?',
-    answer: 'Hiện tại, mình đang là sinh viên ngành Công nghệ Thông tin tại Trường Đại học Đà Lạt (niên khóa 2025 - 2029). Mình tập trung nghiên cứu các thuật toán cơ bản, cấu trúc dữ liệu và phát triển phần mềm.',
-    order_index: 4
-  }
-];
-
 
 // ============================================================================
 // 2. KẾT NỐI NEON SQL BẰNG PG POOL (Singleton Pattern)
@@ -184,6 +51,84 @@ async function runQuery(query: string, params: any[] = []) {
   } finally {
     client.release();
   }
+}
+
+function sendDatabaseError(res: VercelResponse, endpoint: string, error: unknown) {
+  console.error(`[API Error] ${endpoint}:`, error);
+  res.setHeader('x-database-status', 'error');
+  return res.status(503).json({
+    error: 'DATABASE_UNAVAILABLE',
+    message: `Unable to load ${endpoint} from database`
+  });
+}
+
+function stripPrefix(value: string, prefix: RegExp) {
+  return value.replace(prefix, '').trim();
+}
+
+function toMailto(email: string) {
+  const clean = stripPrefix(email, /^mailto:/i);
+  return clean ? `mailto:${clean}` : '';
+}
+
+function toTel(phone: string) {
+  const clean = stripPrefix(phone, /^tel:/i);
+  return clean ? `tel:${clean}` : '';
+}
+
+function toZaloUrl(zaloUrl: string, phone: string) {
+  if (zaloUrl.trim()) return zaloUrl.trim();
+  const cleanPhone = stripPrefix(phone, /^tel:/i).replace(/[^\d+]/g, '');
+  return cleanPhone ? `https://zalo.me/${cleanPhone}` : '';
+}
+
+function profileContactLinks(profile: Record<string, any>) {
+  return [
+    { platform: 'github', label: 'GitHub', url: profile.github_url || profile.githubUrl || '', visible: true, order_index: 0 },
+    { platform: 'facebook', label: 'Facebook', url: profile.facebook_url || profile.facebookUrl || '', visible: true, order_index: 1 },
+    { platform: 'gmail', label: 'Gmail', url: toMailto(profile.email || ''), visible: true, order_index: 2 },
+    { platform: 'phone', label: 'Phone', url: toTel(profile.phone || ''), visible: true, order_index: 3 },
+    { platform: 'zalo', label: 'Zalo', url: toZaloUrl(profile.zalo_url || profile.zaloUrl || '', profile.phone || ''), visible: true, order_index: 4 },
+    { platform: 'songphuong', label: 'Song Phương Website', url: profile.songphuong_url || profile.songphuongUrl || '', visible: true, order_index: 5 }
+  ];
+}
+
+async function syncSocialLinksFromProfile(profile: Record<string, any>) {
+  for (const link of profileContactLinks(profile)) {
+    await runQuery(
+      `INSERT INTO tbl_social_links (platform, label, url, visible, order_index, updated_at)
+       VALUES ($1, $2, $3, $4, $5, NOW())
+       ON CONFLICT (platform) DO UPDATE SET
+         url = EXCLUDED.url,
+         label = EXCLUDED.label,
+         order_index = EXCLUDED.order_index,
+         updated_at = NOW()`,
+      [link.platform, link.label, link.url, link.visible, link.order_index]
+    );
+  }
+}
+
+async function syncProfileFromSocialLinks(links: Array<{ platform: string; url?: string }>) {
+  const patch: Record<string, string> = {};
+  for (const link of links) {
+    const platform = link.platform;
+    const url = String(link.url ?? '').trim();
+    if (platform === 'github') patch.github_url = url;
+    if (platform === 'facebook') patch.facebook_url = url;
+    if (platform === 'gmail') patch.email = stripPrefix(url, /^mailto:/i);
+    if (platform === 'phone') patch.phone = url;
+    if (platform === 'zalo') patch.zalo_url = url;
+    if (platform === 'songphuong') patch.songphuong_url = url;
+  }
+
+  const keys = Object.keys(patch);
+  if (keys.length === 0) return;
+
+  const assignments = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
+  await runQuery(
+    `UPDATE tbl_profile SET ${assignments}, updated_at = NOW() WHERE id = 1`,
+    keys.map((key) => patch[key])
+  );
 }
 
 // Helper xác thực (JWT admin bảo mật)
@@ -354,14 +299,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           bioVn: p.bio_vn
         });
       } catch (e) {
-        console.error('[API Fallback] /profile error:', e);
-        res.setHeader('x-database-status', 'fallback_error');
-        const fb = FALLBACK_PROFILE;
-        return res.status(200).json({
-          ...fb,
-          title: lang === 'en' ? fb.titleEn : fb.titleVn,
-          bio: lang === 'en' ? fb.bioEn : fb.bioVn
-        });
+        return sendDatabaseError(res, '/profile', e);
       }
     }
 
@@ -393,14 +331,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         return res.status(200).json(mappedTimeline);
       } catch (e) {
-        console.error('[API Fallback] /timeline error:', e);
-        res.setHeader('x-database-status', 'fallback_error');
-        const fb = FALLBACK_TIMELINE.map(t => ({
-          ...t,
-          role: lang === 'en' && t.role === 'Sinh viên CNTT' ? 'IT Student' : t.role,
-          period: lang === 'en' && t.period.includes('Hiện tại') ? 'Mar 2025 - Present' : t.period
-        }));
-        return res.status(200).json(fb);
+        return sendDatabaseError(res, '/timeline', e);
       }
     }
 
@@ -427,9 +358,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }));
         return res.status(200).json(mappedProducts);
       } catch (e) {
-        console.error('[API Fallback] /products error:', e);
-        res.setHeader('x-database-status', 'fallback_error');
-        return res.status(200).json(FALLBACK_PRODUCTS);
+        return sendDatabaseError(res, '/products', e);
       }
     }
 
@@ -460,33 +389,37 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         });
         return res.status(200).json(mappedProjects);
       } catch (e) {
-        console.error('[API Fallback] /projects error:', e);
-        res.setHeader('x-database-status', 'fallback_error');
-        const fb = FALLBACK_PROJECTS.map(p => ({
-          ...p,
-          desc: lang === 'en' ? p.desc.replace('Cá nhân', 'Personally') : p.desc
-        }));
-        return res.status(200).json(fb);
+        return sendDatabaseError(res, '/projects', e);
       }
     }
 
     // /SOCIALS
     if (path === '/socials') {
       try {
-        const rows = await runQuery('SELECT * FROM tbl_social_links WHERE visible = true ORDER BY order_index ASC');
+        const [profile] = await runQuery('SELECT * FROM tbl_profile LIMIT 1');
+        const rows = await runQuery('SELECT * FROM tbl_social_links ORDER BY order_index ASC, id ASC');
+        const byPlatform = new Map<string, any>();
+        for (const row of rows) {
+          byPlatform.set(row.platform, row);
+        }
+        if (profile) {
+          for (const link of profileContactLinks(profile)) {
+            const existing = byPlatform.get(link.platform);
+            byPlatform.set(link.platform, {
+              ...existing,
+              ...link,
+              visible: existing?.visible !== false,
+              order_index: existing?.order_index ?? link.order_index
+            });
+          }
+        }
+        const visibleRows = Array.from(byPlatform.values())
+          .filter((row) => row.visible !== false)
+          .sort((a, b) => (a.order_index ?? 0) - (b.order_index ?? 0));
         res.setHeader('x-database-status', 'online');
-        return res.status(200).json(rows);
+        return res.status(200).json(visibleRows);
       } catch (e) {
-        console.error('[API Fallback] /socials error:', e);
-        res.setHeader('x-database-status', 'fallback_error');
-        const fallbackSocials = [
-          { platform: 'github', label: 'GitHub', url: 'https://github.com/hmduongdl' },
-          { platform: 'facebook', label: 'Facebook', url: 'https://facebook.com/' },
-          { platform: 'gmail', label: 'Gmail', url: 'mailto:hoanglong.workdl@gmail.com' },
-          { platform: 'phone', label: 'Phone', url: 'tel:+84' },
-          { platform: 'zalo', label: 'Zalo', url: 'https://zalo.me/' }
-        ];
-        return res.status(200).json(fallbackSocials);
+        return sendDatabaseError(res, '/socials', e);
       }
     }
 
@@ -503,16 +436,14 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         }
 
         return res.status(200).json({
-          title: settingsObj['seo_title'] || FALLBACK_SEO.title,
-          description: settingsObj['seo_description'] || FALLBACK_SEO.description,
-          keywords: settingsObj['seo_keywords'] || FALLBACK_SEO.keywords,
-          ogImage: settingsObj['og_image'] || FALLBACK_SEO.ogImage,
-          twitterCard: settingsObj['twitter_card'] || FALLBACK_SEO.twitterCard
+          title: settingsObj['seo_title'] || DEFAULT_SEO.title,
+          description: settingsObj['seo_description'] || DEFAULT_SEO.description,
+          keywords: settingsObj['seo_keywords'] || DEFAULT_SEO.keywords,
+          ogImage: settingsObj['og_image'] || DEFAULT_SEO.ogImage,
+          twitterCard: settingsObj['twitter_card'] || DEFAULT_SEO.twitterCard
         });
       } catch (e) {
-        console.error('[API Fallback] /seo error:', e);
-        res.setHeader('x-database-status', 'fallback_error');
-        return res.status(200).json(FALLBACK_SEO);
+        return sendDatabaseError(res, '/seo', e);
       }
     }
 
@@ -530,24 +461,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           )
         `);
 
-        // Check if empty, seed default data
-        const checkRows = await runQuery('SELECT COUNT(*) FROM tbl_chatbot_qa');
-        if (parseInt(checkRows[0].count, 10) === 0) {
-          for (const item of FALLBACK_CHATBOT_QA) {
-            await runQuery(
-              'INSERT INTO tbl_chatbot_qa (question, answer, order_index) VALUES ($1, $2, $3)',
-              [item.question, item.answer, item.order_index]
-            );
-          }
-        }
-
         const rows = await runQuery('SELECT * FROM tbl_chatbot_qa ORDER BY order_index ASC, id ASC');
         res.setHeader('x-database-status', 'online');
         return res.status(200).json(rows);
       } catch (e) {
-        console.error('[API Fallback] /chatbot error:', e);
-        res.setHeader('x-database-status', 'fallback_error');
-        return res.status(200).json(FALLBACK_CHATBOT_QA);
+        return sendDatabaseError(res, '/chatbot', e);
       }
     }
   }
@@ -565,6 +483,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'PUT' && path === '/admin/profile') {
       const b = req.body ?? {};
       try {
+        const nextProfile = {
+          name: b.name ?? '',
+          title_en: b.title_en ?? b.titleEn ?? '',
+          title_vn: b.title_vn ?? b.titleVn ?? '',
+          bio_en: b.bio_en ?? b.bioEn ?? '',
+          bio_vn: b.bio_vn ?? b.bioVn ?? '',
+          avatar_url: b.avatar_url ?? b.avatarUrl ?? b.avatar ?? '',
+          email: stripPrefix(b.email ?? '', /^mailto:/i),
+          phone: b.phone ?? '',
+          github_url: b.github_url ?? b.githubUrl ?? b.github ?? '',
+          facebook_url: b.facebook_url ?? b.facebookUrl ?? b.facebook ?? '',
+          zalo_url: b.zalo_url ?? b.zaloUrl ?? b.zalo ?? '',
+          songphuong_url: b.songphuong_url ?? b.songPhuongUrl ?? ''
+        };
+
         await runQuery(
           `UPDATE tbl_profile SET 
             name = $1,
@@ -582,21 +515,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             updated_at = NOW() 
            WHERE id = 1`,
           [
-            b.name ?? '',
-            b.title_en ?? b.titleEn ?? '',
-            b.title_vn ?? b.titleVn ?? '',
-            b.bio_en ?? b.bioEn ?? '',
-            b.bio_vn ?? b.bioVn ?? '',
-            b.avatar_url ?? b.avatarUrl ?? b.avatar ?? '',
-            b.email ?? '',
-            b.phone ?? '',
-            b.github_url ?? b.githubUrl ?? b.github ?? '',
-            b.facebook_url ?? b.facebookUrl ?? b.facebook ?? '',
-            b.zalo_url ?? b.zaloUrl ?? b.zalo ?? '',
-            b.songphuong_url ?? b.songPhuongUrl ?? ''
+            nextProfile.name,
+            nextProfile.title_en,
+            nextProfile.title_vn,
+            nextProfile.bio_en,
+            nextProfile.bio_vn,
+            nextProfile.avatar_url,
+            nextProfile.email,
+            nextProfile.phone,
+            nextProfile.github_url,
+            nextProfile.facebook_url,
+            nextProfile.zalo_url,
+            nextProfile.songphuong_url
           ]
         );
-        return res.status(200).json({ success: true, message: 'Cập nhật Profile thành công.' });
+        await syncSocialLinksFromProfile(nextProfile);
+        return res.status(200).json({ success: true, message: 'Cập nhật Profile và đồng bộ liên hệ thành công.' });
       } catch (e: any) {
         return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
       }
@@ -942,6 +876,54 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // --- 5. CONTACT AUDIT ---
+    if (req.method === 'GET' && path === '/admin/contact-audit') {
+      try {
+        const [profile] = await runQuery('SELECT * FROM tbl_profile LIMIT 1');
+        const socialLinks = await runQuery('SELECT * FROM tbl_social_links ORDER BY order_index ASC, id ASC');
+        const legacyTables = await runQuery(
+          `SELECT table_name
+           FROM information_schema.tables
+           WHERE table_schema = 'public'
+             AND table_name IN ('profile', 'social_links', 'tb_social_links')`
+        );
+
+        const legacy: Record<string, any[]> = {};
+        for (const table of legacyTables) {
+          if (table.table_name === 'profile') {
+            legacy.profile = await runQuery('SELECT * FROM profile LIMIT 5');
+          }
+          if (table.table_name === 'social_links') {
+            legacy.social_links = await runQuery('SELECT * FROM social_links ORDER BY order_index ASC, id ASC');
+          }
+          if (table.table_name === 'tb_social_links') {
+            legacy.tb_social_links = await runQuery('SELECT * FROM tb_social_links ORDER BY order_index ASC, id ASC');
+          }
+        }
+
+        const expected = profile ? profileContactLinks(profile) : [];
+        const socialMap = new Map(socialLinks.map((link: any) => [link.platform, link.url]));
+        const mismatches = expected
+          .filter((link) => (socialMap.get(link.platform) ?? '') !== link.url)
+          .map((link) => ({
+            platform: link.platform,
+            profileDerivedUrl: link.url,
+            tblSocialLinksUrl: socialMap.get(link.platform) ?? ''
+          }));
+
+        return res.status(200).json({
+          sourceOfTruth: 'tbl_profile',
+          profile,
+          expectedSocialLinks: expected,
+          tblSocialLinks: socialLinks,
+          legacyTables: legacy,
+          mismatches
+        });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
     // --- 5. SYSTEM & SEO SETTINGS ---
     if (req.method === 'GET' && path === '/admin/settings') {
       try {
@@ -1012,6 +994,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
               );
             }
           }
+          await syncProfileFromSocialLinks(socialLinks);
         }
 
         if (seoSettings && typeof seoSettings === 'object') {
@@ -1065,6 +1048,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             ]
           );
         }
+        await syncProfileFromSocialLinks(links);
         return res.status(200).json({ success: true, updated: links.length });
       } catch (e: any) {
         return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });

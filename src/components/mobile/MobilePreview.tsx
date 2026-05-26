@@ -162,7 +162,11 @@ export const MobilePreview: React.FC<MobilePreviewProps> = ({ apps, socialApps =
     const social = socialApps.find((s) => s.id === id);
     if (social) {
       const matched = socials.find(s => s.platform === id);
-      const url = matched?.url || social.mailto || social.url;
+      const url = matched?.url;
+      if (!url) {
+        console.warn(`Missing database social URL for ${id}`);
+        return;
+      }
       window.open(url, '_blank');
       return;
     }

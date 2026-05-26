@@ -18,11 +18,19 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
   };
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [profileLoadFailed, setProfileLoadFailed] = useState(false);
 
   useEffect(() => {
     profileService.getProfile(language)
-      .then(setProfile)
-      .catch((err) => console.error('Failed to load profile in widget:', err));
+      .then((data) => {
+        setProfile(data);
+        setProfileLoadFailed(false);
+      })
+      .catch((err) => {
+        console.error('Failed to load profile in widget:', err);
+        setProfile(null);
+        setProfileLoadFailed(true);
+      });
   }, [language]);
 
   const experienceYears = Math.max(1, new Date().getFullYear() - 2025);
@@ -40,17 +48,17 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-3">
           <img
-            src={profile?.avatarUrl || '/my-avatar.jpg'}
+            src={profile?.avatarUrl || '/songphuong-logo.png'}
             className="w-12 h-12 rounded-full border border-white/50 object-cover shadow-sm bg-neutral-100"
             alt="Avatar"
           />
           <div className="flex flex-col">
             <span className="text-[9px] font-bold text-gray-400 dark:text-zinc-500 tracking-wider">ABOUT ME</span>
             <span className="text-base font-bold text-gray-800 dark:text-white mt-0.5 leading-none">
-              {profile?.name || 'Song Phương'}
+              {profile?.name || (profileLoadFailed ? 'DB unavailable' : 'Đang tải...')}
             </span>
             <span className="text-[11px] text-gray-500 dark:text-zinc-400 mt-1">
-              {profile?.title || 'Product Designer & Dev'}
+              {profile?.title || (profileLoadFailed ? 'Không tải được profile' : 'Đang tải profile')}
             </span>
           </div>
         </div>
@@ -154,4 +162,3 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
     </div>
   );
 };
-

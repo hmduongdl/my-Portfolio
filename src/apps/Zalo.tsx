@@ -6,15 +6,21 @@ import { profileService } from '../services/profileService';
 export const ZaloApp: React.FC = () => {
   const [showToast, setShowToast] = useState(false);
   const language = useOSStore((state) => state.language);
-  const [phone, setPhone] = useState<string>('0911818016');
+  const [phone, setPhone] = useState<string>('');
+  const [phoneLoadFailed, setPhoneLoadFailed] = useState(false);
 
   useEffect(() => {
     const loadProfile = () => {
       profileService.getProfile(language)
         .then((p) => {
+          setPhoneLoadFailed(false);
           if (p && p.phone) setPhone(p.phone);
         })
-        .catch(() => {});
+        .catch((err) => {
+          console.error('Failed to load Zalo phone from database:', err);
+          setPhone('');
+          setPhoneLoadFailed(true);
+        });
     };
 
     loadProfile();
@@ -36,6 +42,7 @@ export const ZaloApp: React.FC = () => {
   displayPhone = displayPhone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
 
   const handleCopy = async () => {
+    if (!cleanPhone) return;
     try {
       await navigator.clipboard.writeText(cleanPhone);
       setShowToast(true);
@@ -105,7 +112,7 @@ export const ZaloApp: React.FC = () => {
           {/* Phone Number */}
           <div className="flex items-center gap-2 mt-3.5">
             <span className="text-[15px] font-semibold text-gray-900 dark:text-white tracking-wide">
-              {displayPhone}
+              {displayPhone || (phoneLoadFailed ? 'Không tải được SĐT từ DB' : 'Đang tải SĐT...')}
             </span>
           </div>
         </div>
@@ -116,7 +123,11 @@ export const ZaloApp: React.FC = () => {
             href={`https://zalo.me/${cleanPhone}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-[#0068FF] hover:bg-[#005AE0] text-white text-[13px] font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 shadow-[0_2px_6px_rgba(0,104,255,0.25)] transition-all active:scale-[0.98] w-full select-none cursor-pointer"
+            aria-disabled={!cleanPhone}
+            onClick={(e) => {
+              if (!cleanPhone) e.preventDefault();
+            }}
+            className={`text-white text-[13px] font-semibold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 shadow-[0_2px_6px_rgba(0,104,255,0.25)] transition-all active:scale-[0.98] w-full select-none ${cleanPhone ? 'bg-[#0068FF] hover:bg-[#005AE0] cursor-pointer' : 'bg-gray-400 cursor-not-allowed opacity-70'}`}
           >
             <MessageSquare className="w-4 h-4" />
             Nhắn tin Zalo
@@ -124,7 +135,8 @@ export const ZaloApp: React.FC = () => {
 
           <button
             onClick={handleCopy}
-            className="bg-white/5 hover:bg-white/10 text-gray-800 dark:text-white/90 border border-gray-200 dark:border-white/10 shadow-sm text-[13px] font-semibold py-2.5 px-4 rounded-lg transition-all active:scale-[0.98] w-full flex items-center justify-center gap-2 select-none cursor-pointer backdrop-blur-sm"
+            disabled={!cleanPhone}
+            className="bg-white/5 hover:bg-white/10 text-gray-800 dark:text-white/90 border border-gray-200 dark:border-white/10 shadow-sm text-[13px] font-semibold py-2.5 px-4 rounded-lg transition-all active:scale-[0.98] w-full flex items-center justify-center gap-2 select-none cursor-pointer backdrop-blur-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Copy className="w-4 h-4" />
             Sao chép SĐT

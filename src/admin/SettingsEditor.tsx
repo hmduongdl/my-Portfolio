@@ -182,6 +182,8 @@ export const SettingsEditor: React.FC = () => {
 
       setSaveStatus('ok');
       showToast('Đã lưu cấu hình thành công', 'ok');
+      window.dispatchEvent(new Event('profile-updated'));
+      window.dispatchEvent(new Event('social-links-updated'));
       await loadSettings();
       setTimeout(() => setSaveStatus('idle'), 2000);
     } catch (e: any) {

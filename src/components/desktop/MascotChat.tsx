@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { chatbotService, ChatbotQA } from '../../services/chatbotService';
+import { profileService } from '../../services/profileService';
 
 interface Message {
   sender: 'bot' | 'user';
@@ -19,6 +20,7 @@ export const MascotChat: React.FC = () => {
   const [askedIds, setAskedIds] = useState<number[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isResponding, setIsResponding] = useState(false);
+  const [hotline, setHotline] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -28,33 +30,20 @@ export const MascotChat: React.FC = () => {
       .then(data => setQaList(data))
       .catch(err => {
         console.error('Error fetching Q&As:', err);
-        // Fallback initialized locally if API fails
-        setQaList([
-          {
-            id: 1,
-            question: 'Song Phương Technology làm về lĩnh vực gì và bạn làm gì ở đó?',
-            answer: 'Song Phương Technology là công ty chuyên cung cấp các giải pháp công nghệ thông tin và dịch vụ phần mềm chất lượng cao. Mình làm Web Developer tại đây từ tháng 3/2025. Công việc chính là thiết kế và phát triển giao diện người dùng sáng tạo cho các dự án, quản lý hệ thống cơ sở dữ liệu và tích hợp các API dịch vụ.',
-            order_index: 1
-          },
-          {
-            id: 2,
-            question: 'Dự án tiêu biểu nhất bạn từng phát triển là gì?',
-            answer: 'Dự án tiêu biểu nhất của mình là "Song Phương macOS Portfolio" - chính là trang web bạn đang trải nghiệm! Đây là danh mục đầu tư tương tác phong cách macOS, tích hợp hệ thống cửa sổ kéo-thả, Dock và Menu Bar do mình phát triển giao diện và logic state bằng React, TypeScript, Zustand và Tailwind.',
-            order_index: 2
-          },
-          {
-            id: 3,
-            question: 'Thông tin liên hệ của Hoàng Minh Dương là gì?',
-            answer: 'Bạn có thể liên hệ với mình qua:\n- Email: hoanglong.workdl@gmail.com\n- GitHub: github.com/hmduongdl\n- Website: songphuong.vn\nHoặc bạn có thể gọi hotline: 0911 818 016 để kết nối trực tiếp nhé!',
-            order_index: 3
-          },
-          {
-            id: 4,
-            question: 'Bạn đang theo học chuyên ngành gì và tại đâu?',
-            answer: 'Hiện tại, mình đang là sinh viên ngành Công nghệ Thông tin tại Trường Đại học Đà Lạt (niên khóa 2025 - 2029). Mình tập trung nghiên cứu các thuật toán cơ bản, cấu trúc dữ liệu và phát triển phần mềm.',
-            order_index: 4
-          }
+        setQaList([]);
+        setMessages(prev => [
+          ...prev,
+          { sender: 'bot', text: 'Không tải được danh sách câu hỏi từ database. Vui lòng kiểm tra kết nối hoặc dữ liệu chatbot trong admin.' }
         ]);
+      });
+  }, []);
+
+  useEffect(() => {
+    profileService.getProfile('vn')
+      .then((profile) => setHotline(profile?.phone || ''))
+      .catch((err) => {
+        console.error('Error fetching hotline:', err);
+        setHotline('');
       });
   }, []);
 
@@ -139,6 +128,7 @@ export const MascotChat: React.FC = () => {
   const remainingSuggestions = qaList
     .filter(item => !askedIds.includes(item.id))
     .slice(0, 3);
+  const cleanHotline = hotline.replace(/^tel:/i, '').replace(/[^\d+]/g, '');
 
   return (
     <div className="fixed bottom-[45px] right-[45px] xl:right-[54px] z-[900] hidden md:flex flex-col items-end pointer-events-none select-none">
@@ -254,8 +244,12 @@ export const MascotChat: React.FC = () => {
                     🔄 Hỏi lại từ đầu
                   </button>
                   <a
-                    href="tel:0911818016"
-                    className="flex-1 py-2 bg-white/5 hover:bg-white/10 text-zinc-300 text-xs xl:text-[13px] font-semibold rounded-xl transition-all flex items-center justify-center gap-1 border border-white/10"
+                    href={cleanHotline ? `tel:${cleanHotline}` : undefined}
+                    aria-disabled={!cleanHotline}
+                    onClick={(e) => {
+                      if (!cleanHotline) e.preventDefault();
+                    }}
+                    className={`flex-1 py-2 text-zinc-300 text-xs xl:text-[13px] font-semibold rounded-xl transition-all flex items-center justify-center gap-1 border border-white/10 ${cleanHotline ? 'bg-white/5 hover:bg-white/10' : 'bg-white/5 opacity-50 cursor-not-allowed'}`}
                   >
                     📞 Gọi Hotline
                   </a>

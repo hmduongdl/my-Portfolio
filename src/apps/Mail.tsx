@@ -2,9 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useOSStore } from '../store/useOSStore';
 import { profileService } from '../services/profileService';
 
-// Correct fallback — matches database default
-const FALLBACK_EMAIL = 'hoanglong.workdl@gmail.com';
-
 /** Strip "mailto:" prefix if present (defensive — API may return link format) */
 function cleanEmail(raw: string): string {
   return raw.replace(/^mailto:/i, '').trim();
@@ -17,16 +14,20 @@ export const MailApp: React.FC = () => {
   const [sent, setSent] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const language = useOSStore((state) => state.language);
-  const [recipientEmail, setRecipientEmail] = useState<string>(FALLBACK_EMAIL);
+  const [recipientEmail, setRecipientEmail] = useState<string>('');
+  const [recipientLoadFailed, setRecipientLoadFailed] = useState(false);
 
   useEffect(() => {
     const loadProfile = () => {
       profileService.getProfile(language)
         .then((p) => {
+          setRecipientLoadFailed(false);
           if (p?.email) setRecipientEmail(cleanEmail(p.email));
         })
-        .catch(() => {
-          // Keep fallback on network error
+        .catch((err) => {
+          console.error('Failed to load recipient email from database:', err);
+          setRecipientEmail('');
+          setRecipientLoadFailed(true);
         });
     };
 
@@ -39,6 +40,7 @@ export const MailApp: React.FC = () => {
 
   const handleSend = () => {
     const e: Record<string, string> = {};
+    if (!recipientEmail) e.to = 'Recipient email unavailable from database';
     if (!from || !/^\S+@\S+\.\S+$/.test(from)) e.from = 'Enter a valid email';
     if (!subject.trim()) e.subject = 'Subject required';
     if (!body.trim()) e.body = 'Message required';
@@ -97,7 +99,11 @@ export const MailApp: React.FC = () => {
       <div className="px-4 flex flex-col bg-paper flex-shrink-0">
         <div className="flex items-center border-b border-neutral-200/10 dark:border-white/5 py-1.5 gap-2">
           <span className="text-xs text-neutral-400 dark:text-neutral-500 w-16 shrink-0">To:</span>
-          <span className="text-[13px] font-medium text-ink">{recipientEmail}</span>
+          <span
+            className={`text-[13px] font-medium ${recipientEmail ? 'text-ink' : 'text-red-500 dark:text-red-400'}`}
+          >
+            {recipientEmail || (recipientLoadFailed ? 'Không tải được email từ database' : 'Đang tải email từ database...')}
+          </span>
         </div>
         <div className="flex items-center border-b border-neutral-200/10 dark:border-white/5 py-1.5 gap-2">
           <span className="text-xs text-neutral-400 dark:text-neutral-500 w-16 shrink-0">From:</span>

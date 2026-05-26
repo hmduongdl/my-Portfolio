@@ -67,7 +67,11 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
             return;
         }
         const matchedSocial = socials.find(s => s.platform === app.id);
-        const url = matchedSocial?.url || app.url || app.mailto;
+        const url = matchedSocial?.url;
+        if (!url) {
+            console.warn(`Missing database social URL for ${app.id}`);
+            return;
+        }
         if (url) {
             window.open(url, '_blank', 'noopener,noreferrer');
         }

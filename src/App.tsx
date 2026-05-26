@@ -118,6 +118,18 @@ export const App: React.FC = () => {
     bootSystem();
   }, [fetchSocials]);
 
+  useEffect(() => {
+    const refreshContactLinks = () => {
+      void fetchSocials();
+    };
+    window.addEventListener('profile-updated', refreshContactLinks);
+    window.addEventListener('social-links-updated', refreshContactLinks);
+    return () => {
+      window.removeEventListener('profile-updated', refreshContactLinks);
+      window.removeEventListener('social-links-updated', refreshContactLinks);
+    };
+  }, [fetchSocials]);
+
   // Open Social apps or normal apps inside simulated iOS smartphone screens
   // Zalo always opens as an in-app card (same experience as desktop)
   // Other social platforms open their URL in a new tab using the dynamic DB value
@@ -128,11 +140,15 @@ export const App: React.FC = () => {
       return;
     }
 
-    // Other social apps: open dynamic URL from DB, fall back to static
+    // Other social apps: open dynamic URL from DB only.
     const social = SOCIAL_APPS.find((s) => s.id === id);
     if (social) {
       const matched = socials.find(s => s.platform === id);
-      const url = matched?.url || social.mailto || social.url;
+      const url = matched?.url;
+      if (!url) {
+        console.warn(`Missing database social URL for ${id}`);
+        return;
+      }
       if (url) window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }

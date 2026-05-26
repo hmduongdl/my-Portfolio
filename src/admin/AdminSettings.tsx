@@ -28,6 +28,22 @@ const EMPTY: ProfileData = {
 };
 
 type SaveStatus = 'idle' | 'saving' | 'ok' | 'error';
+type AuditStatus = 'idle' | 'checking' | 'syncing';
+
+interface ContactAudit {
+  sourceOfTruth: string;
+  mismatches: Array<{
+    platform: string;
+    profileDerivedUrl: string;
+    tblSocialLinksUrl: string;
+  }>;
+  legacyTables: Record<string, unknown[]>;
+  expectedSocialLinks: Array<{
+    platform: string;
+    label: string;
+    url: string;
+  }>;
+}
 
 // ────────────────────────────────────────────────────────────────────────────
 // Sub-components
@@ -119,6 +135,8 @@ export const AdminSettings: React.FC = () => {
   const [original, setOriginal] = useState<ProfileData>(EMPTY);
   const [loading, setLoading] = useState(true);
   const [status, setStatus] = useState<SaveStatus>('idle');
+  const [auditStatus, setAuditStatus] = useState<AuditStatus>('idle');
+  const [audit, setAudit] = useState<ContactAudit | null>(null);
   const [toast, setToast] = useState<ToastProps | null>(null);
 
   const showToast = (message: string, type: 'ok' | 'error') => {
@@ -126,36 +144,84 @@ export const AdminSettings: React.FC = () => {
     setTimeout(() => setToast(null), 2800);
   };
 
+  const loadProfile = async () => {
+    setLoading(true);
+    try {
+      const d = await api.get<any>('/profile');
+      if (!d) return;
+      // Map camelCase API response to our snake_case interface
+      const mapped: ProfileData = {
+        name: d.name || d.name || '',
+        title_en: d.title_en || d.titleEn || '',
+        title_vn: d.title_vn || d.titleVn || '',
+        bio_en: d.bio_en || d.bioEn || '',
+        bio_vn: d.bio_vn || d.bioVn || '',
+        avatar_url: d.avatar_url || d.avatarUrl || '',
+        email: d.email || '',
+        phone: d.phone || '',
+        github_url: d.github_url || d.githubUrl || '',
+        facebook_url: d.facebook_url || d.facebookUrl || '',
+        zalo_url: d.zalo_url || d.zaloUrl || '',
+        songphuong_url: d.songphuong_url || d.songphuongUrl || '',
+      };
+      setData(mapped);
+      setOriginal(mapped);
+    } catch (e) {
+      console.error(e);
+      showToast('Không tải được hồ sơ từ database', 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    api.get<any>('/profile')
-      .then((d) => {
-        if (!d) return;
-        // Map camelCase API response to our snake_case interface
-        const mapped: ProfileData = {
-          name: d.name || d.name || '',
-          title_en: d.title_en || d.titleEn || '',
-          title_vn: d.title_vn || d.titleVn || '',
-          bio_en: d.bio_en || d.bioEn || '',
-          bio_vn: d.bio_vn || d.bioVn || '',
-          avatar_url: d.avatar_url || d.avatarUrl || '',
-          email: d.email || '',
-          phone: d.phone || '',
-          github_url: d.github_url || d.githubUrl || '',
-          facebook_url: d.facebook_url || d.facebookUrl || '',
-          zalo_url: d.zalo_url || d.zaloUrl || '',
-          songphuong_url: d.songphuong_url || d.songphuongUrl || '',
-        };
-        setData(mapped);
-        setOriginal(mapped);
-      })
-      .catch(console.error)
-      .finally(() => setLoading(false));
+    loadProfile();
   }, []);
+
+  const runAudit = async () => {
+    setAuditStatus('checking');
+    try {
+      const result = await api.get<ContactAudit>('/admin/contact-audit');
+      setAudit(result);
+      showToast(
+        result.mismatches.length === 0 ? 'Liên hệ đang đồng bộ' : `Phát hiện ${result.mismatches.length} mục lệch`,
+        result.mismatches.length === 0 ? 'ok' : 'error'
+      );
+    } catch (e: any) {
+      console.error(e);
+      showToast(`Không kiểm tra được DB: ${e.message || 'Lỗi không xác định'}`, 'error');
+    } finally {
+      setAuditStatus('idle');
+    }
+  };
+
+  const syncContacts = async () => {
+    setAuditStatus('syncing');
+    try {
+      await api.put('/admin/profile', data);
+      setOriginal(data);
+      window.dispatchEvent(new Event('profile-updated'));
+      window.dispatchEvent(new Event('social-links-updated'));
+      await runAudit();
+      showToast('Đã đồng bộ thông tin liên hệ', 'ok');
+    } catch (e: any) {
+      console.error(e);
+      showToast(`Không đồng bộ được: ${e.message || 'Lỗi không xác định'}`, 'error');
+    } finally {
+      setAuditStatus('idle');
+    }
+  };
 
   const set = (k: keyof ProfileData) => (v: string) =>
     setData((d) => ({ ...d, [k]: v }));
 
   const isDirty = JSON.stringify(data) !== JSON.stringify(original);
+  const cleanEmail = data.email.replace(/^mailto:/i, '').trim();
+  const cleanPhone = data.phone.replace(/^tel:/i, '').trim();
+  const mailtoPreview = cleanEmail ? `mailto:${cleanEmail}` : '';
+  const phonePreview = cleanPhone ? `tel:${cleanPhone}` : '';
+  const zaloPreview = data.zalo_url.trim() || (cleanPhone ? `https://zalo.me/${cleanPhone.replace(/[^\d+]/g, '')}` : '');
+  const legacyTableNames = audit ? Object.keys(audit.legacyTables) : [];
 
   const save = async () => {
     setStatus('saving');
@@ -163,8 +229,10 @@ export const AdminSettings: React.FC = () => {
       await api.put('/admin/profile', data);
       setOriginal(data);
       setStatus('ok');
-      showToast('Đã cập nhật hồ sơ cá nhân', 'ok');
+      showToast('Đã cập nhật hồ sơ và đồng bộ liên hệ', 'ok');
       window.dispatchEvent(new Event('profile-updated'));
+      window.dispatchEvent(new Event('social-links-updated'));
+      void runAudit();
       setTimeout(() => setStatus('idle'), 2000);
     } catch (e: any) {
       setStatus('error');
@@ -352,6 +420,83 @@ export const AdminSettings: React.FC = () => {
             />
           </SettingsRow>
         </SettingsCard>
+        <p className="px-2 text-[11px] leading-relaxed text-on-surface-variant/60">
+          Nguồn chuẩn là hồ sơ cá nhân. Khi lưu, hệ thống tự đồng bộ các shortcut Gmail, Phone, Zalo, GitHub và Facebook trong bảng social links.
+        </p>
+      </section>
+
+      <section className="space-y-1.5">
+        <SectionLabel>Đồng bộ dữ liệu liên hệ</SectionLabel>
+        <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm">
+          <div className="p-4 space-y-4">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div className="rounded-xl bg-surface-container-low/60 border border-outline-variant/30 p-3 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">Gmail app</p>
+                <p className="mt-1 text-[12px] text-on-surface truncate">{mailtoPreview || 'Chưa có email'}</p>
+              </div>
+              <div className="rounded-xl bg-surface-container-low/60 border border-outline-variant/30 p-3 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">Phone shortcut</p>
+                <p className="mt-1 text-[12px] text-on-surface truncate">{phonePreview || 'Chưa có số điện thoại'}</p>
+              </div>
+              <div className="rounded-xl bg-surface-container-low/60 border border-outline-variant/30 p-3 min-w-0">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">Zalo shortcut</p>
+                <p className="mt-1 text-[12px] text-on-surface truncate">{zaloPreview || 'Chưa có Zalo URL'}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div className="text-[12px] text-on-surface-variant">
+                <p>
+                  Nguồn chuẩn: <span className="font-semibold text-on-surface">{audit?.sourceOfTruth || 'tbl_profile'}</span>
+                </p>
+                <p className="mt-1">
+                  {audit ? (
+                    audit.mismatches.length > 0
+                      ? `${audit.mismatches.length} mục đang lệch với social links`
+                      : 'Không có lệch dữ liệu trong social links'
+                  ) : (
+                    'Chưa kiểm tra dữ liệu liên hệ'
+                  )}
+                </p>
+                {audit && legacyTableNames.length > 0 && (
+                  <p className="mt-1 text-amber-600 dark:text-amber-400">
+                    Bảng cũ còn tồn tại: {legacyTableNames.join(', ')}
+                  </p>
+                )}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={runAudit}
+                  disabled={auditStatus !== 'idle'}
+                  className="px-3 py-1.5 rounded-xl border border-outline-variant/50 bg-surface-container-highest/40 text-[12px] font-semibold text-on-surface hover:bg-surface-container-high transition-colors disabled:opacity-50"
+                >
+                  {auditStatus === 'checking' ? 'Đang kiểm tra...' : 'Kiểm tra DB'}
+                </button>
+                <button
+                  type="button"
+                  onClick={syncContacts}
+                  disabled={auditStatus !== 'idle' || status === 'saving'}
+                  className="px-3 py-1.5 rounded-xl bg-primary text-on-primary text-[12px] font-semibold hover:brightness-105 transition-all disabled:opacity-50"
+                >
+                  {auditStatus === 'syncing' ? 'Đang đồng bộ...' : 'Đồng bộ ngay'}
+                </button>
+              </div>
+            </div>
+
+            {audit && audit.mismatches.length > 0 && (
+              <div className="space-y-2 border-t border-outline-variant/25 pt-3">
+                {audit.mismatches.map((item) => (
+                  <div key={item.platform} className="rounded-xl border border-red-500/20 bg-red-500/[0.04] p-3">
+                    <p className="text-[12px] font-semibold text-red-600 dark:text-red-300">{item.platform}</p>
+                    <p className="mt-1 text-[11px] text-on-surface-variant break-all">tbl_profile: {item.profileDerivedUrl || 'Trống'}</p>
+                    <p className="mt-0.5 text-[11px] text-on-surface-variant break-all">tbl_social_links: {item.tblSocialLinksUrl || 'Trống'}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
       </section>
 
         </div>

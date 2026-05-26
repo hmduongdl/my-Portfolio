@@ -22,7 +22,6 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     icon: (
       <img src={githubIcon} alt="GitHub" className="w-full h-full object-contain pointer-events-none" />
     ),
-    url: 'https://github.com/hmduongdl',
   },
   {
     id: 'facebook', name: 'Facebook',
@@ -30,7 +29,6 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     icon: (
       <img src={facebookIcon} alt="Facebook" className="w-full h-full object-contain pointer-events-none" />
     ),
-    url: 'https://www.facebook.com/hmd.stewiclez',
   },
   {
     id: 'phone', name: 'Phone',
@@ -38,16 +36,13 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     icon: (
       <img src={phoneIcon} alt="Phone" className="w-full h-full object-contain pointer-events-none" />
     ),
-    url: 'tel:0911818016',
   },
   {
-    // Zalo opens an in-app card (ZaloApp) — static url used only as deep-link fallback
     id: 'zalo', name: 'Zalo',
     bg: '#ffffff',
     icon: (
       <img src={zaloIcon} alt="Zalo" className="w-full h-full object-contain pointer-events-none" />
     ),
-    url: 'https://zalo.me/0911818016',
   },
 ];
 
@@ -96,7 +91,6 @@ export const APP_DEFS: AppDefinition[] = [
       <img src={gmailIcon} alt="Mail" className="w-full h-full object-contain pointer-events-none" />
     ),
     initial: { w: 600, h: 480, x: 320, y: 90 },
-    mailto: 'mailto:hoanglong.workdl@gmail.com',
     Component: MailApp,
   },
   {
