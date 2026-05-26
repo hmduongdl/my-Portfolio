@@ -104,6 +104,7 @@ export const useOSStore = create<OSState>((set, get) => {
           minimized: false,
           minW: 320,
           minH: 200,
+          isResizable: appDef?.isResizable !== false,
           _restore: null,
         };
         return {
@@ -130,7 +131,7 @@ export const useOSStore = create<OSState>((set, get) => {
     maxWindow: (id) =>
       set((state) => {
         const win = state.windows.find((w) => w.id === id);
-        if (!win) return state;
+        if (!win || win.isResizable === false) return state;
 
         if (win._restore) {
           return {

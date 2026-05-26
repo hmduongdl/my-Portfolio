@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type AppID = 'finder' | 'about' | 'projects' | 'mail' | 'welcome';
+export type AppID = 'finder' | 'about' | 'projects' | 'mail' | 'welcome' | 'zalo';
 
 export interface AppDefinition {
   id: AppID;
@@ -15,6 +15,7 @@ export interface AppDefinition {
     y: number;
   };
   mailto?: string;
+  isResizable?: boolean;
   Component: React.ComponentType<{ compact?: boolean }>;
 }
 
@@ -38,6 +39,7 @@ export interface WindowInstance {
   minimized: boolean;
   minW: number;
   minH: number;
+  isResizable?: boolean;
   _restore?: {
     w: number;
     h: number;

@@ -7,9 +7,10 @@ interface TrafficLightsProps {
   onClose: () => void;
   onMin: () => void;
   onMax: () => void;
+  isResizable?: boolean;
 }
 
-const TrafficLights: React.FC<TrafficLightsProps> = ({ onClose, onMin, onMax }) => {
+const TrafficLights: React.FC<TrafficLightsProps> = ({ onClose, onMin, onMax, isResizable }) => {
   return (
     <div className="traffic-lights flex gap-2 items-center group-hover:visible">
       <div
@@ -35,15 +36,21 @@ const TrafficLights: React.FC<TrafficLightsProps> = ({ onClose, onMin, onMax }) 
         </svg>
       </div>
       <div
-        className="traffic-light traffic-max w-3 h-3 rounded-full flex items-center justify-center cursor-pointer border border-black/15 bg-[#28C840] relative"
+        className={`traffic-light traffic-max w-3 h-3 rounded-full flex items-center justify-center border border-black/15 bg-[#28C840] relative ${
+          isResizable === false ? 'opacity-50 pointer-events-none cursor-not-allowed' : 'cursor-pointer'
+        }`}
         onClick={(e) => {
           e.stopPropagation();
-          onMax();
+          if (isResizable !== false) {
+            onMax();
+          }
         }}
       >
-        <svg viewBox="0 0 6 6" className="w-[6px] h-[6px] opacity-0 hover:opacity-100 text-black/65 absolute">
-          <path d="M1.5 1.5L4.5 1.5L4.5 4.5z M4.5 4.5L1.5 4.5L1.5 1.5z" fill="currentColor" />
-        </svg>
+        {isResizable !== false && (
+          <svg viewBox="0 0 6 6" className="w-[6px] h-[6px] opacity-0 hover:opacity-100 text-black/65 absolute">
+            <path d="M1.5 1.5L4.5 1.5L4.5 4.5z M4.5 4.5L1.5 4.5L1.5 1.5z" fill="currentColor" />
+          </svg>
+        )}
       </div>
     </div>
   );
@@ -99,7 +106,7 @@ export const Window: React.FC<WindowProps> = ({
         }`}
         onMouseDown={startDrag}
       >
-        <TrafficLights onClose={onClose} onMin={onMin} onMax={onMax} />
+        <TrafficLights onClose={onClose} onMin={onMin} onMax={onMax} isResizable={win.isResizable} />
         <div className="window-title absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[13px] font-semibold text-ink-2 tracking-tight pointer-events-none select-none">
           {win.title}
         </div>
@@ -111,14 +118,18 @@ export const Window: React.FC<WindowProps> = ({
       </div>
 
       {/* 8-Directional Resize handles */}
-      <div className="resize-handle resize-n absolute z-[5] top-[-3px] left-0 right-0 h-1.5 cursor-ns-resize" onMouseDown={startResize('n')} />
-      <div className="resize-handle resize-s absolute z-[5] bottom-[-3px] left-0 right-0 h-1.5 cursor-ns-resize" onMouseDown={startResize('s')} />
-      <div className="resize-handle resize-e absolute z-[5] right-[-3px] top-0 bottom-0 w-1.5 cursor-ew-resize" onMouseDown={startResize('e')} />
-      <div className="resize-handle resize-w absolute z-[5] left-[-3px] top-0 bottom-0 w-1.5 cursor-ew-resize" onMouseDown={startResize('w')} />
-      <div className="resize-handle resize-ne absolute z-[5] right-[-3px] top-[-3px] w-3 h-3 cursor-nesw-resize" onMouseDown={startResize('ne')} />
-      <div className="resize-handle resize-nw absolute z-[5] left-[-3px] top-[-3px] w-3 h-3 cursor-nwse-resize" onMouseDown={startResize('nw')} />
-      <div className="resize-handle resize-se absolute z-[5] right-[-3px] bottom-[-3px] w-3 h-3 cursor-nwse-resize" onMouseDown={startResize('se')} />
-      <div className="resize-handle resize-sw absolute z-[5] left-[-3px] bottom-[-3px] w-3 h-3 cursor-nesw-resize" onMouseDown={startResize('sw')} />
+      {win.isResizable !== false && (
+        <>
+          <div className="resize-handle resize-n absolute z-[5] top-[-3px] left-0 right-0 h-1.5 cursor-ns-resize" onMouseDown={startResize('n')} />
+          <div className="resize-handle resize-s absolute z-[5] bottom-[-3px] left-0 right-0 h-1.5 cursor-ns-resize" onMouseDown={startResize('s')} />
+          <div className="resize-handle resize-e absolute z-[5] right-[-3px] top-0 bottom-0 w-1.5 cursor-ew-resize" onMouseDown={startResize('e')} />
+          <div className="resize-handle resize-w absolute z-[5] left-[-3px] top-0 bottom-0 w-1.5 cursor-ew-resize" onMouseDown={startResize('w')} />
+          <div className="resize-handle resize-ne absolute z-[5] right-[-3px] top-[-3px] w-3 h-3 cursor-nesw-resize" onMouseDown={startResize('ne')} />
+          <div className="resize-handle resize-nw absolute z-[5] left-[-3px] top-[-3px] w-3 h-3 cursor-nwse-resize" onMouseDown={startResize('nw')} />
+          <div className="resize-handle resize-se absolute z-[5] right-[-3px] bottom-[-3px] w-3 h-3 cursor-nwse-resize" onMouseDown={startResize('se')} />
+          <div className="resize-handle resize-sw absolute z-[5] left-[-3px] bottom-[-3px] w-3 h-3 cursor-nesw-resize" onMouseDown={startResize('sw')} />
+        </>
+      )}
     </div>
   );
 };
