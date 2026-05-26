@@ -12,6 +12,9 @@ interface DockIconProps {
 }
 
 const DockIcon: React.FC<DockIconProps> = ({ id, name, icon, onClick, isRunning = false }) => {
+    const isSPIcon = name.includes('Song Phương');
+    const scaleClass = isSPIcon ? 'p-[3px] scale-[0.92]' : 'p-0';
+
     return (
         <div
             id={id}
@@ -27,7 +30,7 @@ const DockIcon: React.FC<DockIconProps> = ({ id, name, icon, onClick, isRunning 
             </div>
 
             <div
-                className="w-full h-full p-0 bg-transparent flex items-center justify-center overflow-visible cursor-pointer will-change-transform group-hover:[transform:scale(1.12)_translateY(-4px)] [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none"
+                className={`w-full h-full ${scaleClass} bg-transparent flex items-center justify-center overflow-visible cursor-pointer will-change-transform group-hover:[transform:scale(1.12)_translateY(-4px)] [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none`}
                 style={{
                     transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}

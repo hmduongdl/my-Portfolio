@@ -12,6 +12,7 @@ import notesIcon from './icons/Notes.png';
 
 export const App: React.FC = () => {
   const [baseSeoTitle, setBaseSeoTitle] = useState('Song Phương');
+  const [showHotlineToast, setShowHotlineToast] = useState(false);
   const tweaks = useOSStore((state) => state.tweaks);
   const windows = useOSStore((state) => state.windows);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
@@ -144,8 +145,6 @@ export const App: React.FC = () => {
       </div>
     );
   }
-
-  const [showHotlineToast, setShowHotlineToast] = useState(false);
 
   const handleHotlineClick = () => {
     setShowHotlineToast(true);
