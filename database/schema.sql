@@ -98,7 +98,7 @@ SELECT
 FROM products;
 
 -- 4. Admin users
-CREATE TABLE IF NOT EXISTS admin_users (
+CREATE TABLE IF NOT EXISTS tbl_users (
   id            SERIAL      PRIMARY KEY,
   username      VARCHAR(50) UNIQUE NOT NULL,
   password_hash TEXT        NOT NULL,

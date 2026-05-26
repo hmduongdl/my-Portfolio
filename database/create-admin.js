@@ -15,10 +15,8 @@ if (!password) {
   process.exit(1);
 }
 
-const hash = await bcrypt.hash(password, 12);
+const hash = await bcrypt.hash(password, 10);
 
 console.log(`-- Paste vào NeonSQL SQL Editor:
-INSERT INTO admin_users (username, password_hash)
-VALUES ('${username}', '${hash}')
-ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash;
+INSERT INTO tbl_users (username, password_hash, created_at) VALUES ('${username}', '${hash}', NOW());
 `);
