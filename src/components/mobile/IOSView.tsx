@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { Wallpaper } from '../desktop/Wallpaper';
 import { AppDefinition, SocialAppDefinition } from '../../types';
 
@@ -19,14 +19,6 @@ export const IOSView: React.FC<IOSViewProps> = ({
   onOpenApp,
   onClose,
 }) => {
-  const [time, setTime] = useState<Date>(new Date());
-
-  useEffect(() => {
-    const t = setInterval(() => setTime(new Date()), 30000);
-    return () => clearInterval(t);
-  }, []);
-
-  const clock = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: false });
   const openApp = apps.find((a) => a.id === openAppId);
 
   return (
@@ -36,20 +28,8 @@ export const IOSView: React.FC<IOSViewProps> = ({
         <Wallpaper />
       </div>
 
-      {/* iOS Top Bar */}
-      <div className="absolute top-0 left-0 right-0 h-11 flex items-center justify-between px-6 text-white text-[15px] font-semibold z-10 drop-shadow-[0_1px_2px_rgba(0,0,0,0.4)]">
-        <div>{clock}</div>
-        <div className="flex gap-1.5 items-center">
-          <svg width="16" height="11" viewBox="0 0 16 11" fill="currentColor">
-            <path d="M1 7h2v3H1zm4-2h2v5H5zm4-2h2v7H9zm4-2h2v9h-2z" />
-          </svg>
-          <svg width="24" height="11" viewBox="0 0 24 11">
-            <rect x="0.5" y="0.5" width="20" height="10" rx="2.5" fill="none" stroke="currentColor" strokeOpacity="0.6" />
-            <rect x="2" y="2" width="14" height="7" rx="1" fill="currentColor" />
-            <rect x="21" y="3" width="2" height="5" rx="0.6" fill="currentColor" />
-          </svg>
-        </div>
-      </div>
+      {/* iOS Top Bar placeholder (cleared per request) */}
+      <div className="absolute top-0 left-0 right-0 h-11 z-10 pointer-events-none"></div>
 
       {/* Home Screen Grid Layout */}
       {!openApp && (

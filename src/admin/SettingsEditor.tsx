@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api';
-import { useOSStore } from '../store/useOSStore';
+
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -95,7 +95,7 @@ export const SettingsEditor: React.FC = () => {
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
   const [toast, setToast]           = useState<ToastState | null>(null);
 
-  const { tweaks, setTweak } = useOSStore();
+  // removed unused useOSStore
 
   // ── Helpers ──────────────────────────────────────────────────────────────
   const showToast = (msg: string, type: 'ok' | 'error') => {
@@ -218,69 +218,7 @@ export const SettingsEditor: React.FC = () => {
         </div>
       )}
 
-      {/* ── Appearance & Wallpaper ─────────────────────────────── */}
-      <section className="space-y-2">
-        <h2 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">
-          Giao diện &amp; Hình nền
-        </h2>
-        <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm">
-          <div className="p-4 space-y-4">
-            <div>
-              <label className="block text-[12px] font-bold text-on-surface mb-2">Chế độ Hình nền</label>
-              <div className="flex gap-4">
-                {([
-                  { value: 'image',         label: 'Hình tĩnh (Image)' },
-                  { value: 'video',         label: 'Video Động'         },
-                  { value: 'time-shifting', label: 'Tự động (Sáng/Tối)' },
-                ] as const).map(opt => (
-                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
-                    <input
-                      type="radio"
-                      name="wallpaperType"
-                      value={opt.value}
-                      checked={tweaks.wallpaperType === opt.value}
-                      onChange={() => setTweak('wallpaperType', opt.value)}
-                      className="text-primary focus:ring-primary"
-                    />
-                    <span className="text-[13px] text-on-surface">{opt.label}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
 
-            {tweaks.wallpaperType !== 'time-shifting' && (
-              <div>
-                <label className="block text-[12px] font-bold text-on-surface mb-1">
-                  Đường dẫn Hình nền / Video
-                </label>
-                <input
-                  type="text"
-                  value={tweaks.wallpaperUrl || ''}
-                  onChange={e => setTweak('wallpaperUrl', e.target.value)}
-                  className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
-                  placeholder="e.g. /wallpapers/sonoma-light.jpg"
-                />
-              </div>
-            )}
-
-            <div className="flex flex-wrap gap-2 pt-1">
-              {[
-                { label: 'Sonoma Sáng',  type: 'image', url: '/wallpapers/sonoma-light.jpg' },
-                { label: 'Sonoma Tối',   type: 'image', url: '/wallpapers/sonoma-dark.jpg'  },
-                { label: 'Video Động',   type: 'video', url: '/bkgr.mp4'                   },
-              ].map(preset => (
-                <button
-                  key={preset.label}
-                  onClick={() => { setTweak('wallpaperType', preset.type as any); setTweak('wallpaperUrl', preset.url); }}
-                  className="px-3 py-1.5 text-[11px] font-bold bg-surface-container rounded-lg hover:bg-surface-container-high transition-colors text-on-surface border border-outline-variant/30"
-                >
-                  {preset.label}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* ── Social Networks & Contacts ─────────────────────────── */}
       <section className="space-y-2">

@@ -56,4 +56,12 @@ export interface Tweaks {
   showMobilePreview: boolean;
   wallpaperType?: 'image' | 'video' | 'time-shifting';
   wallpaperUrl?: string;
+  aboutWidgetStats?: {
+    focusTitle: string;
+    focusSub: string;
+    statusTitle: string;
+    statusSub: string;
+    locationTitle: string;
+    locationSub: string;
+  };
 }

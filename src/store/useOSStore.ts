@@ -11,7 +11,16 @@ const TWEAK_DEFAULTS: Tweaks = {
   showMobilePreview: false,
   wallpaperType: 'video',
   wallpaperUrl: '/bkgr.mp4',
+  aboutWidgetStats: {
+    focusTitle: 'UI/UX',
+    focusSub: 'Design',
+    statusTitle: 'Open',
+    statusSub: 'to work',
+    locationTitle: 'DaLat, VN',
+    locationSub: 'GMT+7',
+  }
 };
+
 
 function loadTweaks(): Tweaks {
   if (typeof window !== 'undefined') {

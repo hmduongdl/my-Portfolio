@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { MapPin, MessageCircle, Mail, Globe } from 'lucide-react';
+import { MapPin, Cpu, Palette, Code, Handshake } from 'lucide-react';
 import { useOSStore } from '../../store/useOSStore';
-import { APP_DEFS } from '../../apps';
 import { profileService, ProfileData } from '../../services/profileService';
 
 interface BentoAboutWidgetProps {
@@ -10,10 +9,13 @@ interface BentoAboutWidgetProps {
 }
 
 export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, scale = 1 }) => {
-  const isMobile = useOSStore((state) => state.isMobile);
-  const setIosOpenAppId = useOSStore((state) => state.setIosOpenAppId);
-  const openApp = useOSStore((state) => state.openApp);
   const language = useOSStore((state) => state.language);
+  const { tweaks } = useOSStore();
+  const stats = tweaks.aboutWidgetStats || {
+    focusTitle: 'UI/UX', focusSub: 'Design',
+    statusTitle: 'Open', statusSub: 'to work',
+    locationTitle: 'DaLat, VN', locationSub: 'GMT+7'
+  };
 
   const [profile, setProfile] = useState<ProfileData | null>(null);
 
@@ -23,44 +25,18 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
       .catch((err) => console.error('Failed to load profile in widget:', err));
   }, [language]);
 
-  const handleGithubClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.open(profile?.githubUrl || 'https://github.com/hmduongdl', '_blank', 'noopener,noreferrer');
-  };
-
-  const handleZaloClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isMobile) {
-      setIosOpenAppId('zalo');
-    } else {
-      openApp('zalo', APP_DEFS);
-    }
-  };
-
-  const handleEmailClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (isMobile) {
-      setIosOpenAppId('mail');
-    } else {
-      openApp('mail', APP_DEFS);
-    }
-  };
-
-  const handlePortfolioClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    window.open(profile?.songphuongUrl || 'https://songphuong.vn', '_blank', 'noopener,noreferrer');
-  };
+  const experienceYears = Math.max(1, new Date().getFullYear() - 2025);
 
   return (
     <div
       onClick={onClick}
-      className="col-span-4 cursor-pointer select-none hover:scale-[0.98] active:scale-[0.97] transition-all duration-300 max-w-md w-full mx-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-lg rounded-3xl p-5 shadow-2xl border border-white/20 flex flex-col space-y-4"
+      className="col-span-4 cursor-pointer select-none hover:scale-[0.98] active:scale-[0.97] transition-all duration-300 max-w-md w-full mx-auto bg-white/75 dark:bg-zinc-900/75 backdrop-blur-lg rounded-3xl p-4 pb-3 shadow-2xl border border-white/20 flex flex-col space-y-3.5"
       style={{
         transform: `scale(${scale})`,
         transformOrigin: 'top center',
       }}
     >
-      {/* 2. Widget Header */}
+      {/* 1. Widget Header */}
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-3">
           <img
@@ -81,44 +57,44 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
         <div className="w-2 h-2 bg-emerald-500 rounded-full shadow-[0_0_8px_#10b981] animate-pulse" />
       </div>
 
-      {/* 3. Sub-cards Grid - Row 1 */}
-      <div className="grid grid-cols-3 gap-2.5 w-full">
+      {/* 2. Sub-cards Grid - Row 1 */}
+      <div className="grid grid-cols-3 gap-2 w-full">
         {/* CARD 1 (Focus) */}
         <div className="bg-indigo-50/70 dark:bg-indigo-950/30 p-2.5 rounded-2xl flex flex-col justify-between">
           <span className="text-[8px] font-bold text-indigo-400 dark:text-indigo-300 tracking-wider">FOCUS</span>
-          <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-indigo-700 dark:text-indigo-200 mt-1 leading-none">UI/UX</span>
-            <span className="text-[9px] text-indigo-500/80 dark:text-indigo-400/80 mt-0.5">Design</span>
+          <div className="flex flex-col mt-2">
+            <span className="text-sm font-extrabold text-indigo-700 dark:text-indigo-200 leading-none">{stats.focusTitle}</span>
+            <span className="text-[9px] text-indigo-500/80 dark:text-indigo-400/80 mt-0.5">{stats.focusSub}</span>
           </div>
         </div>
 
-        {/* CARD 2 (Stack) */}
+        {/* CARD 2 (Experience) */}
         <div className="bg-blue-50/70 dark:bg-blue-950/30 p-2.5 rounded-2xl flex flex-col justify-between">
-          <span className="text-[8px] font-bold text-blue-400 dark:text-blue-300 tracking-wider">STACK</span>
-          <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-blue-700 dark:text-blue-200 mt-1 leading-none">React</span>
-            <span className="text-[9px] text-blue-500/80 dark:text-blue-400/80 mt-0.5">Node · TS</span>
+          <span className="text-[8px] font-bold text-blue-400 dark:text-blue-300 tracking-wider">EXPERIENCE</span>
+          <div className="flex flex-col mt-2">
+            <span className="text-sm font-extrabold text-blue-700 dark:text-blue-200 leading-none">{experienceYears}+</span>
+            <span className="text-[9px] text-blue-500/80 dark:text-blue-400/80 mt-0.5">Years coding</span>
           </div>
         </div>
 
         {/* CARD 3 (Status) */}
         <div className="bg-emerald-50/70 dark:bg-emerald-950/30 p-2.5 rounded-2xl flex flex-col justify-between">
           <span className="text-[8px] font-bold text-emerald-400 dark:text-emerald-300 tracking-wider">STATUS</span>
-          <div className="flex flex-col">
-            <span className="text-sm font-extrabold text-emerald-700 dark:text-emerald-200 mt-1 leading-none">Open</span>
-            <span className="text-[9px] text-emerald-500/80 dark:text-emerald-400/80 mt-0.5">to work</span>
+          <div className="flex flex-col mt-2">
+            <span className="text-sm font-extrabold text-emerald-700 dark:text-emerald-200 leading-none">{stats.statusTitle}</span>
+            <span className="text-[9px] text-emerald-500/80 dark:text-emerald-400/80 mt-0.5">{stats.statusSub}</span>
           </div>
         </div>
       </div>
 
-      {/* 4. Lưới 2 cột vừa (Medium-cards Grid - Row 2) */}
-      <div className="grid grid-cols-2 gap-2.5 w-full">
+      {/* 3. Lưới 2 cột vừa (Medium-cards Grid - Row 2) */}
+      <div className="grid grid-cols-2 gap-2 w-full">
         {/* CARD LOCATION */}
         <div className="bg-neutral-50/60 dark:bg-zinc-800/40 p-3 rounded-2xl border border-gray-100/50 dark:border-zinc-800/50 flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-[8px] font-bold text-gray-400 dark:text-zinc-500 tracking-wider">LOCATION</span>
-            <span className="text-xs font-bold text-gray-800 dark:text-white mt-1 leading-none">Hanoi, VN</span>
-            <span className="text-[9px] text-gray-500 mt-0.5">GMT+7</span>
+            <span className="text-xs font-bold text-gray-800 dark:text-white mt-1 leading-none">{stats.locationTitle}</span>
+            <span className="text-[9px] text-gray-500 mt-0.5">{stats.locationSub}</span>
           </div>
           <MapPin className="w-4 h-4 text-gray-400 dark:text-zinc-500" strokeWidth={2.5} />
         </div>
@@ -140,57 +116,42 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
         </div>
       </div>
 
-      {/* 5. Quick Links Grid - Row 3 */}
-      <div className="grid grid-cols-4 gap-2 w-full">
-        {/* GitHub */}
-        <div
-          onClick={handleGithubClick}
-          className="bg-white/95 dark:bg-zinc-800/90 shadow-[0_2px_4px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-center space-y-1 hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-gray-700 dark:text-zinc-300"
-          >
-            <path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4" />
-            <path d="M9 18c-4.51 2-5-2-7-2" />
-          </svg>
-          <span className="text-[9px] font-bold text-gray-500 dark:text-zinc-400">GitHub</span>
-        </div>
+      {/* 4. Services Grid - Row 3 */}
+      <div className="flex flex-col space-y-1.5 pt-1 border-t border-gray-100 dark:border-zinc-800/50">
+        <div className="text-center text-[9px] font-bold text-gray-400 dark:text-zinc-500 uppercase tracking-widest w-full">Dịch vụ</div>
+        <div className="grid grid-cols-4 gap-2 w-full">
+          {/* Build PC */}
+          <div className="bg-white/95 dark:bg-zinc-800/90 shadow-[0_2px_4px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-center space-y-1">
+            <Cpu className="w-[16px] h-[16px] text-gray-600 dark:text-zinc-400" strokeWidth={2.5} />
+            <span className="text-[8.5px] font-bold text-gray-500 dark:text-zinc-400">Build PC</span>
+          </div>
 
-        {/* Zalo */}
-        <div
-          onClick={handleZaloClick}
-          className="bg-white/95 dark:bg-zinc-800/90 shadow-[0_2px_4px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-center space-y-1 hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer"
-        >
-          <MessageCircle className="w-[18px] h-[18px] text-[#0068FF] fill-[#0068FF]/10" strokeWidth={2.5} />
-          <span className="text-[9px] font-bold text-gray-500 dark:text-zinc-400">Zalo</span>
-        </div>
+          {/* Design */}
+          <div className="bg-white/95 dark:bg-zinc-800/90 shadow-[0_2px_4px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-center space-y-1">
+            <Palette className="w-[16px] h-[16px] text-gray-600 dark:text-zinc-400" strokeWidth={2.5} />
+            <span className="text-[8.5px] font-bold text-gray-500 dark:text-zinc-400">Design</span>
+          </div>
 
-        {/* Email */}
-        <div
-          onClick={handleEmailClick}
-          className="bg-white/95 dark:bg-zinc-800/90 shadow-[0_2px_4px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-center space-y-1 hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer"
-        >
-          <Mail className="w-[18px] h-[18px] text-red-500 dark:text-red-400" strokeWidth={2.5} />
-          <span className="text-[9px] font-bold text-gray-500 dark:text-zinc-400">Email</span>
-        </div>
+          {/* Fullstack */}
+          <div className="bg-white/95 dark:bg-zinc-800/90 shadow-[0_2px_4px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-center space-y-1">
+            <Code className="w-[16px] h-[16px] text-gray-600 dark:text-zinc-400" strokeWidth={2.5} />
+            <span className="text-[8.5px] font-bold text-gray-500 dark:text-zinc-400">Fullstack</span>
+          </div>
 
-        {/* Portfolio */}
-        <div
-          onClick={handlePortfolioClick}
-          className="bg-white/95 dark:bg-zinc-800/90 shadow-[0_2px_4px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-center space-y-1 hover:scale-105 active:scale-95 transition-transform duration-150 cursor-pointer"
-        >
-          <Globe className="w-[18px] h-[18px] text-emerald-600 dark:text-emerald-400" strokeWidth={2} />
-          <span className="text-[9px] font-bold text-gray-500 dark:text-zinc-400">Portfolio</span>
+          {/* Hợp tác */}
+          <div className="bg-white/95 dark:bg-zinc-800/90 shadow-[0_2px_4px_rgba(0,0,0,0.04)] border border-gray-100 dark:border-zinc-700 rounded-xl p-2 flex flex-col items-center justify-center space-y-1">
+            <Handshake className="w-[16px] h-[16px] text-gray-600 dark:text-zinc-400" strokeWidth={2.5} />
+            <span className="text-[8.5px] font-bold text-gray-500 dark:text-zinc-400">Hợp tác</span>
+          </div>
         </div>
       </div>
+
+      {/* 5. CTA Button */}
+      <div className="w-full bg-[#007AFF] text-white rounded-[14px] py-2.5 flex justify-center items-center font-semibold text-[13px] shadow-[0_4px_12px_rgba(0,122,255,0.3)] select-none">
+        Liên hệ ngay
+      </div>
+
     </div>
   );
 };
+
