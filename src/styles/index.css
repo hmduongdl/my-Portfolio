@@ -9,21 +9,21 @@
    ═══════════════════════════════════════════════════════════════ */
 :root {
 
-  /* ── Paper & Ink Hybrid Palette ─────────────────────────────── */
-  --bg-paper:        #FAF8F4;   /* parchment white */
-  --bg-paper-2:      #F3F0E8;   /* slightly warmer */
-  --bg-paper-3:      #EAE6DA;   /* aged paper */
-  --ink:             #1A1D2E;   /* near-black */
-  --ink-2:           #3D4252;   /* body text */
-  --ink-3:           #6B7080;   /* secondary text */
-  --ink-4:           #9CA0AC;   /* placeholder / muted */
-  --rule:            #E8E3D7;   /* divider line */
-  --rule-strong:     #D6CFBE;   /* strong divider */
+  /* ── Deep Navy Palette ─────────────────────────────── */
+  --bg-paper:        #0A192F;   /* deep navy */
+  --bg-paper-2:      #112240;   /* lighter navy */
+  --bg-paper-3:      #233554;   /* lightest navy */
+  --ink:             #E6F1FF;   /* light text */
+  --ink-2:           #8892B0;   /* slate text */
+  --ink-3:           #A8B2D1;   /* light slate text */
+  --ink-4:           #495670;   /* muted text */
+  --rule:            #233554;   /* divider line */
+  --rule-strong:     #112240;   /* strong divider */
 
   /* Semantic accent */
-  --primary:         #3B82C4;
-  --primary-hover:   #2966A3;
-  --primary-soft:    #DCE8F4;
+  --primary:         #64FFDA;
+  --primary-hover:   #52E0C4;
+  --primary-soft:    rgba(100, 255, 218, 0.1);
   --success:         #7A8C5C;
   --error:           #B85450;
   --warning:         #C99A2E;

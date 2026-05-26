@@ -118,9 +118,9 @@ export const IOSView: React.FC<IOSViewProps> = ({
 
       {/* App Opening Overlay Frame */}
       {openApp && (
-        <div className="absolute top-11 left-2 right-2 bottom-2 bg-paper/90 mac-vibrancy rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col z-[15] animate-slide-up">
+        <div className="absolute top-11 left-2 right-2 bottom-2 bg-paper rounded-[28px] overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.4)] flex flex-col z-[15] animate-slide-up">
           {/* Internal Navbar */}
-          <div className="px-4 py-3.5 border-b border-rule flex items-center bg-transparent relative flex-shrink-0">
+          <div className="px-4 py-3.5 border-b border-rule flex items-center bg-paper-2 relative flex-shrink-0">
             <button
               onClick={onClose}
               className="border-none bg-transparent text-primary text-[15px] font-medium cursor-pointer p-0 select-none"
@@ -133,7 +133,7 @@ export const IOSView: React.FC<IOSViewProps> = ({
           </div>
           
           {/* Scrollable Compact Mode Sub-app Body */}
-          <div className="flex-1 overflow-auto bg-transparent">
+          <div className="flex-1 overflow-auto bg-paper">
             {React.createElement(openApp.Component, { compact: true })}
           </div>
         </div>

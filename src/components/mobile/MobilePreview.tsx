@@ -104,8 +104,8 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
 
       {/* Opened Application frame inside mobile */}
       {openApp && (
-        <div className="absolute top-[38px] left-0 right-0 bottom-0 bg-paper/90 mac-vibrancy flex flex-col z-[15] animate-slide-up">
-          <div className="px-3 py-2 border-b border-rule flex items-center bg-transparent relative flex-shrink-0">
+        <div className="absolute top-[38px] left-0 right-0 bottom-0 bg-paper flex flex-col z-[15] animate-slide-up">
+          <div className="px-3 py-2 border-b border-rule flex items-center bg-paper-2 relative flex-shrink-0">
             <button
               onClick={() => setOpenId(null)}
               className="border-none bg-transparent text-primary text-[13px] font-medium cursor-pointer p-0 select-none"
@@ -116,7 +116,7 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
               {openApp.name}
             </div>
           </div>
-          <div className="flex-1 overflow-auto bg-transparent text-[11px]">
+          <div className="flex-1 overflow-auto bg-paper text-[11px]">
             {React.createElement(openApp.Component, { compact: true })}
           </div>
         </div>
