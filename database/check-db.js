@@ -209,7 +209,7 @@ async function main() {
       'IT Student at Da Lat University & Web Developer at Song Phương Technology. Passionate about creative UI design and optimizing user experience.',
       'Sinh viên IT tại Đại học Đà Lạt & Web Developer tại Song Phương Technology. Đam mê thiết kế giao diện sáng tạo và tối ưu hóa trải nghiệm người dùng.',
       '/img/my-avatar.jpg',
-      'duonghm.work@gmail.com',
+      'hoanglong.workdl@gmail.com',
       'https://github.com/hmduongdl',
       'https://facebook.com/',
       'https://songphuong.vn'
@@ -233,7 +233,7 @@ async function main() {
   const socialData = [
     { platform: 'github', label: 'GitHub', url: 'https://github.com/hmduongdl', order: 0 },
     { platform: 'facebook', label: 'Facebook', url: 'https://facebook.com/', order: 1 },
-    { platform: 'gmail', label: 'Gmail', url: 'mailto:duonghm.work@gmail.com', order: 2 },
+    { platform: 'gmail', label: 'Gmail', url: 'mailto:hoanglong.workdl@gmail.com', order: 2 },
     { platform: 'phone', label: 'Phone', url: 'tel:+84', order: 3 },
     { platform: 'zalo', label: 'Zalo', url: 'https://zalo.me/', order: 4 },
   ];

@@ -45,7 +45,7 @@ export const MascotChat: React.FC = () => {
           {
             id: 3,
             question: 'Thông tin liên hệ của Hoàng Minh Dương là gì?',
-            answer: 'Bạn có thể liên hệ với mình qua:\n- Email: duonghm.work@gmail.com (hoặc hoanglong.workdl@gmail.com)\n- GitHub: github.com/hmduongdl\n- Website: songphuong.vn\nHoặc bạn có thể gọi hotline: 0911 818 016 để kết nối trực tiếp nhé!',
+            answer: 'Bạn có thể liên hệ với mình qua:\n- Email: hoanglong.workdl@gmail.com\n- GitHub: github.com/hmduongdl\n- Website: songphuong.vn\nHoặc bạn có thể gọi hotline: 0911 818 016 để kết nối trực tiếp nhé!',
             order_index: 3
           },
           {

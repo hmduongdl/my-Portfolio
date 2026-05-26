@@ -18,7 +18,7 @@ const FALLBACK_PROFILE = {
   bioEn: '',
   bioVn: '',
   avatarUrl: '/my-avatar.jpg',
-  email: 'duonghm.work@gmail.com',
+  email: 'hoanglong.workdl@gmail.com',
   phone: '',
   githubUrl: 'https://github.com/hmduongdl',
   facebookUrl: 'https://facebook.com/',
@@ -135,7 +135,7 @@ const FALLBACK_CHATBOT_QA = [
   {
     id: 3,
     question: 'Thông tin liên hệ của Hoàng Minh Dương là gì?',
-    answer: 'Bạn có thể liên hệ với mình qua:\n- Email: duonghm.work@gmail.com (hoặc hoanglong.workdl@gmail.com)\n- GitHub: github.com/hmduongdl\n- Website: songphuong.vn\nHoặc bạn có thể gọi hotline: 0911 818 016 để kết nối trực tiếp nhé!',
+    answer: 'Bạn có thể liên hệ với mình qua:\n- Email: hoanglong.workdl@gmail.com\n- GitHub: github.com/hmduongdl\n- Website: songphuong.vn\nHoặc bạn có thể gọi hotline: 0911 818 016 để kết nối trực tiếp nhé!',
     order_index: 3
   },
   {
@@ -482,7 +482,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const fallbackSocials = [
           { platform: 'github', label: 'GitHub', url: 'https://github.com/hmduongdl' },
           { platform: 'facebook', label: 'Facebook', url: 'https://facebook.com/' },
-          { platform: 'gmail', label: 'Gmail', url: 'mailto:duonghm.work@gmail.com' },
+          { platform: 'gmail', label: 'Gmail', url: 'mailto:hoanglong.workdl@gmail.com' },
           { platform: 'phone', label: 'Phone', url: 'tel:+84' },
           { platform: 'zalo', label: 'Zalo', url: 'https://zalo.me/' }
         ];

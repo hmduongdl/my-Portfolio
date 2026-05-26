@@ -81,7 +81,7 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
               <div
                 key={app.id}
                 onClick={() => setOpenId(app.id)}
-                className="w-[38px] h-[38px] flex items-center justify-center cursor-pointer scale-[0.85] origin-center hover:scale-[0.8] transition-transform p-0 bg-transparent border-none shadow-none [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none"
+                className={`${app.id === 'finder' ? 'w-[28px] h-[28px]' : 'w-[38px] h-[38px]'} flex items-center justify-center cursor-pointer scale-[0.85] origin-center hover:scale-[0.8] transition-transform p-0 bg-transparent border-none shadow-none [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none`}
               >
                 {app.icon}
               </div>
