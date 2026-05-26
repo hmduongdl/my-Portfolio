@@ -78,12 +78,12 @@ export const IOSView: React.FC<IOSViewProps> = ({
           </div>
 
           {/* iOS Bottom Dock */}
-          <div className="absolute bottom-[30px] left-3.5 right-3.5 bg-white/22 backdrop-blur-md rounded-[26px] p-2.5 flex justify-around border border-white/30 z-[5]">
+          <div className="absolute bottom-[14px] left-1/2 -translate-x-1/2 w-max mx-auto bg-white/22 dark:bg-black/30 backdrop-blur-xl rounded-[26px] px-4 py-2 flex items-center justify-center space-x-2.5 border border-white/30 z-[5]">
             {apps.slice(0, 4).map((app) => (
               <div
                 key={app.id}
                 onClick={() => onOpenApp(app.id)}
-                className="w-[54px] h-[54px] flex items-center justify-center cursor-pointer hover:scale-95 transition-transform p-0 bg-transparent border-none shadow-none"
+                className="w-[48px] h-[48px] flex items-center justify-center cursor-pointer hover:scale-95 transition-transform p-0 bg-transparent border-none shadow-none [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none"
               >
                 {app.icon}
               </div>

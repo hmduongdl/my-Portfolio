@@ -76,12 +76,12 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
           </div>
 
           {/* iOS Bottom Dock */}
-          <div className="absolute bottom-4 left-2 right-2 bg-white/22 backdrop-blur-md rounded-[18px] p-[6px] flex justify-around border border-white/30 z-[5]">
+          <div className="absolute bottom-[14px] left-1/2 -translate-x-1/2 w-max mx-auto bg-white/22 dark:bg-black/30 backdrop-blur-xl rounded-[18px] px-[8px] py-[6px] flex items-center justify-center space-x-1.5 border border-white/30 z-[5]">
             {apps.slice(0, 4).map((app) => (
               <div
                 key={app.id}
                 onClick={() => setOpenId(app.id)}
-                className="w-[38px] h-[38px] flex items-center justify-center cursor-pointer scale-[0.85] origin-center hover:scale-[0.8] transition-transform p-0 bg-transparent border-none shadow-none"
+                className="w-[38px] h-[38px] flex items-center justify-center cursor-pointer scale-[0.85] origin-center hover:scale-[0.8] transition-transform p-0 bg-transparent border-none shadow-none [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none"
               >
                 {app.icon}
               </div>

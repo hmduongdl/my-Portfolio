@@ -13,7 +13,7 @@ interface DockIconProps {
 const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = false }) => {
     return (
         <div
-            className="group relative flex items-center justify-center w-[38px] h-[38px] md:w-[44px] md:h-[44px] flex-shrink-0 p-0 bg-transparent border-none shadow-none"
+            className="group relative flex items-center justify-center w-[48px] h-[48px] md:w-[44px] md:h-[44px] flex-shrink-0 p-0 bg-transparent border-none shadow-none"
             onClick={onClick}
             role="button"
             tabIndex={0}
@@ -25,7 +25,7 @@ const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = fa
             </div>
 
             <div
-                className="w-full h-full p-0 bg-transparent flex items-center justify-center overflow-visible cursor-pointer will-change-transform group-hover:[transform:scale(1.12)_translateY(-4px)]"
+                className="w-full h-full p-0 bg-transparent flex items-center justify-center overflow-visible cursor-pointer will-change-transform group-hover:[transform:scale(1.12)_translateY(-4px)] [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none"
                 style={{
                     transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
@@ -69,9 +69,9 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
     };
 
     return (
-        <div className="dock-wrap fixed bottom-1.5 left-1/2 -translate-x-1/2 z-[900] flex items-end pointer-events-none">
+        <div className="dock-wrap fixed bottom-[14px] md:bottom-1.5 left-1/2 -translate-x-1/2 z-[900] flex items-end pointer-events-none">
             <div
-                className="dock flex items-center space-x-3 md:space-x-4 px-3 h-[48px] md:h-[54px] bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/15 dark:border-white/5 shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] rounded-2xl pointer-events-auto will-change-transform"
+                className="dock flex w-max mx-auto items-center justify-center space-x-2.5 md:space-x-4 px-4 py-2 md:py-0 md:h-[54px] bg-white/10 dark:bg-black/30 backdrop-blur-xl border border-white/10 shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] rounded-2xl pointer-events-auto will-change-transform"
                 style={{
                     transition: 'all 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
