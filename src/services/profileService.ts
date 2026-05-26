@@ -29,11 +29,20 @@ export interface TimelineItem {
 }
 
 const cache: Record<string, any> = {};
+const pending: Record<string, Promise<any> | undefined> = {};
+
+function preloadImage(src?: string) {
+    if (!src || typeof window === 'undefined') return;
+    const img = new Image();
+    img.src = src;
+}
 
 if (typeof window !== 'undefined') {
     window.addEventListener('profile-updated', () => {
         delete cache.profile_vn;
         delete cache.profile_en;
+        delete pending.profile_vn;
+        delete pending.profile_en;
     });
     window.addEventListener('timeline-updated', () => {
         delete cache.timeline_vn;
@@ -43,9 +52,27 @@ if (typeof window !== 'undefined') {
 
 export const profileService = {
     async getProfile(lang: 'en' | 'vn' = 'vn'): Promise<ProfileData> {
-        const res = await fetch(`${API_BASE_URL}/profile?lang=${lang}`, { cache: 'no-store' });
-        if (!res.ok) throw new Error('Failed to fetch SQL profile');
-        return res.json();
+        const key = `profile_${lang}`;
+        if (cache[key]) return cache[key];
+        if (pending[key]) return pending[key];
+
+        pending[key] = fetch(`${API_BASE_URL}/profile?lang=${lang}`, { cache: 'no-store' })
+            .then(async (res) => {
+                if (!res.ok) throw new Error('Failed to fetch SQL profile');
+                const data = await res.json();
+                cache[key] = data;
+                preloadImage(data.avatarUrl);
+                return data;
+            })
+            .finally(() => {
+                delete pending[key];
+            });
+
+        return pending[key];
+    },
+
+    getCachedProfile(lang: 'en' | 'vn' = 'vn'): ProfileData | null {
+        return cache[`profile_${lang}`] || null;
     },
 
     async getTimeline(lang: 'en' | 'vn' = 'vn'): Promise<TimelineItem[]> {

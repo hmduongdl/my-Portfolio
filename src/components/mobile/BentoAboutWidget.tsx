@@ -17,10 +17,16 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
     locationTitle: 'DaLat, VN', locationSub: 'GMT+7'
   };
 
-  const [profile, setProfile] = useState<ProfileData | null>(null);
+  const [profile, setProfile] = useState<ProfileData | null>(() => profileService.getCachedProfile(language));
   const [profileLoadFailed, setProfileLoadFailed] = useState(false);
 
   useEffect(() => {
+    const cachedProfile = profileService.getCachedProfile(language);
+    if (cachedProfile) {
+      setProfile(cachedProfile);
+      setProfileLoadFailed(false);
+    }
+
     profileService.getProfile(language)
       .then((data) => {
         setProfile(data);
@@ -51,6 +57,8 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
             src={profile?.avatarUrl || '/songphuong-logo.png'}
             className="w-12 h-12 rounded-full border border-white/50 object-cover shadow-sm bg-neutral-100"
             alt="Avatar"
+            loading="eager"
+            decoding="async"
           />
           <div className="flex flex-col">
             <span className="text-[9px] font-bold text-gray-400 dark:text-zinc-500 tracking-wider">ABOUT ME</span>
