@@ -13,7 +13,7 @@ interface DockIconProps {
 
 const DockIcon: React.FC<DockIconProps> = ({ id, name, icon, onClick, isRunning = false }) => {
     const isSPIcon = name.includes('Song Phương');
-    const scaleClass = isSPIcon ? 'p-[3px] scale-[0.92]' : 'p-0';
+    const scaleClass = isSPIcon ? 'p-[1px] sm:p-[1.5px] scale-100' : 'p-0';
 
     return (
         <div

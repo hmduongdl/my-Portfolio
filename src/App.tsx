@@ -7,7 +7,6 @@ import { Window } from './components/desktop/Window';
 import { IOSView } from './components/mobile/IOSView';
 import { MobilePreview } from './components/mobile/MobilePreview';
 import { APP_DEFS, SOCIAL_APPS } from './apps';
-import finderIcon from './icons/Finder.png';
 import notesIcon from './icons/Notes.png';
 import { MascotChat } from './components/desktop/MascotChat';
 import { profileService } from './services/profileService';
@@ -192,8 +191,14 @@ export const App: React.FC = () => {
           onDoubleClick={() => openApp('finder', APP_DEFS)}
           className="desktop-icon flex flex-col items-center gap-1 w-[80px] md:w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
         >
-          <div className="desktop-icon-art w-[48px] h-[48px] md:w-12 md:h-12 rounded-md bg-transparent flex items-center justify-center overflow-hidden">
-            <img src={finderIcon} alt="Finder icon" className="w-full h-full object-contain" />
+          <div className="desktop-icon-art w-[48px] h-[48px] md:w-12 md:h-12 rounded-md bg-transparent flex items-center justify-center overflow-visible">
+            <div className="w-full h-full bg-[#1853a1] rounded-[22%] flex items-center justify-center p-[3px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.25)] border border-[#124285]">
+              <img
+                src="/songphuong-logo.png"
+                alt="Song Phương"
+                className="w-[78%] h-[78%] object-contain pointer-events-none drop-shadow-md"
+              />
+            </div>
           </div>
           <div className="desktop-icon-label text-[10px] md:text-[12px] font-medium text-white drop-shadow-md md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] text-center max-w-[80px] md:max-w-none truncate md:whitespace-normal md:break-words leading-tight">
             Song Phương
