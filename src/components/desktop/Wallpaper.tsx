@@ -30,33 +30,40 @@ export const Wallpaper: React.FC = () => {
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none bg-black">
-      {wallpaperType === 'image' && (
-        <img 
-          src={wallpaperUrl} 
-          alt="Wallpaper" 
-          className="absolute inset-0 w-full h-full object-cover"
-          style={{ objectFit: 'cover' }}
-        />
-      )}
-      {wallpaperType === 'video' && (
-        <video 
-          src={wallpaperUrl} 
-          autoPlay 
-          muted 
-          loop 
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover pointer-events-none z-[-1] scale-[1.2]"
-          style={{ objectFit: 'cover' }}
-        />
-      )}
-      {wallpaperType === 'time-shifting' && (
-        <img 
-          src={timeShiftUrl} 
-          alt="Time Shifting Wallpaper" 
-          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000"
-          style={{ objectFit: 'cover' }}
-        />
-      )}
+      {/* Mobile specific background */}
+      <img 
+        src="/mobile-background.jpg" 
+        alt="Mobile Wallpaper" 
+        className="block md:hidden w-full h-full object-cover absolute inset-0 z-[-1] select-none pointer-events-none"
+      />
+
+      {/* Desktop backgrounds */}
+      <div className="hidden md:block w-full h-full absolute inset-0">
+        {wallpaperType === 'image' && (
+          <img 
+            src={wallpaperUrl} 
+            alt="Wallpaper" 
+            className="w-full h-full object-cover absolute inset-0 z-[-1] select-none pointer-events-none"
+          />
+        )}
+        {wallpaperType === 'video' && (
+          <video 
+            src={wallpaperUrl} 
+            autoPlay 
+            muted 
+            loop 
+            playsInline
+            className="w-full h-full object-cover absolute inset-0 pointer-events-none z-[-1] scale-[1.2]"
+          />
+        )}
+        {wallpaperType === 'time-shifting' && (
+          <img 
+            src={timeShiftUrl} 
+            alt="Time Shifting Wallpaper" 
+            className="w-full h-full object-cover absolute inset-0 z-[-1] select-none pointer-events-none transition-opacity duration-1000"
+          />
+        )}
+      </div>
     </div>
   );
 };

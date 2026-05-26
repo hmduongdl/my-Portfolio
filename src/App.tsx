@@ -168,16 +168,16 @@ export const App: React.FC = () => {
       <MenuBar />
 
       {/* Desktop shortcuts icons */}
-      <div className="desktop-icons absolute top-12 right-4 md:right-5 grid grid-cols-2 gap-4 md:flex md:flex-col md:gap-4 z-10 select-none max-w-[calc(100vw-2rem)] md:max-w-none">
+      <div className="desktop-icons absolute top-12 left-0 right-0 md:left-auto md:right-5 grid grid-cols-2 gap-y-6 gap-x-4 px-4 py-6 justify-items-center md:flex md:flex-col md:gap-4 md:px-0 md:py-0 z-10 select-none max-w-full md:max-w-none">
         {/* Finder (Song Phương) */}
         <div
           onDoubleClick={() => openApp('finder', APP_DEFS)}
-          className="desktop-icon flex flex-col items-center gap-1 w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
+          className="desktop-icon flex flex-col items-center gap-1 w-[80px] md:w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
         >
-          <div className="desktop-icon-art w-12 h-12 rounded-md bg-transparent flex items-center justify-center overflow-hidden">
+          <div className="desktop-icon-art w-[48px] h-[48px] md:w-12 md:h-12 rounded-md bg-transparent flex items-center justify-center overflow-hidden">
             <img src={finderIcon} alt="Finder icon" className="w-full h-full object-contain" />
           </div>
-          <div className="desktop-icon-label text-white text-[12px] font-medium text-center leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+          <div className="desktop-icon-label text-[10px] md:text-[12px] font-medium text-white drop-shadow-md md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] text-center max-w-[80px] md:max-w-none truncate md:whitespace-normal md:break-words leading-tight">
             Song Phương
           </div>
         </div>
@@ -185,12 +185,12 @@ export const App: React.FC = () => {
         {/* Notes (Welcome.md) */}
         <div
           onDoubleClick={() => openApp('welcome', APP_DEFS)}
-          className="desktop-icon flex flex-col items-center gap-1 w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
+          className="desktop-icon flex flex-col items-center gap-1 w-[80px] md:w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
         >
-          <div className="desktop-icon-art w-12 h-12 rounded-md bg-transparent flex items-center justify-center overflow-hidden">
+          <div className="desktop-icon-art w-[48px] h-[48px] md:w-12 md:h-12 rounded-md bg-transparent flex items-center justify-center overflow-hidden">
             <img src={notesIcon} alt="Notes icon" className="w-full h-full object-contain" />
           </div>
-          <div className="desktop-icon-label text-white text-[12px] font-medium text-center leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
+          <div className="desktop-icon-label text-[10px] md:text-[12px] font-medium text-white drop-shadow-md md:drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)] text-center max-w-[80px] md:max-w-none truncate md:whitespace-normal md:break-words leading-tight">
             README.md
           </div>
         </div>

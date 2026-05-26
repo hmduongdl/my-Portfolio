@@ -46,7 +46,7 @@ export const ZaloApp: React.FC = () => {
   };
 
   return (
-    <div className="relative flex h-full w-full bg-slate-50/80 dark:bg-zinc-900/80 select-text overflow-hidden backdrop-blur-md">
+    <div className="relative flex flex-col sm:flex-row h-full w-full bg-slate-50/80 dark:bg-zinc-900/80 select-text overflow-y-auto sm:overflow-hidden backdrop-blur-md p-4 sm:p-0 space-y-4 sm:space-y-0">
       {/* Toast Notification */}
       <div 
         className={`absolute top-4 left-1/2 -translate-x-1/2 z-50 transition-all duration-300 transform ${showToast ? 'translate-y-0 opacity-100' : '-translate-y-8 opacity-0 pointer-events-none'}`}
@@ -61,8 +61,8 @@ export const ZaloApp: React.FC = () => {
         </div>
       </div>
 
-      {/* LEFT COLUMN: QR Code (45% width) */}
-      <div className="w-[45%] flex flex-col items-center justify-center p-5 border-r border-gray-200/50 dark:border-white/5 relative bg-white/5">
+      {/* LEFT COLUMN: QR Code */}
+      <div className="w-full sm:w-[45%] flex flex-col items-center justify-center p-2 sm:p-5 sm:border-r border-gray-200/50 dark:border-white/5 relative bg-transparent sm:bg-white/5">
         <div className="rounded-2xl bg-white shadow-[0_4px_12px_rgba(0,0,0,0.08)] p-5 border border-neutral-100 flex flex-col items-center justify-center w-full max-w-[210px] aspect-square">
           <div className="relative p-1 rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden w-full aspect-square flex items-center justify-center">
             <img
@@ -78,9 +78,9 @@ export const ZaloApp: React.FC = () => {
         </div>
       </div>
 
-      {/* RIGHT COLUMN: Contact Details (55% width) */}
-      <div className="w-[55%] flex flex-col justify-between p-6 pl-7 select-text">
-        <div className="flex flex-col items-start">
+      {/* RIGHT COLUMN: Contact Details */}
+      <div className="w-full sm:w-[55%] flex flex-col justify-between p-2 sm:p-6 sm:pl-7 select-text">
+        <div className="flex flex-col items-center sm:items-start text-center sm:text-left">
           {/* Avatar */}
           <div className="relative">
             <img

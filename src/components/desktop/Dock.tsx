@@ -2,7 +2,6 @@ import React, { useMemo } from 'react';
 import { AppDefinition, AppID } from '../../types';
 import { useOSStore } from '../../store/useOSStore';
 import { SOCIAL_APPS } from '../../apps';
-import { Trash2 } from 'lucide-react';
 
 interface DockIconProps {
     name: string;
@@ -55,7 +54,6 @@ interface DockProps {
 export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
     const windows = useOSStore((state) => state.windows);
     const socials = useOSStore((state) => state.socials);
-    const language = useOSStore((state) => state.language);
     const runningIds = useMemo(() => windows.map((w) => w.id), [windows]);
 
     const handleSocialClick = (app: any) => {
@@ -101,16 +99,6 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                         isRunning={app.id === 'zalo' ? runningIds.includes('zalo') : false}
                     />
                 ))}
-
-                {/* Divider for Trash Can */}
-                <div className="w-px h-7 md:h-8 bg-black/10 dark:bg-white/10 self-center flex-shrink-0" />
-
-                {/* Trash Can Icon */}
-                <DockIcon
-                    name={language === 'vn' ? 'Thùng rác' : 'Trash'}
-                    icon={<Trash2 className="w-[18px] h-[18px] md:w-[22px] md:h-[22px] text-gray-800 dark:text-white/90" />}
-                    onClick={() => alert(language === 'vn' ? 'Thùng rác trống' : 'Trash is empty')}
-                />
             </div>
         </div>
     );

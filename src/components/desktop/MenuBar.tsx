@@ -89,7 +89,7 @@ export const MenuBar: React.FC = () => {
         </div>
         <div className="px-2.5 py-0.5 h-5 flex items-center cursor-default rounded text-[13px] tracking-tight font-semibold hover:bg-black/8">{displayAppName}</div>
         {menus.map((m) => (
-          <div key={m} className="px-2.5 py-0.5 h-5 flex items-center cursor-default rounded text-[13px] tracking-tight hover:bg-black/8">{m}</div>
+          <div key={m} className="hidden sm:flex px-2.5 py-0.5 h-5 items-center cursor-default rounded text-[13px] tracking-tight hover:bg-black/8">{m}</div>
         ))}
 
         {openMenu === 'apple' && (
@@ -115,7 +115,7 @@ export const MenuBar: React.FC = () => {
         )}
       </div>
       
-      <div className="ml-auto flex items-center gap-0.5">
+      <div className="ml-auto hidden sm:flex items-center gap-0.5">
         <div className="px-2 py-0.5 h-5 flex items-center cursor-default rounded hover:bg-black/8" title="Battery">
           <svg viewBox="0 0 24 12" fill="none" stroke="currentColor" strokeWidth="1" className="w-[22px] h-[11px]">
             <rect x="0.5" y="0.5" width="20" height="11" rx="2.5" />

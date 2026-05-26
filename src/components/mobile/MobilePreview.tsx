@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Wallpaper } from '../desktop/Wallpaper';
 import { AppDefinition, SocialAppDefinition } from '../../types';
 import { useOSStore } from '../../store/useOSStore';
+import { BentoAboutWidget } from './BentoAboutWidget';
 
 type IosApp = Pick<AppDefinition, 'id' | 'name' | 'bg' | 'icon'>;
 
@@ -51,22 +52,8 @@ const MobileScreen: React.FC<MobileScreenProps> = ({ apps, socialApps = [], open
         <>
           <div className="absolute inset-x-0 top-[46px] bottom-[70px] px-3 py-0.5 grid grid-cols-4 gap-y-3 gap-x-1.5 align-content-start overflow-y-auto [&::-webkit-scrollbar]:w-0">
             {/* About Widget */}
-            <div
-              onClick={() => setOpenId('about')}
-              className="col-span-4 bg-white/80 backdrop-blur-xl rounded-[20px] p-3 shadow-[0_6px_16px_rgba(0,0,0,0.12),inset_0_1px_1px_rgba(255,255,255,0.6)] cursor-pointer flex gap-3.5 items-center min-h-[80px] border border-white/40 hover:scale-[0.98] transition-transform duration-300"
-            >
-              <div className="relative w-[56px] h-[56px] rounded-full bg-gradient-to-br from-[#E2F1FF] via-[#B5CCE6] to-[#7DA2CA] shadow-[inset_0_2px_4px_rgba(255,255,255,0.8),0_4px_10px_rgba(31,78,128,0.25)] flex items-center justify-center text-[24px] font-black text-[#1F4E80] flex-shrink-0 border border-white/60">
-                SP
-              </div>
-              <div className="flex-1 min-w-0 flex flex-col justify-center">
-                <div className="text-[8px] font-bold text-primary/80 uppercase tracking-widest mb-0.5">About me</div>
-                <div className="text-[14px] font-bold text-ink tracking-tight mb-0.5 truncate">Song Phương</div>
-                <div className="text-[10px] font-medium text-ink-2 leading-tight truncate">Product Designer & Dev</div>
-                <div className="text-[9px] font-medium text-ink-3 mt-1 flex items-center gap-1 truncate">
-                  <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor" className="opacity-70"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
-                  Hanoi, Vietnam
-                </div>
-              </div>
+            <div className="col-span-4 flex justify-center pb-2">
+              <BentoAboutWidget onClick={() => setOpenId('about')} scale={0.7} />
             </div>
 
             {/* Social Icons */}
