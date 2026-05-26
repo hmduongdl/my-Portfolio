@@ -4,6 +4,7 @@ import { Wallpaper } from './components/desktop/Wallpaper';
 import { MenuBar } from './components/desktop/MenuBar';
 import { Dock } from './components/desktop/Dock';
 import { Window } from './components/desktop/Window';
+import { IOSView } from './components/mobile/IOSView';
 import { MobilePreview } from './components/mobile/MobilePreview';
 import { APP_DEFS, SOCIAL_APPS } from './apps';
 import finderIcon from './icons/Finder.png';
@@ -22,7 +23,10 @@ export const App: React.FC = () => {
   const updateWindow = useOSStore((state) => state.updateWindow);
   const focusedId = useOSStore((state) => state.focusedId);
   const fetchSocials = useOSStore((state) => state.fetchSocials);
+  const socials = useOSStore((state) => state.socials);
 
+  const iosOpenAppId = useOSStore((state) => state.iosOpenAppId);
+  const setIosOpenAppId = useOSStore((state) => state.setIosOpenAppId);
   const isMobile = useOSStore((state) => state.isMobile);
 
   // Fetch dynamic socials from database on mount
@@ -119,6 +123,41 @@ export const App: React.FC = () => {
 
     runDiagnostics();
   }, []);
+
+  // Open Social apps or normal apps inside simulated iOS smartphone screens
+  // Zalo always opens as an in-app card (same experience as desktop)
+  // Other social platforms open their URL in a new tab using the dynamic DB value
+  const handleIOSAppOpen = (id: string) => {
+    // Zalo: open the ZaloApp card inside iOS view (NOT external link)
+    if (id === 'zalo') {
+      setIosOpenAppId('zalo');
+      return;
+    }
+
+    // Other social apps: open dynamic URL from DB, fall back to static
+    const social = SOCIAL_APPS.find((s) => s.id === id);
+    if (social) {
+      const matched = socials.find(s => s.platform === id);
+      const url = matched?.url || social.mailto || social.url;
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
+      return;
+    }
+
+    // Normal apps (About, Finder, etc.)
+    setIosOpenAppId(id);
+  };
+
+  if (isMobile) {
+    return (
+      <IOSView
+        apps={APP_DEFS}
+        socialApps={SOCIAL_APPS}
+        openAppId={iosOpenAppId}
+        onOpenApp={handleIOSAppOpen}
+        onClose={() => setIosOpenAppId(null)}
+      />
+    );
+  }
 
   return (
     <div className="desktop relative w-screen h-screen overflow-hidden isolation-auto">
