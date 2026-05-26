@@ -1,4 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useOSStore } from '../store/useOSStore';
+import { profileService } from '../services/profileService';
+import { profileVN } from '../data/profileData';
 
 export const MailApp: React.FC = () => {
   const [from, setFrom] = useState<string>('');
@@ -6,6 +9,16 @@ export const MailApp: React.FC = () => {
   const [body, setBody] = useState<string>('');
   const [sent, setSent] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const language = useOSStore((state) => state.language);
+  const [recipientEmail, setRecipientEmail] = useState<string>(profileVN.email);
+
+  useEffect(() => {
+    profileService.getProfile(language)
+      .then((p) => {
+        if (p && p.email) setRecipientEmail(p.email);
+      })
+      .catch(() => {});
+  }, [language]);
 
   const handleSend = () => {
     const e: Record<string, string> = {};
@@ -16,8 +29,8 @@ export const MailApp: React.FC = () => {
     setErrors(e);
     
     if (Object.keys(e).length === 0) {
-      const mailto = `mailto:hoanglong.workdl@gmail.com?subject=${encodeURIComponent(`[Portfolio Inquiry] ${subject}`)}&body=${encodeURIComponent(`From: ${from}\n\n${body}`)}`;
-      window.open(mailto, '_blank');
+      const mailto = `mailto:${recipientEmail}?subject=${encodeURIComponent(`[Portfolio Inquiry] ${subject}`)}&body=${encodeURIComponent(`From: ${from}\n\n${body}`)}`;
+      window.location.href = mailto;
       setSent(true);
       setTimeout(() => {
         setSent(false);
@@ -64,7 +77,7 @@ export const MailApp: React.FC = () => {
       <div className="px-4 flex flex-col bg-paper flex-shrink-0">
         <div className="flex items-center border-b border-neutral-200/10 dark:border-white/5 py-1.5 gap-2">
           <span className="text-xs text-neutral-400 dark:text-neutral-500 w-16 shrink-0">To:</span>
-          <span className="text-[13px] font-medium text-ink">hoanglong.workdl@gmail.com</span>
+          <span className="text-[13px] font-medium text-ink">{recipientEmail}</span>
         </div>
         <div className="flex items-center border-b border-neutral-200/10 dark:border-white/5 py-1.5 gap-2">
           <span className="text-xs text-neutral-400 dark:text-neutral-500 w-16 shrink-0">From:</span>

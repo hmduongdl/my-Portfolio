@@ -53,6 +53,7 @@ interface DockProps {
 
 export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
     const windows = useOSStore((state) => state.windows);
+    const socials = useOSStore((state) => state.socials);
     const runningIds = useMemo(() => windows.map((w) => w.id), [windows]);
 
     const handleSocialClick = (app: any) => {
@@ -60,7 +61,8 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
             onOpen('zalo');
             return;
         }
-        const url = app.url || app.mailto;
+        const matchedSocial = socials.find(s => s.platform === app.id);
+        const url = matchedSocial?.url || app.url || app.mailto;
         if (url) {
             window.open(url, '_blank', 'noopener,noreferrer');
         }

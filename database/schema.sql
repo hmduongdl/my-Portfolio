@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS profile (
 );
 
 -- 2. Social links (có toggle visible và thứ tự hiển thị)
-CREATE TABLE IF NOT EXISTS social_links (
+CREATE TABLE IF NOT EXISTS tbl_social_links (
   id          SERIAL       PRIMARY KEY,
   platform    VARCHAR(50)  UNIQUE NOT NULL,
   label       VARCHAR(100) NOT NULL,
@@ -121,7 +121,7 @@ CREATE TRIGGER trg_products_updated_at
   BEFORE UPDATE ON products
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
-DROP TRIGGER IF EXISTS trg_social_links_updated_at ON social_links;
-CREATE TRIGGER trg_social_links_updated_at
-  BEFORE UPDATE ON social_links
+DROP TRIGGER IF EXISTS trg_tbl_social_links_updated_at ON tbl_social_links;
+CREATE TRIGGER trg_tbl_social_links_updated_at
+  BEFORE UPDATE ON tbl_social_links
   FOR EACH ROW EXECUTE FUNCTION set_updated_at();

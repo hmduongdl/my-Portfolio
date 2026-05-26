@@ -142,10 +142,10 @@ async function main() {
     )
   `;
 
-  // e. social_links
-  console.log('- Đang tạo bảng social_links...');
+  // e. tbl_social_links
+  console.log('- Đang tạo bảng tbl_social_links...');
   await sql`
-    CREATE TABLE IF NOT EXISTS social_links (
+    CREATE TABLE IF NOT EXISTS tbl_social_links (
       id          SERIAL       PRIMARY KEY,
       platform    VARCHAR(50)  UNIQUE NOT NULL,
       label       VARCHAR(100) NOT NULL,
@@ -167,7 +167,7 @@ async function main() {
     )
   `;
 
-  // g. trigger set_updated_at cho tbl_products và social_links
+  // g. trigger set_updated_at cho tbl_products và tbl_social_links
   console.log('- Đang tạo trigger...');
   await sql`
     CREATE OR REPLACE FUNCTION set_updated_at()
@@ -186,10 +186,10 @@ async function main() {
       FOR EACH ROW EXECUTE FUNCTION set_updated_at()
   `;
 
-  await sql`DROP TRIGGER IF EXISTS trg_social_links_updated_at ON social_links`;
+  await sql`DROP TRIGGER IF EXISTS trg_tbl_social_links_updated_at ON tbl_social_links`;
   await sql`
-    CREATE TRIGGER trg_social_links_updated_at
-      BEFORE UPDATE ON social_links
+    CREATE TRIGGER trg_tbl_social_links_updated_at
+      BEFORE UPDATE ON tbl_social_links
       FOR EACH ROW EXECUTE FUNCTION set_updated_at()
   `;
 
@@ -239,7 +239,7 @@ async function main() {
   ];
   for (const s of socialData) {
     await sql`
-      INSERT INTO social_links (platform, label, url, visible, order_index)
+      INSERT INTO tbl_social_links (platform, label, url, visible, order_index)
       VALUES (${s.platform}, ${s.label}, ${s.url}, true, ${s.order})
       ON CONFLICT (platform) DO UPDATE SET
         label = EXCLUDED.label,

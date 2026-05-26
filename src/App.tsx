@@ -21,10 +21,17 @@ export const App: React.FC = () => {
   const focusWindow = useOSStore((state) => state.focusWindow);
   const updateWindow = useOSStore((state) => state.updateWindow);
   const focusedId = useOSStore((state) => state.focusedId);
+  const fetchSocials = useOSStore((state) => state.fetchSocials);
+  const socials = useOSStore((state) => state.socials);
 
   const iosOpenAppId = useOSStore((state) => state.iosOpenAppId);
   const setIosOpenAppId = useOSStore((state) => state.setIosOpenAppId);
   const isMobile = useOSStore((state) => state.isMobile);
+
+  // Fetch dynamic socials from database on mount
+  useEffect(() => {
+    fetchSocials();
+  }, [fetchSocials]);
 
   // Initialize About + Notes (Welcome) side-by-side on first desktop load
   useEffect(() => {
@@ -110,7 +117,9 @@ export const App: React.FC = () => {
   const handleIOSAppOpen = (id: string) => {
     const social = SOCIAL_APPS.find((s) => s.id === id);
     if (social) {
-      window.open(social.mailto || social.url, '_blank');
+      const matched = socials.find(s => s.platform === id);
+      const url = matched?.url || social.mailto || social.url;
+      window.open(url, '_blank');
       return;
     }
     setIosOpenAppId(id);

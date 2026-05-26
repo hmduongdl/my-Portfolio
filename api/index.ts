@@ -1,5 +1,8 @@
 import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Pool } from 'pg';
+import bcrypt from 'bcryptjs';
+import { SignJWT } from 'jose';
+import crypto from 'crypto';
 
 // ============================================================================
 // 1. DỮ LIỆU DỰ PHÒNG (STATIC FALLBACK DATA)
@@ -206,6 +209,58 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 
   // -------------------------------------------------------------
+  // ENDPOINT: LOGIN
+  // -------------------------------------------------------------
+  if (req.method === 'POST' && path === '/auth/login') {
+    const { username, password } = (req.body ?? {}) as Record<string, string>;
+    if (!username || !password) {
+      return res.status(400).json({ error: 'BAD_REQUEST', message: 'Username and password are required.' });
+    }
+
+    try {
+      let rows = await runQuery('SELECT * FROM tbl_users WHERE username = $1 LIMIT 1', [username]);
+      
+      if (rows.length === 0) {
+        try {
+          rows = await runQuery('SELECT * FROM admin_users WHERE username = $1 LIMIT 1', [username]);
+        } catch (dbErr) {
+          // Ignore
+        }
+      }
+
+      if (rows.length === 0) {
+        return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Tài khoản hoặc mật khẩu không chính xác.' });
+      }
+
+      const user = rows[0];
+      let isMatch = false;
+
+      if (user.password_hash.startsWith('$2a$') || user.password_hash.startsWith('$2b$')) {
+        isMatch = await bcrypt.compare(password, user.password_hash);
+      } else {
+        const hash = crypto.createHash('sha256').update(password).digest('hex');
+        isMatch = (hash === user.password_hash);
+      }
+
+      if (!isMatch) {
+        return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Tài khoản hoặc mật khẩu không chính xác.' });
+      }
+
+      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'default-secret-key-123456');
+      const token = await new SignJWT({ id: user.id, username: user.username })
+        .setProtectedHeader({ alg: 'HS256' })
+        .setIssuedAt()
+        .setExpirationTime('24h')
+        .sign(secret);
+
+      return res.status(200).json({ token });
+    } catch (e: any) {
+      console.error('[API Login Error]:', e);
+      return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+    }
+  }
+
+  // -------------------------------------------------------------
   // ENDPOINT: HEALTH CHECK
   // -------------------------------------------------------------
   if (path === '/health' || path === '/') {
@@ -381,6 +436,26 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           desc: lang === 'en' ? p.desc.replace('Cá nhân', 'Personally') : p.desc
         }));
         return res.status(200).json(fb);
+      }
+    }
+
+    // /SOCIALS
+    if (path === '/socials') {
+      try {
+        const rows = await runQuery('SELECT * FROM tbl_social_links WHERE visible = true ORDER BY order_index ASC');
+        res.setHeader('x-database-status', 'online');
+        return res.status(200).json(rows);
+      } catch (e) {
+        console.error('[API Fallback] /socials error:', e);
+        res.setHeader('x-database-status', 'fallback_error');
+        const fallbackSocials = [
+          { platform: 'github', label: 'GitHub', url: 'https://github.com/hmduongdl' },
+          { platform: 'facebook', label: 'Facebook', url: 'https://facebook.com/' },
+          { platform: 'gmail', label: 'Gmail', url: 'mailto:duonghm.work@gmail.com' },
+          { platform: 'phone', label: 'Phone', url: 'tel:+84' },
+          { platform: 'zalo', label: 'Zalo', url: 'https://zalo.me/' }
+        ];
+        return res.status(200).json(fallbackSocials);
       }
     }
 
@@ -769,7 +844,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           )
         `);
 
-        const socialLinks = await runQuery('SELECT * FROM social_links ORDER BY order_index ASC, id ASC');
+        const socialLinks = await runQuery('SELECT * FROM tbl_social_links ORDER BY order_index ASC, id ASC');
         const seoRows = await runQuery('SELECT * FROM tbl_settings');
 
         const seoSettings: Record<string, string> = {};
@@ -819,7 +894,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           for (const link of socialLinks) {
             if (link.platform) {
               await runQuery(
-                `UPDATE social_links
+                `UPDATE tbl_social_links
                  SET url = $1,
                      visible = $2,
                      updated_at = NOW()

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Wallpaper } from '../desktop/Wallpaper';
 import { AppDefinition, SocialAppDefinition } from '../../types';
+import { useOSStore } from '../../store/useOSStore';
 
 type IosApp = Pick<AppDefinition, 'id' | 'name' | 'bg' | 'icon'>;
 
@@ -141,6 +142,7 @@ export const MobilePreview: React.FC<MobilePreviewProps> = ({ apps, socialApps =
   const [pos, setPos] = useState<{ x: number; y: number }>({ x: 24, y: 60 });
   const [drag, setDrag] = useState<{ startX: number; startY: number; x: number; y: number } | null>(null);
   const [collapsed, setCollapsed] = useState<boolean>(false);
+  const socials = useOSStore((state) => state.socials);
 
   useEffect(() => {
     if (!drag) return;
@@ -153,11 +155,11 @@ export const MobilePreview: React.FC<MobilePreviewProps> = ({ apps, socialApps =
       });
     };
     const handleMouseUp = () => setDrag(null);
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
     };
   }, [drag]);
 
@@ -172,7 +174,9 @@ export const MobilePreview: React.FC<MobilePreviewProps> = ({ apps, socialApps =
     }
     const social = socialApps.find((s) => s.id === id);
     if (social) {
-      window.open(social.mailto || social.url, '_blank');
+      const matched = socials.find(s => s.platform === id);
+      const url = matched?.url || social.mailto || social.url;
+      window.open(url, '_blank');
       return;
     }
     setOpenId(id);

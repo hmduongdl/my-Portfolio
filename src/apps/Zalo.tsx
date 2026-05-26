@@ -1,14 +1,30 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { MessageSquare, Copy, Check } from 'lucide-react';
+import { useOSStore } from '../store/useOSStore';
+import { profileService } from '../services/profileService';
 
 export const ZaloApp: React.FC = () => {
   const [copied, setCopied] = useState(false);
-  const phoneNumber = '0911818016';
-  const displayPhone = '0911 818 016';
+  const language = useOSStore((state) => state.language);
+  const [phone, setPhone] = useState<string>('0911818016');
+
+  useEffect(() => {
+    profileService.getProfile(language)
+      .then((p) => {
+        if (p && p.phone) setPhone(p.phone);
+      })
+      .catch(() => {});
+  }, [language]);
+
+  // Clean phone number for URL (strip non-digits or spaces)
+  const cleanPhone = phone.replace(/\s+/g, '');
+  
+  // Format phone number for display (e.g. 0911 818 016)
+  const displayPhone = cleanPhone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(phoneNumber);
+      await navigator.clipboard.writeText(cleanPhone);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
@@ -22,7 +38,7 @@ export const ZaloApp: React.FC = () => {
       <div className="w-[45%] flex flex-col items-center justify-center p-4 border-r border-gray-100 dark:border-zinc-800">
         <div className="rounded-2xl bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.05)] border border-gray-100 p-4 flex flex-col items-center justify-center">
           <img
-            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://zalo.me/${phoneNumber}`}
+            src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://zalo.me/${cleanPhone}`}
             alt="Zalo QR Code"
             className="w-[120px] h-[120px] object-contain select-none rounded-xl"
             draggable={false}
@@ -63,7 +79,7 @@ export const ZaloApp: React.FC = () => {
         {/* Action Buttons */}
         <div className="flex flex-col gap-2 mt-4">
           <a
-            href={`https://zalo.me/${phoneNumber}`}
+            href={`https://zalo.me/${cleanPhone}`}
             target="_blank"
             rel="noopener noreferrer"
             className="bg-[#0068FF] hover:bg-[#005AE0] text-white text-xs font-semibold py-2 px-4 rounded-lg flex items-center justify-center gap-1.5 shadow-sm transition-colors w-full select-none"
@@ -74,7 +90,7 @@ export const ZaloApp: React.FC = () => {
 
           <button
             onClick={handleCopy}
-            className="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-800 dark:text-zinc-200 text-xs font-medium py-2 px-4 rounded-lg transition-colors w-full flex items-center justify-center gap-1.5 select-none"
+            className="bg-gray-100 hover:bg-gray-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-gray-800 dark:text-zinc-200 text-xs font-medium py-2 px-4 rounded-lg transition-colors w-full flex items-center justify-center gap-1.5 select-none cursor-pointer border-none"
           >
             {copied ? (
               <>

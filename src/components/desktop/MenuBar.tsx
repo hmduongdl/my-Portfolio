@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useOSStore } from '../../store/useOSStore';
 import { APP_DEFS } from '../../apps';
+import { profileService } from '../../services/profileService';
+import { profileVN } from '../../data/profileData';
 
 const AppleLogo: React.FC = () => (
   <svg viewBox="0 0 24 24" fill="currentColor" className="w-3.5 h-3.5">
@@ -14,11 +16,21 @@ export const MenuBar: React.FC = () => {
   const openMenu = useOSStore((state) => state.openMenu);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
   const openApp = useOSStore((state) => state.openApp);
+  const language = useOSStore((state) => state.language);
+  const [profile, setProfile] = useState<any>(profileVN);
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
     return () => clearInterval(t);
   }, []);
+
+  useEffect(() => {
+    profileService.getProfile(language)
+      .then((p) => {
+        if (p) setProfile(p);
+      })
+      .catch(() => {});
+  }, [language]);
 
   const day = time.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
   const clock = time.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
@@ -27,6 +39,9 @@ export const MenuBar: React.FC = () => {
 
   const appleMenu = [
     { label: 'About This Mac', action: () => openApp('about', APP_DEFS) },
+    { divider: true },
+    { label: 'Website Song Phương', action: () => window.open(profile?.songphuongUrl || 'https://songphuong.vn', '_blank') },
+    { label: 'Contact Mail', action: () => window.open(`mailto:${profile?.email || 'duonghm.work@gmail.com'}`, '_blank') },
     { divider: true },
     { label: 'System Settings…', shortcut: '' },
     { label: 'App Store…' },

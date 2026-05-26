@@ -41,6 +41,15 @@ function topZ(windows: WindowInstance[]): number {
   return windows.reduce((m, w) => Math.max(m, w.z), 10);
 }
 
+export interface SocialLink {
+  id?: number;
+  platform: string;
+  label: string;
+  url: string;
+  visible?: boolean;
+  order_index?: number;
+}
+
 interface OSState {
   windows: WindowInstance[];
   tweaks: Tweaks;
@@ -50,6 +59,7 @@ interface OSState {
   activeAppName: string;
   iosOpenAppId: string | null;
   language: 'en' | 'vn';
+  socials: SocialLink[];
 
   openApp: (id: AppID, defs: AppDefinition[]) => void;
   closeWindow: (id: AppID) => void;
@@ -62,6 +72,7 @@ interface OSState {
   setIsMobile: (val: boolean) => void;
   setIosOpenAppId: (id: string | null) => void;
   setLanguage: (lang: 'en' | 'vn') => void;
+  fetchSocials: () => Promise<void>;
 }
 
 export const useOSStore = create<OSState>((set, get) => {
@@ -201,5 +212,17 @@ export const useOSStore = create<OSState>((set, get) => {
     setIsMobile: (val) => set({ isMobile: val }),
     setIosOpenAppId: (id) => set({ iosOpenAppId: id }),
     setLanguage: (lang) => set({ language: lang }),
+    socials: [],
+    fetchSocials: async () => {
+      try {
+        const res = await fetch('/api/socials');
+        if (res.ok) {
+          const data = await res.json();
+          set({ socials: data });
+        }
+      } catch (err) {
+        console.error('Failed to fetch socials:', err);
+      }
+    },
   };
 });
