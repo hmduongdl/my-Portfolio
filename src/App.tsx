@@ -128,7 +128,7 @@ export const App: React.FC = () => {
     );
   }
 
-  const runningIds = windows.map((w) => w.id);
+
 
   return (
     <div className="desktop relative w-screen h-screen overflow-hidden isolation-auto">
@@ -188,11 +188,7 @@ export const App: React.FC = () => {
       {/* Bottom sliding application Dock */}
       <Dock
         apps={APP_DEFS}
-        runningIds={runningIds}
         onOpen={(id) => openApp(id, APP_DEFS)}
-        dockSize={tweaks.dockSize}
-        magnify={tweaks.dockMagnify}
-        autoHide={tweaks.dockAutoHide}
       />
 
       {/* Live iPhone bezel on desktop */}
