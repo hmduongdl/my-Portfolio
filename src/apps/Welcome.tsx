@@ -19,8 +19,8 @@ export const WelcomeApp: React.FC = () => {
         Drag windows around. Resize from any edge. The yellow light minimizes; the green one zooms. Hit <span className="bg-paper-2 px-1.5 py-0.5 rounded text-[12px] font-mono border border-rule">⌘ T</span> in the tweaks panel to customize window styles.
       </p>
       
-      <div className="mt-5 p-3.5 bg-paper-2 rounded-lg border border-rule text-[13px] text-ink-2">
-        <div className="font-semibold mb-1 text-ink">Tip</div>
+      <div className="mt-5 p-4 bg-blue-500/10 dark:bg-blue-500/5 text-blue-700 dark:text-blue-200 border border-blue-500/20 rounded-xl text-[13px] leading-relaxed">
+        <div className="font-semibold mb-1">Tip</div>
         Hover the dock — the icons magnify like the real thing.
       </div>
     </div>

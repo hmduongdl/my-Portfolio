@@ -20,11 +20,11 @@ export const ZaloApp: React.FC = () => {
     <div className="flex h-full w-full bg-slate-50/50 dark:bg-zinc-900/50 select-text">
       {/* LEFT COLUMN: QR Code (45% width) */}
       <div className="w-[45%] flex flex-col items-center justify-center p-4 border-r border-gray-100 dark:border-zinc-800">
-        <div className="rounded-2xl bg-white shadow-inner p-4 flex flex-col items-center justify-center border border-gray-100">
+        <div className="rounded-2xl bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.06),0_1px_2px_rgba(0,0,0,0.05)] border border-gray-100 p-4 flex flex-col items-center justify-center">
           <img
             src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://zalo.me/${phoneNumber}`}
             alt="Zalo QR Code"
-            className="w-[120px] h-[120px] object-contain select-none"
+            className="w-[120px] h-[120px] object-contain select-none rounded-xl"
             draggable={false}
           />
           <span className="text-[10px] text-gray-400 mt-2 font-medium">

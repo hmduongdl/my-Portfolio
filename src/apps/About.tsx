@@ -64,7 +64,22 @@ export const AboutApp: React.FC = () => {
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 px-10 py-7 select-text overflow-y-auto w-full h-full">
+    <div className="flex flex-col items-center gap-6 px-10 py-7 select-text overflow-y-auto w-full h-full about-app-container">
+      <style>{`
+        .about-app-container::-webkit-scrollbar {
+          width: 6px;
+        }
+        .about-app-container::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .about-app-container::-webkit-scrollbar-thumb {
+          background: rgba(155, 155, 155, 0.2);
+          border-radius: 20px;
+        }
+        .about-app-container::-webkit-scrollbar-thumb:hover {
+          background: rgba(155, 155, 155, 0.4);
+        }
+      `}</style>
 
       {/* ── Header: Avatar + Name + Title + Company badge ── */}
       <div className="flex flex-col items-center gap-3">
@@ -105,17 +120,17 @@ export const AboutApp: React.FC = () => {
 
       {/* ── Tech Stack ── */}
       <div className="w-full max-w-[440px]">
-        <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-2">
+        <div className="text-[11px] font-semibold text-ink-3 uppercase tracking-wider mb-2 px-3">
           Tech Stack
         </div>
-        <div className="bg-paper-2/80 backdrop-blur-md rounded-lg border border-rule px-4 py-0.5 shadow-sm">
-          {techStack.map((item, i) => (
+        <div className="flex flex-col gap-1">
+          {techStack.map((item) => (
             <div
               key={item.category}
-              className={`flex items-baseline gap-4 py-2.5 text-[13px] ${i < techStack.length - 1 ? 'border-b border-rule' : ''}`}
+              className="flex items-baseline gap-4 px-3 py-2 rounded-md even:bg-white/5 odd:bg-transparent"
             >
-              <span className="text-ink-3 shrink-0 w-[72px] font-medium">{item.category}</span>
-              <span className="text-ink font-medium">{item.name}</span>
+              <span className="text-neutral-400 font-medium w-24 shrink-0 text-[12px]">{item.category}</span>
+              <span className="text-neutral-100 text-[12px] flex-1">{item.name}</span>
             </div>
           ))}
         </div>

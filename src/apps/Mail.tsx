@@ -31,19 +31,19 @@ export const MailApp: React.FC = () => {
   return (
     <div className="flex flex-col h-full select-text bg-paper">
       {/* Mail Toolbar */}
-      <div className="flex gap-1.5 px-3.5 py-2 border-b border-rule bg-paper-2 select-none flex-shrink-0">
+      <div className="bg-neutral-100/80 dark:bg-zinc-800/80 border-b border-black/5 dark:border-white/5 p-2 flex items-center space-x-2 backdrop-blur-md select-none flex-shrink-0">
         <button
           onClick={handleSend}
-          className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-md border border-rule-strong bg-white hover:bg-paper-2 text-[13px] font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer transition-colors duration-120"
+          className="bg-[#007AFF] hover:bg-[#0063CC] text-white rounded-md px-3 py-1 flex items-center space-x-1.5 text-xs font-medium transition-colors cursor-pointer border-none"
         >
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
+          <svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" />
           </svg>
-          Send
+          <span>Send</span>
         </button>
         
-        <button className="inline-flex items-center justify-center gap-1.5 px-3.5 py-1.5 rounded-md border border-rule-strong bg-white hover:bg-paper-2 text-[13px] font-medium shadow-[0_1px_0_rgba(0,0,0,0.04)] cursor-pointer transition-colors duration-120">
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="1.6">
+        <button className="bg-transparent hover:bg-neutral-200/50 dark:hover:bg-zinc-700/50 text-ink-2 rounded-md p-1.5 w-7 h-7 flex items-center justify-center transition-colors cursor-pointer border-none">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2">
             <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
           </svg>
         </button>
@@ -61,27 +61,31 @@ export const MailApp: React.FC = () => {
       </div>
 
       {/* Header Fields */}
-      <div className="px-3.5 py-1 border-b border-rule grid grid-cols-[60px_1fr] items-center">
-        <div className="text-xs text-ink-3">To:</div>
-        <div className="py-1.5 text-[13px] font-medium text-ink">hoanglong.workdl@gmail.com</div>
-        
-        <div className="text-xs text-ink-3 border-t border-rule py-2">From:</div>
-        <input
-          placeholder="your.email@example.com"
-          value={from}
-          onChange={(e) => setFrom(e.target.value)}
-          className="border-none outline-none py-1.5 text-[13px] font-sans border-t border-rule bg-transparent w-full"
-          style={{ color: errors.from ? 'var(--error)' : 'var(--ink)' }}
-        />
-        
-        <div className="text-xs text-ink-3 border-t border-rule py-2">Subject:</div>
-        <input
-          placeholder="What's this about?"
-          value={subject}
-          onChange={(e) => setSubject(e.target.value)}
-          className="border-none outline-none py-1.5 text-[13px] font-semibold border-t border-rule bg-transparent w-full"
-          style={{ color: errors.subject ? 'var(--error)' : 'var(--ink)' }}
-        />
+      <div className="px-4 flex flex-col bg-paper flex-shrink-0">
+        <div className="flex items-center border-b border-neutral-200/10 dark:border-white/5 py-1.5 gap-2">
+          <span className="text-xs text-neutral-400 dark:text-neutral-500 w-16 shrink-0">To:</span>
+          <span className="text-[13px] font-medium text-ink">hoanglong.workdl@gmail.com</span>
+        </div>
+        <div className="flex items-center border-b border-neutral-200/10 dark:border-white/5 py-1.5 gap-2">
+          <span className="text-xs text-neutral-400 dark:text-neutral-500 w-16 shrink-0">From:</span>
+          <input
+            placeholder="your.email@example.com"
+            value={from}
+            onChange={(e) => setFrom(e.target.value)}
+            className="border-none outline-none bg-transparent w-full text-[13px] font-sans text-ink placeholder:text-neutral-400/50"
+            style={{ color: errors.from ? 'var(--error)' : 'var(--ink)' }}
+          />
+        </div>
+        <div className="flex items-center border-b border-neutral-200/10 dark:border-white/5 py-1.5 gap-2">
+          <span className="text-xs text-neutral-400 dark:text-neutral-500 w-16 shrink-0">Subject:</span>
+          <input
+            placeholder="What's this about?"
+            value={subject}
+            onChange={(e) => setSubject(e.target.value)}
+            className="border-none outline-none bg-transparent w-full text-[13px] font-semibold text-ink placeholder:text-neutral-400/50"
+            style={{ color: errors.subject ? 'var(--error)' : 'var(--ink)' }}
+          />
+        </div>
       </div>
 
       {/* Editor Body */}
@@ -89,7 +93,7 @@ export const MailApp: React.FC = () => {
         placeholder="Write your message…"
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        className="flex-1 border-none outline-none p-[18px] text-[14px] font-sans resize-none bg-transparent leading-relaxed"
+        className="bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md p-4 rounded-b-xl w-full flex-grow resize-none outline-none border-none text-sm leading-relaxed"
         style={{ color: errors.body ? 'var(--error)' : 'var(--ink)' }}
       />
     </div>

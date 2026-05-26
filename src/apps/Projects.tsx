@@ -2,6 +2,7 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useOSStore } from '../store/useOSStore';
 import { projectService } from '../services/projectService';
 import type { ProjectCategory, Project } from '../types/project';
+import { Code, Palette, Terminal } from 'lucide-react';
 
 type TabId = 'all' | ProjectCategory;
 
@@ -11,6 +12,25 @@ const TABS: { id: TabId; label: string; labelVN: string }[] = [
   { id: 'design', label: '2D Graphic Designs', labelVN: 'Thiết kế' },
   { id: 'tools', label: 'Utilities & Tools', labelVN: 'Công cụ' },
 ];
+
+const renderProjectIcon = (category: ProjectCategory) => {
+  let IconComponent = Code;
+  let gradientClasses = 'from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-800';
+
+  if (category === 'design') {
+    IconComponent = Palette;
+    gradientClasses = 'from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-700';
+  } else if (category === 'tools') {
+    IconComponent = Terminal;
+    gradientClasses = 'from-neutral-500 to-zinc-700 dark:from-neutral-600 dark:to-zinc-800';
+  }
+
+  return (
+    <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md bg-gradient-to-br ${gradientClasses}`}>
+      <IconComponent size={20} className="drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.2)]" />
+    </div>
+  );
+};
 
 export const ProjectsApp: React.FC = () => {
   const language = useOSStore((s) => s.language);
@@ -64,27 +84,41 @@ export const ProjectsApp: React.FC = () => {
     </div>
   );
 
+  const activeIndex = TABS.findIndex((t) => t.id === activeTab);
+
   return (
     <div className="h-full flex flex-col select-text bg-paper">
       {/* Toolbar */}
-      <div className="px-4 pt-3 pb-2.5 flex items-center gap-2 border-b border-rule bg-paper-2 flex-shrink-0">
-        <div className="flex gap-1 flex-1 flex-wrap">
-          {TABS.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setActiveTab(t.id)}
-              className={`px-3 py-1 text-[12.5px] font-medium border-none rounded-md cursor-pointer transition-colors duration-150 whitespace-nowrap ${activeTab === t.id
-                  ? 'bg-primary text-white'
-                  : 'text-ink-2 hover:bg-black/5 dark:hover:bg-white/8 bg-transparent'
+      <div className="px-4 pt-3 pb-2.5 flex items-center justify-between gap-4 border-b border-rule bg-paper-2 flex-shrink-0 flex-wrap sm:flex-nowrap">
+        <div className="bg-neutral-200/50 dark:bg-zinc-800/50 p-0.5 rounded-lg flex space-x-1 border border-black/5 dark:border-white/5 relative w-full sm:w-auto sm:min-w-[480px]">
+          {/* Sliding background */}
+          <div
+            className="absolute top-0.5 bottom-0.5 bg-white dark:bg-zinc-700 shadow-sm rounded-md transition-all duration-200"
+            style={{
+              width: `calc(100% / ${TABS.length} - 0.25rem)`,
+              left: `calc(0.125rem + ${activeIndex} * 100% / ${TABS.length})`,
+            }}
+          />
+          {TABS.map((t) => {
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id)}
+                className={`flex-1 text-center px-1 py-1.5 text-[12.5px] font-medium border-none rounded-md cursor-pointer relative z-10 transition-colors duration-200 whitespace-nowrap ${
+                  isActive
+                    ? 'text-neutral-900 dark:text-neutral-100 font-semibold'
+                    : 'text-neutral-500 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
                 }`}
-            >
-              {language === 'vn' ? t.labelVN : t.label}
-            </button>
-          ))}
+              >
+                {language === 'vn' ? t.labelVN : t.label}
+              </button>
+            );
+          })}
         </div>
 
         {/* Search */}
-        <div className="relative flex-shrink-0">
+        <div className="relative w-full sm:w-44 flex-shrink-0">
           <svg
             className="absolute left-2.5 top-1/2 -translate-y-1/2 text-ink-3 pointer-events-none"
             width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -97,7 +131,7 @@ export const ProjectsApp: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={language === 'vn' ? 'Tìm kiếm...' : 'Search...'}
-            className="pl-8 pr-3 py-1 text-[12px] bg-black/5 dark:bg-white/6 border border-rule rounded-md outline-none focus:ring-1 focus:ring-primary/40 text-ink w-36 placeholder:text-ink-3 transition-all"
+            className="pl-8 pr-3 py-1.5 text-[12px] bg-black/5 dark:bg-white/6 border border-rule rounded-lg outline-none focus:ring-1 focus:ring-primary/40 text-ink w-full placeholder:text-ink-3 transition-all"
           />
         </div>
       </div>
@@ -130,17 +164,12 @@ export const ProjectsApp: React.FC = () => {
                 key={p.id}
                 className="bg-paper-2 border border-rule rounded-xl overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.05)] transition-all duration-300 hover:-translate-y-1 hover:shadow-lg flex flex-col"
               >
-                {/* Header with gradient + initial */}
+                {/* Header with gradient + icon */}
                 <div
                   className="h-[76px] relative flex items-center justify-center flex-shrink-0"
                   style={{ background: `linear-gradient(135deg, ${p.color}28, ${p.color}10)` }}
                 >
-                  <div
-                    className="w-11 h-11 rounded-full flex items-center justify-center text-white font-bold text-[18px] shadow-md select-none"
-                    style={{ background: `linear-gradient(135deg, ${p.color}, ${p.color}bb)` }}
-                  >
-                    {p.name.charAt(0).toUpperCase()}
-                  </div>
+                  {renderProjectIcon(p.category)}
                 </div>
 
                 {/* Body */}
@@ -153,7 +182,7 @@ export const ProjectsApp: React.FC = () => {
                     {p.tags.map((tag) => (
                       <span
                         key={tag}
-                        className="bg-gray-100 text-gray-600 dark:bg-neutral-800 dark:text-neutral-300 text-xs px-2 py-0.5 rounded"
+                        className="bg-neutral-100/50 dark:bg-white/5 text-neutral-800 dark:text-neutral-200 border border-neutral-200/50 dark:border-white/10 px-2 py-0.5 text-[10px] rounded-md font-medium"
                       >
                         {tag}
                       </span>
