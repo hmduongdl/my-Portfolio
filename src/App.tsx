@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useOSStore } from './store/useOSStore';
 import { Wallpaper } from './components/desktop/Wallpaper';
 import { MenuBar } from './components/desktop/MenuBar';
@@ -33,16 +33,16 @@ export const App: React.FC = () => {
   const setIosOpenAppId = useOSStore((state) => state.setIosOpenAppId);
   const isMobile = useOSStore((state) => state.isMobile);
 
-  const setSystemReady = useOSStore((state) => state.setSystemReady);
-  const isSystemReady = useOSStore((state) => state.isSystemReady);
+  const didOpenInitialWindows = useRef(false);
 
   // Initialize About + Notes (Welcome) side-by-side on first desktop load
   useEffect(() => {
-    if (isSystemReady && !isMobile) {
+    if (!didOpenInitialWindows.current && !isMobile) {
+      didOpenInitialWindows.current = true;
       setTimeout(() => openApp('about', APP_DEFS), 100);
       setTimeout(() => openApp('welcome', APP_DEFS), 250);
     }
-  }, [isSystemReady, isMobile, openApp]);
+  }, [isMobile, openApp]);
 
   // Handle outside click to close active Menu Bar dropdown
   useEffect(() => {
@@ -61,7 +61,7 @@ export const App: React.FC = () => {
     }
   }, [focusedId, baseSeoTitle]);
 
-  // Master Boot Sequence
+  // Warm shared data caches in the background without blocking first paint.
   useEffect(() => {
     const bootSystem = async () => {
       try {
@@ -112,14 +112,11 @@ export const App: React.FC = () => {
         
       } catch (e) {
         console.error('Boot sequence error:', e);
-      } finally {
-        // Remove the static 1.2s delay for instant ready once data has been loaded.
-        setSystemReady(true);
       }
     };
 
     bootSystem();
-  }, [fetchSocials, setSystemReady]);
+  }, [fetchSocials]);
 
   // Open Social apps or normal apps inside simulated iOS smartphone screens
   // Zalo always opens as an in-app card (same experience as desktop)
@@ -143,24 +140,6 @@ export const App: React.FC = () => {
     // Normal apps (About, Finder, etc.)
     setIosOpenAppId(id);
   };
-
-  if (!isSystemReady) {
-    return (
-      <div className="w-screen h-screen bg-black flex flex-col items-center justify-center z-[9999]">
-        <div className="w-16 h-16 mb-12">
-          <svg viewBox="0 0 170 170" fill="white" xmlns="http://www.w3.org/2000/svg">
-            <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69.04-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.75.21-9.84-2.2-15.27-7.23-3.03-2.92-6.41-7.16-10.14-12.72-6.85-10.22-11.83-21.57-14.92-34.07-3.08-12.49-3.23-23.77-.45-33.84 2.1-7.51 5.92-13.88 11.45-19.12 5.53-5.24 11.82-8 18.88-8.29 4.88-.13 10.15 1.48 15.82 4.82 5.67 3.35 9.22 5.06 10.66 5.12 1.9-.13 5.91-2.07 12.04-5.83 6.13-3.76 11.41-5.46 15.84-5.07 7.03.38 12.82 2.64 17.38 6.78 2.05 1.83 4.11 4.19 6.2 7.07-8.6 5.04-12.86 11.75-12.78 20.14.07 8.01 3.51 14.88 10.3 20.62 3.19 2.7 6.94 4.54 11.23 5.53-1.6 5.2-3.8 10.32-6.58 15.35Z"/>
-            <path d="M117.84 32.22c-3.79 4.31-8.52 7.07-14.22 8.27-1.12-6.26.25-11.84 4.1-16.72 2.5-3.21 5.66-5.59 9.47-7.14 3.82-1.55 7.64-2.12 11.46-1.7-1 6.55-2.6 12.1-4.8 16.65-2.21 4.55-4.22 7.55-6.01 8.99Z"/>
-          </svg>
-        </div>
-        <div className="w-48 h-1 bg-white/20 rounded-full overflow-hidden">
-          <div className="h-full bg-white animate-pulse" style={{ width: '40%', animationDuration: '1s' }} />
-        </div>
-      </div>
-    );
-  }
-
-
 
   if (isMobile) {
     return (

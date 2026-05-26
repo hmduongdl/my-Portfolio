@@ -81,8 +81,6 @@ interface OSState {
   setIsMobile: (val: boolean) => void;
   setIosOpenAppId: (id: string | null) => void;
   setLanguage: (lang: 'en' | 'vn') => void;
-  isSystemReady: boolean;
-  setSystemReady: (ready: boolean) => void;
   fetchSocials: () => Promise<void>;
 }
 
@@ -107,8 +105,6 @@ export const useOSStore = create<OSState>((set, get) => {
     activeAppName: 'Finder',
     iosOpenAppId: null,
     language: 'vn',
-    isSystemReady: false,
-    setSystemReady: (ready) => set({ isSystemReady: ready }),
 
     openApp: (id, defs) =>
       set((state) => {
