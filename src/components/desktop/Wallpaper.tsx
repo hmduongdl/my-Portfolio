@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useOSStore } from '../../store/useOSStore';
+import mobileBg from '../../assets/wallpapers/mobile-background.jpg';
 
 export const Wallpaper: React.FC = () => {
   const isMobile = useOSStore(state => state.isMobile);
@@ -32,9 +33,9 @@ export const Wallpaper: React.FC = () => {
     <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none bg-black">
       {/* Mobile specific background */}
       <img 
-        src="/mobile-background.jpg" 
+        src={mobileBg} 
         alt="Mobile Wallpaper" 
-        className="block md:hidden w-full h-full object-cover absolute inset-0 z-[-1] select-none pointer-events-none"
+        className="block md:hidden w-full h-full object-cover absolute inset-0 select-none pointer-events-none"
       />
 
       {/* Desktop backgrounds */}
