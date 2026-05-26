@@ -1,7 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { useOSStore } from '../store/useOSStore';
 import { profileService } from '../services/profileService';
-import { profileVN } from '../data/profileData';
+
+// Correct fallback — matches database default
+const FALLBACK_EMAIL = 'hoanglong.workdl@gmail.com';
+
+/** Strip "mailto:" prefix if present (defensive — API may return link format) */
+function cleanEmail(raw: string): string {
+  return raw.replace(/^mailto:/i, '').trim();
+}
 
 export const MailApp: React.FC = () => {
   const [from, setFrom] = useState<string>('');
@@ -10,23 +17,24 @@ export const MailApp: React.FC = () => {
   const [sent, setSent] = useState<boolean>(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const language = useOSStore((state) => state.language);
-  const [recipientEmail, setRecipientEmail] = useState<string>(profileVN.email);
+  const [recipientEmail, setRecipientEmail] = useState<string>(FALLBACK_EMAIL);
 
   useEffect(() => {
     const loadProfile = () => {
       profileService.getProfile(language)
         .then((p) => {
-          if (p && p.email) setRecipientEmail(p.email);
+          if (p?.email) setRecipientEmail(cleanEmail(p.email));
         })
-        .catch(() => {});
+        .catch(() => {
+          // Keep fallback on network error
+        });
     };
 
     loadProfile();
 
+    // Re-sync when Admin updates profile via AdminSettings
     window.addEventListener('profile-updated', loadProfile);
-    return () => {
-      window.removeEventListener('profile-updated', loadProfile);
-    };
+    return () => window.removeEventListener('profile-updated', loadProfile);
   }, [language]);
 
   const handleSend = () => {
@@ -34,11 +42,14 @@ export const MailApp: React.FC = () => {
     if (!from || !/^\S+@\S+\.\S+$/.test(from)) e.from = 'Enter a valid email';
     if (!subject.trim()) e.subject = 'Subject required';
     if (!body.trim()) e.body = 'Message required';
-    
+
     setErrors(e);
-    
+
     if (Object.keys(e).length === 0) {
-      const mailto = `mailto:${recipientEmail}?subject=${encodeURIComponent(`[Portfolio Inquiry] ${subject}`)}&body=${encodeURIComponent(`From: ${from}\n\n${body}`)}`;
+      // Dynamic recipient from DB — mailto format as required
+      const mailto = `mailto:${recipientEmail}`
+        + `?subject=${encodeURIComponent(`[Portfolio Inquiry] ${subject}`)}`
+        + `&body=${encodeURIComponent(`From: ${from}\n\n${body}`)}`;
       window.location.href = mailto;
       setSent(true);
       setTimeout(() => {

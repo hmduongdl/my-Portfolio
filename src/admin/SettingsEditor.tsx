@@ -2,6 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { api } from './api';
 import { useOSStore } from '../store/useOSStore';
 
+// ────────────────────────────────────────────────────────────────────────────
+// Types
+// ────────────────────────────────────────────────────────────────────────────
 interface SocialLink {
   id?: number;
   platform: string;
@@ -21,13 +24,61 @@ interface SeoSettings {
 
 type SaveStatus = 'idle' | 'saving' | 'ok' | 'error';
 
+// ────────────────────────────────────────────────────────────────────────────
+// Social platform config (icon, color, placeholder)
+// ────────────────────────────────────────────────────────────────────────────
+const PLATFORM_CONFIG: Record<string, { icon: string; bg: string; label: string; placeholder: string }> = {
+  github:   { icon: 'code',     bg: 'bg-[#24292F]', label: 'GitHub',    placeholder: 'https://github.com/username'         },
+  facebook: { icon: 'public',   bg: 'bg-[#1877F2]', label: 'Facebook',  placeholder: 'https://facebook.com/yourpage'        },
+  zalo:     { icon: 'chat',     bg: 'bg-[#0068FF]', label: 'Zalo',      placeholder: 'https://zalo.me/yourprofile'          },
+  gmail:    { icon: 'mail',     bg: 'bg-[#EA4335]', label: 'Gmail',     placeholder: 'mailto:email@example.com'             },
+  phone:    { icon: 'call',     bg: 'bg-[#34C759]', label: 'Phone',     placeholder: 'tel:+84xxx'                           },
+};
+
+const PLATFORM_ORDER = ['github', 'facebook', 'zalo', 'gmail', 'phone'];
+
+// ────────────────────────────────────────────────────────────────────────────
+// Toggle Switch Component (iOS-style)
+// ────────────────────────────────────────────────────────────────────────────
+interface ToggleProps {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  id?: string;
+}
+const Toggle: React.FC<ToggleProps> = ({ checked, onChange, id }) => (
+  <button
+    id={id}
+    type="button"
+    role="switch"
+    aria-checked={checked}
+    onClick={() => onChange(!checked)}
+    className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1 ${
+      checked ? 'bg-[#34C759]' : 'bg-outline-variant/40'
+    }`}
+  >
+    <span
+      className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-md ring-0 transition-transform duration-200 ease-in-out ${
+        checked ? 'translate-x-5' : 'translate-x-0'
+      }`}
+    />
+  </button>
+);
+
+// ────────────────────────────────────────────────────────────────────────────
+// Toast notification
+// ────────────────────────────────────────────────────────────────────────────
+interface ToastState { msg: string; type: 'ok' | 'error' }
+
+// ────────────────────────────────────────────────────────────────────────────
+// Main Component
+// ────────────────────────────────────────────────────────────────────────────
 export const SettingsEditor: React.FC = () => {
   const [socials, setSocials] = useState<Record<string, { url: string; visible: boolean; label: string; order_index: number }>>({
-    zalo: { url: '', visible: true, label: 'Zalo', order_index: 4 },
-    facebook: { url: '', visible: true, label: 'Facebook', order_index: 1 },
-    github: { url: '', visible: true, label: 'GitHub', order_index: 0 },
-    gmail: { url: '', visible: true, label: 'Gmail', order_index: 2 },
-    phone: { url: '', visible: true, label: 'Phone', order_index: 3 },
+    zalo:     { url: '', visible: true,  label: 'Zalo',     order_index: 4 },
+    facebook: { url: '', visible: true,  label: 'Facebook', order_index: 1 },
+    github:   { url: '', visible: true,  label: 'GitHub',   order_index: 0 },
+    gmail:    { url: '', visible: true,  label: 'Gmail',    order_index: 2 },
+    phone:    { url: '', visible: true,  label: 'Phone',    order_index: 3 },
   });
 
   const [seo, setSeo] = useState<SeoSettings>({
@@ -38,20 +89,25 @@ export const SettingsEditor: React.FC = () => {
     twitter_card: 'summary_large_image',
   });
 
-  const [keywords, setKeywords] = useState<string[]>([]);
-  const [kwInput, setKwInput] = useState('');
-  const [loading, setLoading] = useState(true);
+  const [keywords, setKeywords]     = useState<string[]>([]);
+  const [kwInput, setKwInput]       = useState('');
+  const [loading, setLoading]       = useState(true);
   const [saveStatus, setSaveStatus] = useState<SaveStatus>('idle');
+  const [toast, setToast]           = useState<ToastState | null>(null);
 
   const { tweaks, setTweak } = useOSStore();
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+  const showToast = (msg: string, type: 'ok' | 'error') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 2800);
+  };
 
   const loadSettings = async () => {
     setLoading(true);
     try {
       const data = await api.get<{ socialLinks: SocialLink[]; seoSettings: SeoSettings }>('/admin/settings');
-      
       if (data) {
-        // Map social links
         const mappedSocials = { ...socials };
         data.socialLinks.forEach(link => {
           mappedSocials[link.platform] = {
@@ -62,14 +118,9 @@ export const SettingsEditor: React.FC = () => {
           };
         });
         setSocials(mappedSocials);
-
-        // Map SEO
         setSeo(data.seoSettings);
-
-        // Parse keywords
         const kwStr = data.seoSettings.seo_keywords || '';
-        const parsedKws = kwStr.split(',').map(s => s.trim()).filter(Boolean);
-        setKeywords(parsedKws);
+        setKeywords(kwStr.split(',').map(s => s.trim()).filter(Boolean));
       }
     } catch (e) {
       console.error(e);
@@ -78,23 +129,17 @@ export const SettingsEditor: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
+  useEffect(() => { loadSettings(); }, []);
 
-  const handleUpdateSocial = (platform: string, url: string) => {
+  const handleUpdateSocial = (platform: string, field: 'url' | 'visible', value: string | boolean) => {
     setSocials(prev => ({
       ...prev,
-      [platform]: { ...prev[platform], url }
+      [platform]: { ...prev[platform], [field]: value },
     }));
   };
 
-  const handleUpdateSeo = (key: keyof SeoSettings, val: string) => {
-    setSeo(prev => ({
-      ...prev,
-      [key]: val
-    }));
-  };
+  const handleUpdateSeo = (key: keyof SeoSettings, val: string) =>
+    setSeo(prev => ({ ...prev, [key]: val }));
 
   const handleAddKeyword = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && kwInput.trim()) {
@@ -118,192 +163,203 @@ export const SettingsEditor: React.FC = () => {
   const handleSave = async () => {
     setSaveStatus('saving');
     try {
+      // 1. Save social links via dedicated /admin/socials endpoint
       const socialLinksToSend = Object.keys(socials).map(platform => ({
         platform,
         label: socials[platform].label,
         url: socials[platform].url,
         visible: socials[platform].visible,
-        order_index: socials[platform].order_index
+        order_index: socials[platform].order_index,
       }));
 
+      await api.put('/admin/socials', { socialLinks: socialLinksToSend });
+
+      // 2. Save SEO settings via /admin/settings
       await api.put('/admin/settings', {
         socialLinks: socialLinksToSend,
-        seoSettings: {
-          ...seo,
-          seo_keywords: keywords.join(', ')
-        }
+        seoSettings: { ...seo, seo_keywords: keywords.join(', ') },
       });
 
       setSaveStatus('ok');
+      showToast('Đã lưu cấu hình thành công', 'ok');
       await loadSettings();
       setTimeout(() => setSaveStatus('idle'), 2000);
-    } catch (e) {
+    } catch (e: any) {
       console.error(e);
       setSaveStatus('error');
+      showToast(`Lỗi: ${e.message || 'Không thể lưu.'}`, 'error');
       setTimeout(() => setSaveStatus('idle'), 3000);
     }
   };
 
   if (loading) {
     return (
-      <div className="p-window-padding flex items-center justify-center gap-2 text-on-surface-variant text-[13px]">
-        <div className="w-4 h-4 border-2 border-outline-variant border-t-primary rounded-full animate-spin" />
-        Loading settings...
+      <div className="p-window-padding flex flex-col items-center justify-center gap-3 text-on-surface-variant min-h-[300px]">
+        <div className="w-5 h-5 border-2 border-outline-variant border-t-primary rounded-full animate-spin" />
+        <span className="text-[13px]">Đang tải cài đặt...</span>
       </div>
     );
   }
 
   return (
-    <div className="p-window-padding space-y-6 select-text pb-20">
-      
-      {/* Appearance & Wallpaper */}
+    <div className="p-window-padding space-y-6 select-text pb-24 relative">
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-[200] flex items-center gap-2 px-5 py-2.5 rounded-full shadow-xl border backdrop-blur-xl text-[13px] font-semibold ${
+          toast.type === 'ok'
+            ? 'bg-white/95 dark:bg-zinc-800/95 border-black/[0.06] dark:border-white/10 text-neutral-800 dark:text-neutral-100'
+            : 'bg-red-50/95 dark:bg-red-950/95 border-red-200/50 text-red-700 dark:text-red-300'
+        }`}>
+          <span className={toast.type === 'ok' ? 'text-green-500' : 'text-red-500'}>
+            {toast.type === 'ok' ? '✓' : '✗'}
+          </span>
+          {toast.msg}
+        </div>
+      )}
+
+      {/* ── Appearance & Wallpaper ─────────────────────────────── */}
       <section className="space-y-2">
-        <h2 className="text-section-header font-section-header text-on-surface-variant px-1">Giao diện &amp; Hình nền</h2>
-        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm divide-y divide-outline-variant/30">
+        <h2 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">
+          Giao diện &amp; Hình nền
+        </h2>
+        <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm">
           <div className="p-4 space-y-4">
             <div>
               <label className="block text-[12px] font-bold text-on-surface mb-2">Chế độ Hình nền</label>
               <div className="flex gap-4">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="wallpaperType" value="image" checked={tweaks.wallpaperType === 'image'} onChange={() => setTweak('wallpaperType', 'image')} className="text-primary focus:ring-primary" />
-                  <span className="text-[13px] text-on-surface">Hình tĩnh (Image)</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="wallpaperType" value="video" checked={tweaks.wallpaperType === 'video'} onChange={() => setTweak('wallpaperType', 'video')} className="text-primary focus:ring-primary" />
-                  <span className="text-[13px] text-on-surface">Video Động</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" name="wallpaperType" value="time-shifting" checked={tweaks.wallpaperType === 'time-shifting'} onChange={() => setTweak('wallpaperType', 'time-shifting')} className="text-primary focus:ring-primary" />
-                  <span className="text-[13px] text-on-surface">Tự động (Sáng/Tối)</span>
-                </label>
+                {([
+                  { value: 'image',         label: 'Hình tĩnh (Image)' },
+                  { value: 'video',         label: 'Video Động'         },
+                  { value: 'time-shifting', label: 'Tự động (Sáng/Tối)' },
+                ] as const).map(opt => (
+                  <label key={opt.value} className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="radio"
+                      name="wallpaperType"
+                      value={opt.value}
+                      checked={tweaks.wallpaperType === opt.value}
+                      onChange={() => setTweak('wallpaperType', opt.value)}
+                      className="text-primary focus:ring-primary"
+                    />
+                    <span className="text-[13px] text-on-surface">{opt.label}</span>
+                  </label>
+                ))}
               </div>
             </div>
 
             {tweaks.wallpaperType !== 'time-shifting' && (
               <div>
-                <label className="block text-[12px] font-bold text-on-surface mb-1">Đường dẫn Hình nền / Video</label>
+                <label className="block text-[12px] font-bold text-on-surface mb-1">
+                  Đường dẫn Hình nền / Video
+                </label>
                 <input
                   type="text"
                   value={tweaks.wallpaperUrl || ''}
                   onChange={e => setTweak('wallpaperUrl', e.target.value)}
-                  className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-md px-3 py-1.5 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
+                  className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
                   placeholder="e.g. /wallpapers/sonoma-light.jpg"
                 />
               </div>
             )}
-            
-            <div className="flex flex-wrap gap-2 pt-2">
-              <button onClick={() => { setTweak('wallpaperType', 'image'); setTweak('wallpaperUrl', '/wallpapers/sonoma-light.jpg'); }} className="px-3 py-1.5 text-[11px] font-bold bg-surface-container rounded-md hover:bg-surface-container-high transition-colors text-on-surface">Ảnh Sonoma Sáng</button>
-              <button onClick={() => { setTweak('wallpaperType', 'image'); setTweak('wallpaperUrl', '/wallpapers/sonoma-dark.jpg'); }} className="px-3 py-1.5 text-[11px] font-bold bg-surface-container rounded-md hover:bg-surface-container-high transition-colors text-on-surface">Ảnh Sonoma Tối</button>
-              <button onClick={() => { setTweak('wallpaperType', 'video'); setTweak('wallpaperUrl', '/bkgr.mp4'); }} className="px-3 py-1.5 text-[11px] font-bold bg-surface-container rounded-md hover:bg-surface-container-high transition-colors text-on-surface">Video Động</button>
+
+            <div className="flex flex-wrap gap-2 pt-1">
+              {[
+                { label: 'Sonoma Sáng',  type: 'image', url: '/wallpapers/sonoma-light.jpg' },
+                { label: 'Sonoma Tối',   type: 'image', url: '/wallpapers/sonoma-dark.jpg'  },
+                { label: 'Video Động',   type: 'video', url: '/bkgr.mp4'                   },
+              ].map(preset => (
+                <button
+                  key={preset.label}
+                  onClick={() => { setTweak('wallpaperType', preset.type as any); setTweak('wallpaperUrl', preset.url); }}
+                  className="px-3 py-1.5 text-[11px] font-bold bg-surface-container rounded-lg hover:bg-surface-container-high transition-colors text-on-surface border border-outline-variant/30"
+                >
+                  {preset.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
       </section>
 
-      {/* Social Networks & Contacts */}
+      {/* ── Social Networks & Contacts ─────────────────────────── */}
       <section className="space-y-2">
-        <h2 className="text-section-header font-section-header text-on-surface-variant px-1">Cấu hình Mạng xã hội &amp; Liên hệ</h2>
-        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm divide-y divide-outline-variant/30">
-          
-          {/* Zalo */}
-          <div className="flex items-center p-3 hover:bg-surface-container-low/40 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-[#0068FF] flex items-center justify-center mr-3 shrink-0">
-              <span className="material-symbols-outlined text-white text-[18px]">chat</span>
-            </div>
-            <div className="flex-1">
-              <label className="block text-[11px] font-bold text-on-surface-variant/60 uppercase">Zalo Profile Link / ID</label>
-              <input
-                type="text"
-                value={socials.zalo.url}
-                onChange={e => handleUpdateSocial('zalo', e.target.value)}
-                placeholder="Nhập số điện thoại Zalo hoặc Link Zalo"
-                className="w-full bg-transparent border-none p-0 text-[13px] text-on-surface focus:ring-0 placeholder:text-outline-variant/40 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Facebook */}
-          <div className="flex items-center p-3 hover:bg-surface-container-low/40 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-[#1877F2] flex items-center justify-center mr-3 shrink-0">
-              <span className="material-symbols-outlined text-white text-[18px]">public</span>
-            </div>
-            <div className="flex-1">
-              <label className="block text-[11px] font-bold text-on-surface-variant/60 uppercase">Facebook URL</label>
-              <input
-                type="text"
-                value={socials.facebook.url}
-                onChange={e => handleUpdateSocial('facebook', e.target.value)}
-                placeholder="https://facebook.com/yourpage"
-                className="w-full bg-transparent border-none p-0 text-[13px] text-on-surface focus:ring-0 placeholder:text-outline-variant/40 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Github */}
-          <div className="flex items-center p-3 hover:bg-surface-container-low/40 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-[#24292F] flex items-center justify-center mr-3 shrink-0">
-              <span className="material-symbols-outlined text-white text-[18px]">code</span>
-            </div>
-            <div className="flex-1">
-              <label className="block text-[11px] font-bold text-on-surface-variant/60 uppercase">Github Repository</label>
-              <input
-                type="text"
-                value={socials.github.url}
-                onChange={e => handleUpdateSocial('github', e.target.value)}
-                placeholder="https://github.com/username"
-                className="w-full bg-transparent border-none p-0 text-[13px] text-on-surface focus:ring-0 placeholder:text-outline-variant/40 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="flex items-center p-3 hover:bg-surface-container-low/40 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-[#EA4335] flex items-center justify-center mr-3 shrink-0">
-              <span className="material-symbols-outlined text-white text-[18px]">mail</span>
-            </div>
-            <div className="flex-1">
-              <label className="block text-[11px] font-bold text-on-surface-variant/60 uppercase">Email Liên hệ</label>
-              <input
-                type="text"
-                value={socials.gmail.url}
-                onChange={e => handleUpdateSocial('gmail', e.target.value)}
-                placeholder="mailto:email@example.com"
-                className="w-full bg-transparent border-none p-0 text-[13px] text-on-surface focus:ring-0 placeholder:text-outline-variant/40 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Phone */}
-          <div className="flex items-center p-3 hover:bg-surface-container-low/40 transition-colors">
-            <div className="w-8 h-8 rounded-lg bg-[#34C759] flex items-center justify-center mr-3 shrink-0">
-              <span className="material-symbols-outlined text-white text-[18px]">call</span>
-            </div>
-            <div className="flex-1">
-              <label className="block text-[11px] font-bold text-on-surface-variant/60 uppercase">Số điện thoại</label>
-              <input
-                type="text"
-                value={socials.phone.url}
-                onChange={e => handleUpdateSocial('phone', e.target.value)}
-                placeholder="tel:09xx xxx xxx"
-                className="w-full bg-transparent border-none p-0 text-[13px] text-on-surface focus:ring-0 placeholder:text-outline-variant/40 outline-none"
-              />
-            </div>
-          </div>
-
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70">
+            Mạng xã hội &amp; Liên hệ
+          </h2>
+          <span className="text-[10px] text-on-surface-variant/50">
+            Toggle = hiển thị trên trang
+          </span>
         </div>
+
+        <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm divide-y divide-outline-variant/20">
+          {PLATFORM_ORDER.map((platform) => {
+            const cfg = PLATFORM_CONFIG[platform] ?? {
+              icon: 'link', bg: 'bg-gray-500', label: platform, placeholder: '',
+            };
+            const social = socials[platform] ?? { url: '', visible: true, label: cfg.label, order_index: 0 };
+
+            return (
+              <div key={platform} className="flex items-center gap-3 px-3 py-3 hover:bg-surface-container-low/40 transition-colors group">
+                {/* Platform icon */}
+                <div className={`w-9 h-9 rounded-[10px] flex items-center justify-center shrink-0 ${cfg.bg} shadow-sm`}>
+                  <span className="material-symbols-outlined text-white text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    {cfg.icon}
+                  </span>
+                </div>
+
+                {/* Label + input */}
+                <div className="flex-1 min-w-0">
+                  <label className="block text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-wider mb-1">
+                    {cfg.label}
+                  </label>
+                  <input
+                    type="text"
+                    value={social.url}
+                    onChange={e => handleUpdateSocial(platform, 'url', e.target.value)}
+                    placeholder={cfg.placeholder}
+                    className="w-full bg-transparent border-none p-0 text-[13px] text-on-surface focus:ring-0 placeholder:text-on-surface-variant/30 outline-none"
+                  />
+                </div>
+
+                {/* Visible state badge */}
+                <span className={`text-[10px] font-medium shrink-0 hidden group-hover:inline sm:inline transition-all ${
+                  social.visible ? 'text-green-600 dark:text-green-400' : 'text-on-surface-variant/40'
+                }`}>
+                  {social.visible ? 'Hiển thị' : 'Ẩn'}
+                </span>
+
+                {/* Toggle switch */}
+                <Toggle
+                  id={`toggle-${platform}`}
+                  checked={social.visible}
+                  onChange={v => handleUpdateSocial(platform, 'visible', v)}
+                />
+              </div>
+            );
+          })}
+        </div>
+
+        <p className="text-[11px] text-on-surface-variant/50 px-1">
+          💡 Nhấn toggle để ẩn/hiện nền tảng mạng xã hội tương ứng trên trang portfolio.
+        </p>
       </section>
 
-      {/* SEO Configuration */}
+      {/* ── SEO Configuration ──────────────────────────────────── */}
       <section className="space-y-2">
-        <h2 className="text-section-header font-section-header text-on-surface-variant px-1">Cấu hình SEO &amp; Metadata</h2>
-        <div className="bg-surface-container-lowest border border-outline-variant/60 rounded-xl overflow-hidden shadow-sm divide-y divide-outline-variant/30">
-          
+        <h2 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">
+          Cấu hình SEO &amp; Metadata
+        </h2>
+        <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm divide-y divide-outline-variant/20">
+
           {/* SEO Title */}
           <div className="p-4">
-            <div className="flex justify-between items-center mb-1">
+            <div className="flex justify-between items-center mb-1.5">
               <label className="text-[12px] font-bold text-on-surface">SEO Title</label>
-              <span className="text-[10px] text-on-surface-variant/50 font-mono">
+              <span className={`text-[10px] font-mono tabular-nums ${
+                seo.seo_title.length > 60 ? 'text-red-500' : 'text-on-surface-variant/50'
+              }`}>
                 {seo.seo_title.length} / 60
               </span>
             </div>
@@ -311,35 +367,51 @@ export const SettingsEditor: React.FC = () => {
               type="text"
               value={seo.seo_title}
               onChange={e => handleUpdateSeo('seo_title', e.target.value)}
-              className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-md px-3 py-1.5 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
-              placeholder="System Settings | Professional macOS Management Console"
+              className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
+              placeholder="Hoàng Minh Dương — Portfolio | Web Developer..."
             />
           </div>
 
           {/* SEO Description */}
           <div className="p-4">
-            <label className="block text-[12px] font-bold text-on-surface mb-1">SEO Description</label>
+            <div className="flex justify-between items-center mb-1.5">
+              <label className="block text-[12px] font-bold text-on-surface">SEO Description</label>
+              <span className={`text-[10px] font-mono tabular-nums ${
+                seo.seo_description.length > 160 ? 'text-red-500' : 'text-on-surface-variant/50'
+              }`}>
+                {seo.seo_description.length} / 160
+              </span>
+            </div>
             <textarea
               value={seo.seo_description}
               onChange={e => handleUpdateSeo('seo_description', e.target.value)}
               rows={3}
-              className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-md px-3 py-1.5 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none resize-none"
+              className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none resize-none"
               placeholder="Describe your site details for search engines..."
             />
           </div>
 
           {/* SEO Keywords */}
           <div className="p-4">
-            <label className="block text-[12px] font-bold text-on-surface mb-1.5">SEO Keywords</label>
-            <div className="flex flex-wrap gap-1.5 mb-2">
+            <label className="block text-[12px] font-bold text-on-surface mb-2">SEO Keywords</label>
+            <div className="flex flex-wrap gap-1.5 mb-2.5 min-h-[28px]">
               {keywords.map((kw, idx) => (
-                <span key={idx} className="bg-primary/10 text-primary px-2 py-0.5 rounded text-[11px] flex items-center gap-1 font-medium select-none">
+                <span
+                  key={idx}
+                  className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-[11px] flex items-center gap-1 font-medium select-none border border-primary/20"
+                >
                   {kw}
-                  <button onClick={() => handleRemoveKeyword(kw)} className="hover:text-primary-container leading-none">
+                  <button
+                    onClick={() => handleRemoveKeyword(kw)}
+                    className="hover:text-error transition-colors leading-none"
+                  >
                     <span className="material-symbols-outlined text-[12px]">close</span>
                   </button>
                 </span>
               ))}
+              {keywords.length === 0 && (
+                <span className="text-[11px] text-on-surface-variant/40 italic">Chưa có từ khoá...</span>
+              )}
             </div>
             <input
               type="text"
@@ -347,30 +419,34 @@ export const SettingsEditor: React.FC = () => {
               onChange={e => setKwInput(e.target.value)}
               onKeyDown={handleAddKeyword}
               placeholder="Nhấn Enter để thêm từ khoá..."
-              className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-md px-3 py-1.5 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
+              className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
             />
           </div>
 
           {/* OG Image */}
           <div className="p-4">
-            <label className="block text-[12px] font-bold text-on-surface mb-3">Open Graph Image (og:image)</label>
-            <div className="flex flex-col md:flex-row items-start gap-4">
-              <div className="relative w-40 h-24 bg-surface-container-high rounded-lg overflow-hidden border border-outline-variant/30 flex items-center justify-center shrink-0">
+            <label className="block text-[12px] font-bold text-on-surface mb-3">
+              Open Graph Image (og:image)
+            </label>
+            <div className="flex flex-col sm:flex-row items-start gap-4">
+              <div className="relative w-36 h-20 bg-surface-container-high rounded-xl overflow-hidden border border-outline-variant/30 flex items-center justify-center shrink-0">
                 {seo.og_image ? (
                   <img src={seo.og_image} alt="OG Preview" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="material-symbols-outlined text-[24px] text-on-surface-variant/40">image</span>
+                  <span className="material-symbols-outlined text-[28px] text-on-surface-variant/30">image</span>
                 )}
               </div>
-              <div className="flex-1 space-y-2 w-full">
+              <div className="flex-1 space-y-1.5 w-full">
                 <input
                   type="text"
                   value={seo.og_image}
                   onChange={e => handleUpdateSeo('og_image', e.target.value)}
                   placeholder="https://..."
-                  className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-md px-3 py-1.5 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none font-mono"
+                  className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none font-mono"
                 />
-                <p className="text-[11px] text-on-surface-variant opacity-75">Kích thước khuyên dùng: 1200 x 630 px. Định dạng: JPG, PNG hoặc WebP.</p>
+                <p className="text-[11px] text-on-surface-variant/60">
+                  Kích thước khuyên dùng: 1200×630 px. Định dạng: JPG, PNG hoặc WebP.
+                </p>
               </div>
             </div>
           </div>
@@ -378,28 +454,34 @@ export const SettingsEditor: React.FC = () => {
         </div>
       </section>
 
-      {/* Footer Save Changes Bar */}
-      <footer className="absolute bottom-0 left-0 right-0 h-16 bg-surface/85 backdrop-blur-md flex items-center justify-end px-window-padding gap-3 border-t border-outline-variant/60 z-35">
+      {/* ── Sticky Save Bar ────────────────────────────────────── */}
+      <footer className="fixed bottom-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-xl flex items-center justify-end px-window-padding gap-3 border-t border-outline-variant/40 z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
         <button
           onClick={loadSettings}
-          className="px-4 py-1.5 text-[13px] text-on-surface-variant hover:text-on-surface transition-colors font-medium border border-outline-variant bg-surface-container-lowest rounded-md"
+          disabled={saveStatus === 'saving'}
+          className="px-4 py-1.5 text-[13px] text-on-surface-variant hover:text-on-surface transition-colors font-medium border border-outline-variant/50 bg-surface-container-lowest rounded-xl disabled:opacity-40"
         >
-          Cancel
+          Hủy
         </button>
         <button
           onClick={handleSave}
           disabled={saveStatus === 'saving'}
-          className="px-6 py-1.5 bg-primary text-on-primary rounded-md text-[13px] font-bold shadow-md shadow-primary/20 hover:brightness-110 active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5"
+          className={`px-6 py-1.5 rounded-xl text-[13px] font-bold shadow-sm active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5 ${
+            saveStatus === 'ok'    ? 'bg-green-600 text-white' :
+            saveStatus === 'error' ? 'bg-error text-on-error'  :
+            'bg-primary text-on-primary hover:brightness-105 shadow-primary/20'
+          }`}
         >
           {saveStatus === 'saving' && (
-            <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+            <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />
           )}
-          {saveStatus === 'saving' ? 'Saving...' : 
-           saveStatus === 'ok' ? '✓ Saved' : 
-           saveStatus === 'error' ? '✗ Error' : 'Save Changes'}
+          {saveStatus === 'saving' ? 'Đang lưu...' :
+           saveStatus === 'ok'     ? '✓ Đã lưu'   :
+           saveStatus === 'error'  ? '✗ Thử lại'   :
+           'Lưu thay đổi'}
         </button>
       </footer>
-      
+
     </div>
   );
 };

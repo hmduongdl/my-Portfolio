@@ -114,14 +114,25 @@ export const App: React.FC = () => {
   }, []);
 
   // Open Social apps or normal apps inside simulated iOS smartphone screens
+  // Zalo always opens as an in-app card (same experience as desktop)
+  // Other social platforms open their URL in a new tab using the dynamic DB value
   const handleIOSAppOpen = (id: string) => {
+    // Zalo: open the ZaloApp card inside iOS view (NOT external link)
+    if (id === 'zalo') {
+      setIosOpenAppId('zalo');
+      return;
+    }
+
+    // Other social apps: open dynamic URL from DB, fall back to static
     const social = SOCIAL_APPS.find((s) => s.id === id);
     if (social) {
       const matched = socials.find(s => s.platform === id);
       const url = matched?.url || social.mailto || social.url;
-      window.open(url, '_blank');
+      if (url) window.open(url, '_blank', 'noopener,noreferrer');
       return;
     }
+
+    // Normal apps (About, Finder, etc.)
     setIosOpenAppId(id);
   };
 

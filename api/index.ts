@@ -973,6 +973,42 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
+    // --- 6. SOCIALS (Dedicated endpoint) ---
+    if (req.method === 'PUT' && path === '/admin/socials') {
+      const b = req.body ?? {};
+      const links: Array<{ platform: string; url: string; visible?: boolean; label?: string; order_index?: number }> =
+        Array.isArray(b.socialLinks) ? b.socialLinks : Array.isArray(b) ? b : [];
+      if (links.length === 0) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'socialLinks array is required.' });
+      }
+      try {
+        for (const link of links) {
+          if (!link.platform) continue;
+          // Upsert: update if exists, insert if not
+          await runQuery(
+            `INSERT INTO tbl_social_links (platform, label, url, visible, order_index, updated_at)
+             VALUES ($1, $2, $3, $4, $5, NOW())
+             ON CONFLICT (platform) DO UPDATE SET
+               url        = EXCLUDED.url,
+               visible    = EXCLUDED.visible,
+               label      = COALESCE(EXCLUDED.label, tbl_social_links.label),
+               order_index = COALESCE(EXCLUDED.order_index, tbl_social_links.order_index),
+               updated_at = NOW()`,
+            [
+              link.platform,
+              link.label || link.platform,
+              link.url ?? '',
+              link.visible !== false,
+              link.order_index ?? 0
+            ]
+          );
+        }
+        return res.status(200).json({ success: true, updated: links.length });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
     return res.status(404).json({ error: 'ADMIN_ENDPOINT_NOT_IMPLEMENTED', message: 'Endpoint admin không được hỗ trợ.' });
   }
 

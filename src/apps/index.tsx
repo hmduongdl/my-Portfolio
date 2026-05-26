@@ -30,7 +30,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     icon: (
       <img src={facebookIcon} alt="Facebook" className="w-full h-full object-contain pointer-events-none" />
     ),
-    url: 'https://facebook.com/hmd.Stewiclez',
+    url: 'https://www.facebook.com/hmd.stewiclez',
   },
   {
     id: 'phone', name: 'Phone',
@@ -41,6 +41,7 @@ export const SOCIAL_APPS: SocialAppDefinition[] = [
     url: 'tel:0911818016',
   },
   {
+    // Zalo opens an in-app card (ZaloApp) — static url used only as deep-link fallback
     id: 'zalo', name: 'Zalo',
     bg: '#ffffff',
     icon: (
