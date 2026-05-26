@@ -7,6 +7,8 @@ import { Window } from './components/desktop/Window';
 import { IOSView } from './components/mobile/IOSView';
 import { MobilePreview } from './components/mobile/MobilePreview';
 import { APP_DEFS, SOCIAL_APPS } from './apps';
+import finderIcon from './icons/Finder.png';
+import notesIcon from './icons/Notes.png';
 
 export const App: React.FC = () => {
   const tweaks = useOSStore((state) => state.tweaks);
@@ -46,7 +48,7 @@ export const App: React.FC = () => {
         const res = await fetch('/api/seo');
         if (!res.ok) return;
         const seo = await res.json();
-        
+
         if (seo.seo_title) {
           document.title = seo.seo_title;
           document.querySelector('meta[property="og:title"]')?.setAttribute('content', seo.seo_title);
@@ -143,10 +145,8 @@ export const App: React.FC = () => {
           onDoubleClick={() => openApp('finder', APP_DEFS)}
           className="desktop-icon flex flex-col items-center gap-1 w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
         >
-          <div className="desktop-icon-art w-12 h-12 rounded-md bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center">
-            <svg viewBox="0 0 24 24" width="28" height="28" fill="white" opacity="0.9">
-              <path d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-            </svg>
+          <div className="desktop-icon-art w-12 h-12 rounded-md bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center overflow-hidden">
+            <img src={finderIcon} alt="Finder icon" className="w-full h-full object-contain" />
           </div>
           <div className="desktop-icon-label text-white text-[12px] font-medium text-center leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
             Song Phương
@@ -158,11 +158,8 @@ export const App: React.FC = () => {
           onDoubleClick={() => openApp('welcome', APP_DEFS)}
           className="desktop-icon flex flex-col items-center gap-1 w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
         >
-          <div className="desktop-icon-art w-12 h-12 rounded-md bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center">
-            <svg viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="white" strokeWidth="1.5">
-              <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
-              <path d="M14 2v6h6" />
-            </svg>
+          <div className="desktop-icon-art w-12 h-12 rounded-md bg-white/15 border border-white/30 backdrop-blur-md flex items-center justify-center overflow-hidden">
+            <img src={notesIcon} alt="Notes icon" className="w-full h-full object-contain" />
           </div>
           <div className="desktop-icon-label text-white text-[12px] font-medium text-center leading-tight drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]">
             README.md

@@ -245,12 +245,12 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
     <div className="flex flex-col items-center justify-center h-full gap-4 text-ink-3 py-12 select-none text-center max-w-md mx-auto">
       <span className="text-[72px] opacity-70 animate-bounce select-none">🎁</span>
       <h3 className="text-[16px] font-semibold text-ink">
-        {lang === 'vn' ? 'Chưa có sản phẩm nào hiển thị' : 'No products to display'}
+        {lang === 'vn' ? 'Chưa có sản phẩm nào' : 'No products'}
       </h3>
       <p className="text-[12px] text-ink-3 px-4 leading-normal">
         {lang === 'vn'
-          ? 'Bạn có thể thêm sản phẩm mới từ ứng dụng System Settings bất kỳ lúc nào.'
-          : 'You can add new products from the System Settings app at any time.'}
+          ? 'Bạn có thể thêm sản phẩm từ System Settings'
+          : 'You can add products from System Settings'}
       </p>
       <button
         onClick={loadProducts}

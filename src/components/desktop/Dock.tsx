@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo } from 'react';
 import { AppDefinition, AppID } from '../../types';
 import { useOSStore } from '../../store/useOSStore';
 import { SOCIAL_APPS } from '../../apps';
@@ -20,31 +20,44 @@ const DockIcon: React.FC<DockIconProps> = ({
 }) => {
   return (
     <div
-      className="group relative flex items-center justify-center w-[36px] h-[36px] md:w-[40px] md:h-[40px]"
+      className="group relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 flex-shrink-0"
       onClick={onClick}
+      role="button"
+      tabIndex={0}
     >
       {/* Tooltip */}
       <div
-        className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 bg-paper-2/92 backdrop-blur-md text-ink text-[12px] font-medium px-2.5 py-1 rounded-md border border-black/15 shadow-[0_4px_12px_rgba(0,0,0,0.15)] opacity-0 pointer-events-none transition-all duration-150 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 whitespace-nowrap z-[910]"
+        className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 bg-paper-2/92 backdrop-blur-md text-ink text-xs font-medium px-2.5 py-1 rounded-md border border-black/15 shadow-[0_4px_12px_rgba(0,0,0,0.15)] opacity-0 pointer-events-none transition-all duration-150 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 whitespace-nowrap z-[910]"
       >
         {name}
       </div>
 
-      {/* Icon Wrapper */}
+      {/* Icon Container - Pure CSS Hover with GPU Acceleration */}
       <div
-        className="w-full h-full rounded-xl flex items-center justify-center shadow-[0_2px_6px_rgba(0,0,0,0.2),0_0_0_0.5px_rgba(0,0,0,0.1)] overflow-hidden cursor-pointer transition-[transform] duration-[220ms] ease-[cubic-bezier(0.16,1,0.3,1)] will-change-transform transform hover:scale-[1.15] hover:-translate-y-[5px]"
+        className="w-full h-full rounded-xl flex items-center justify-center shadow-[0_2px_6px_rgba(0,0,0,0.2),0_0_0_0.5px_rgba(0,0,0,0.1)] overflow-hidden cursor-pointer will-change-transform"
         style={{
           background: bg || '#fff',
+          transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = 'scale(1.15) translateY(-5px)';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.transform = 'scale(1) translateY(0)';
         }}
       >
         {icon}
       </div>
 
-      {/* Active Running Indicator Dot */}
+      {/* Active Running Indicator Dot - GPU Accelerated */}
       <div
-        className={`absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black/80 dark:bg-white/80 transition-all duration-200 ${
-          isRunning ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-        }`}
+        className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black/80 dark:bg-white/80 flex-shrink-0"
+        style={{
+          transform: isRunning ? 'scale(1)' : 'scale(0)',
+          opacity: isRunning ? 1 : 0,
+          transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+          willChange: 'transform, opacity',
+        }}
       />
     </div>
   );
@@ -64,26 +77,11 @@ export const Dock: React.FC<DockProps> = ({
   runningIds: _runningIdsProp,
   onOpen,
   dockSize: _dockSize = 52,
-  magnify: _magnify = 1.55,
-  autoHide = false,
+  magnify: _magnify = 1.4,
 }) => {
-  const [hidden, setHidden] = useState<boolean>(autoHide);
-
   // Read windows dynamically from Zustand store to render running indicator dots
   const windows = useOSStore((state) => state.windows);
-  const runningIds = windows.map((w) => w.id);
-
-  useEffect(() => {
-    if (!autoHide) {
-      setHidden(false);
-      return;
-    }
-    const handleMouseMove = (e: MouseEvent) => {
-      setHidden(e.clientY < window.innerHeight - 60);
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, [autoHide]);
+  const runningIds = useMemo(() => windows.map((w) => w.id), [windows]);
 
   const handleSocialClick = (app: any) => {
     const url = app.url || app.mailto;
@@ -92,53 +90,50 @@ export const Dock: React.FC<DockProps> = ({
     }
   };
 
+  // If autoHide is enabled, the dock is always visible
+  // Removed mousemove event listener for better performance
+  // Use CSS for transitions only
+
   return (
-    <>
-      {autoHide && (
-        <div
-          className="fixed bottom-0 left-0 right-0 h-2 z-[899]"
-          onMouseEnter={() => setHidden(false)}
-        />
-      )}
+    <div
+      className="dock-wrap fixed bottom-1.5 left-1/2 -translate-x-1/2 z-[900] flex items-end pointer-events-none"
+    >
+      {/* Main Dock Container - Glassmorphism Design with GPU-Accelerated Animations */}
       <div
-        className={`dock-wrap fixed bottom-1.5 left-1/2 -translate-x-1/2 z-[900] flex items-end pointer-events-none transition-all duration-320 ease-calm ${
-          hidden ? 'translate-y-[120%] opacity-0' : 'translate-y-0 opacity-100'
-        }`}
+        className="dock flex items-center gap-3 md:gap-4 p-1.5 h-12 md:h-[54px] bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/15 dark:border-white/5 shadow-2xl rounded-2xl pointer-events-auto will-change-transform"
+        style={{
+          transition: 'all 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
+        }}
       >
-        <div
-          className="dock flex items-center gap-3 md:gap-4 p-1.5 h-[48px] md:h-[54px] bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/15 dark:border-white/5 shadow-2xl rounded-2xl pointer-events-auto"
-          onMouseEnter={() => setHidden(false)}
-        >
-          {/* System Apps Group */}
-          {apps.map((app) => (
-            <DockIcon
-              key={app.id}
-              name={app.name}
-              icon={app.icon}
-              bg={app.bg}
-              onClick={() => onOpen(app.id)}
-              isRunning={runningIds.includes(app.id)}
-            />
-          ))}
+        {/* System Apps Group */}
+        {apps.map((app) => (
+          <DockIcon
+            key={app.id}
+            name={app.name}
+            icon={app.icon}
+            bg={app.bg}
+            onClick={() => onOpen(app.id)}
+            isRunning={runningIds.includes(app.id)}
+          />
+        ))}
 
-          {/* Vertical Divider Line */}
-          {apps.length > 0 && SOCIAL_APPS.length > 0 && (
-            <div className="w-[1px] h-6 md:h-8 bg-white/20 self-center" />
-          )}
+        {/* Vertical Divider Line - Separator between System Apps and Social Links */}
+        {apps.length > 0 && SOCIAL_APPS.length > 0 && (
+          <div className="w-px h-6 md:h-8 bg-gradient-to-b from-white/0 via-white/20 to-white/0 dark:via-white/10 self-center flex-shrink-0" />
+        )}
 
-          {/* Social Links Group */}
-          {SOCIAL_APPS.map((app) => (
-            <DockIcon
-              key={app.id}
-              name={app.name}
-              icon={app.icon}
-              bg={app.bg}
-              onClick={() => handleSocialClick(app)}
-              isRunning={false}
-            />
-          ))}
-        </div>
+        {/* Social Links Group */}
+        {SOCIAL_APPS.map((app) => (
+          <DockIcon
+            key={app.id}
+            name={app.name}
+            icon={app.icon}
+            bg={app.bg}
+            onClick={() => handleSocialClick(app)}
+            isRunning={false}
+          />
+        ))}
       </div>
-    </>
+    </div>
   );
 };
