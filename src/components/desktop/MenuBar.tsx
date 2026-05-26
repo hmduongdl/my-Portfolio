@@ -12,7 +12,9 @@ const AppleLogo: React.FC = () => (
 
 export const MenuBar: React.FC = () => {
   const [time, setTime] = useState<Date>(new Date());
-  const activeAppName = useOSStore((state) => state.activeAppName);
+  const focusedId = useOSStore((state) => state.focusedId);
+  const activeAppDef = APP_DEFS.find((a) => a.id === focusedId);
+  const displayAppName = activeAppDef ? activeAppDef.name : 'Finder';
   const openMenu = useOSStore((state) => state.openMenu);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
   const openApp = useOSStore((state) => state.openApp);
@@ -50,7 +52,7 @@ export const MenuBar: React.FC = () => {
     { label: 'About This Mac', action: () => openApp('about', APP_DEFS) },
     { divider: true },
     { label: 'Website Song Phương', action: () => window.open(profile?.songphuongUrl || 'https://songphuong.vn', '_blank') },
-    { label: 'Contact Mail', action: () => window.open(`mailto:${profile?.email || 'duonghm.work@gmail.com'}`, '_blank') },
+    { label: 'Contact Mail', action: () => window.open(`mailto:${profile?.email || 'hoanglong.workdl@gmail.com'}`, '_blank') },
     { divider: true },
     { label: 'System Settings…', shortcut: '' },
     { label: 'App Store…' },
@@ -77,7 +79,7 @@ export const MenuBar: React.FC = () => {
         >
           <AppleLogo />
         </div>
-        <div className="px-2.5 py-0.5 h-5 flex items-center cursor-default rounded text-[13px] tracking-tight font-semibold hover:bg-black/8">{activeAppName}</div>
+        <div className="px-2.5 py-0.5 h-5 flex items-center cursor-default rounded text-[13px] tracking-tight font-semibold hover:bg-black/8">{displayAppName}</div>
         {menus.map((m) => (
           <div key={m} className="px-2.5 py-0.5 h-5 flex items-center cursor-default rounded text-[13px] tracking-tight hover:bg-black/8">{m}</div>
         ))}

@@ -38,8 +38,10 @@ const TAG_ITEMS: { id: TagType; label: string; dot: string }[] = [
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-const formatVND = (price: number) =>
-  new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+const formatVND = (price: number) => {
+  if (price === 0) return 'Liên Hệ';
+  return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+};
 
 const calcDiscount = (price: number, oldPrice: number) =>
   Math.round(((oldPrice - price) / oldPrice) * 100);

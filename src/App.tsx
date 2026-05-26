@@ -1,16 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useOSStore } from './store/useOSStore';
 import { Wallpaper } from './components/desktop/Wallpaper';
 import { MenuBar } from './components/desktop/MenuBar';
 import { Dock } from './components/desktop/Dock';
 import { Window } from './components/desktop/Window';
-import { IOSView } from './components/mobile/IOSView';
 import { MobilePreview } from './components/mobile/MobilePreview';
 import { APP_DEFS, SOCIAL_APPS } from './apps';
 import finderIcon from './icons/Finder.png';
 import notesIcon from './icons/Notes.png';
 
 export const App: React.FC = () => {
+  const [baseSeoTitle, setBaseSeoTitle] = useState('Song Phương');
   const tweaks = useOSStore((state) => state.tweaks);
   const windows = useOSStore((state) => state.windows);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
@@ -22,10 +22,7 @@ export const App: React.FC = () => {
   const updateWindow = useOSStore((state) => state.updateWindow);
   const focusedId = useOSStore((state) => state.focusedId);
   const fetchSocials = useOSStore((state) => state.fetchSocials);
-  const socials = useOSStore((state) => state.socials);
 
-  const iosOpenAppId = useOSStore((state) => state.iosOpenAppId);
-  const setIosOpenAppId = useOSStore((state) => state.setIosOpenAppId);
   const isMobile = useOSStore((state) => state.isMobile);
 
   // Fetch dynamic socials from database on mount
@@ -57,7 +54,7 @@ export const App: React.FC = () => {
         const seo = await res.json();
 
         if (seo.seo_title) {
-          document.title = seo.seo_title;
+          setBaseSeoTitle(seo.seo_title);
           document.querySelector('meta[property="og:title"]')?.setAttribute('content', seo.seo_title);
           document.querySelector('meta[name="twitter:title"]')?.setAttribute('content', seo.seo_title);
         }
@@ -82,6 +79,16 @@ export const App: React.FC = () => {
     };
     fetchSEO();
   }, []);
+
+  // Update browser document.title dynamically based on focused app
+  useEffect(() => {
+    const activeApp = APP_DEFS.find((a) => a.id === focusedId);
+    if (activeApp) {
+      document.title = `${activeApp.name} | ${baseSeoTitle}`;
+    } else {
+      document.title = baseSeoTitle;
+    }
+  }, [focusedId, baseSeoTitle]);
 
   // Vibe check diagnostics for SQL-backed endpoints on application mount
   useEffect(() => {
@@ -113,43 +120,6 @@ export const App: React.FC = () => {
     runDiagnostics();
   }, []);
 
-  // Open Social apps or normal apps inside simulated iOS smartphone screens
-  // Zalo always opens as an in-app card (same experience as desktop)
-  // Other social platforms open their URL in a new tab using the dynamic DB value
-  const handleIOSAppOpen = (id: string) => {
-    // Zalo: open the ZaloApp card inside iOS view (NOT external link)
-    if (id === 'zalo') {
-      setIosOpenAppId('zalo');
-      return;
-    }
-
-    // Other social apps: open dynamic URL from DB, fall back to static
-    const social = SOCIAL_APPS.find((s) => s.id === id);
-    if (social) {
-      const matched = socials.find(s => s.platform === id);
-      const url = matched?.url || social.mailto || social.url;
-      if (url) window.open(url, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    // Normal apps (About, Finder, etc.)
-    setIosOpenAppId(id);
-  };
-
-  if (isMobile) {
-    return (
-      <IOSView
-        apps={APP_DEFS}
-        socialApps={SOCIAL_APPS}
-        openAppId={iosOpenAppId}
-        onOpenApp={handleIOSAppOpen}
-        onClose={() => setIosOpenAppId(null)}
-      />
-    );
-  }
-
-
-
   return (
     <div className="desktop relative w-screen h-screen overflow-hidden isolation-auto">
       {/* Dynamic desktop wallpapers */}
@@ -159,8 +129,8 @@ export const App: React.FC = () => {
       <MenuBar />
 
       {/* Desktop shortcuts icons */}
-      <div className="desktop-icons absolute top-10 right-5 flex flex-col gap-4 z-10 select-none">
-        {/* Finder (Song Phuong) */}
+      <div className="desktop-icons absolute top-12 right-4 md:right-5 grid grid-cols-2 gap-4 md:flex md:flex-col md:gap-4 z-10 select-none max-w-[calc(100vw-2rem)] md:max-w-none">
+        {/* Finder (Song Phương) */}
         <div
           onDoubleClick={() => openApp('finder', APP_DEFS)}
           className="desktop-icon flex flex-col items-center gap-1 w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"

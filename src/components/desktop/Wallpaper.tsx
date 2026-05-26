@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useOSStore } from '../../store/useOSStore';
 
 export const Wallpaper: React.FC = () => {
+  const isMobile = useOSStore(state => state.isMobile);
   const tweaks = useOSStore(state => state.tweaks);
-  const wallpaperType = tweaks.wallpaperType || 'image';
+  const wallpaperType = isMobile ? 'image' : (tweaks.wallpaperType || 'image');
   const wallpaperUrl = tweaks.wallpaperUrl || '/wallpapers/sonoma-light.jpg';
   
   const [timeShiftUrl, setTimeShiftUrl] = useState('/wallpapers/sonoma-light.jpg');

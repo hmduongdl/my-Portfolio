@@ -2,19 +2,21 @@ import React, { useRef } from 'react';
 import { WindowInstance } from '../../types';
 import { useWindowDragResize } from '../../hooks/useWindowDragResize';
 import { APP_DEFS } from '../../apps';
+import { useOSStore } from '../../store/useOSStore';
 
 interface TrafficLightsProps {
   onClose: () => void;
   onMin: () => void;
   onMax: () => void;
   isResizable?: boolean;
+  isMobile?: boolean;
 }
 
-const TrafficLights: React.FC<TrafficLightsProps> = ({ onClose, onMin, onMax, isResizable }) => {
+const TrafficLights: React.FC<TrafficLightsProps> = ({ onClose, onMin, onMax, isResizable, isMobile }) => {
   return (
     <div className="traffic-lights flex gap-2 items-center group-hover:visible">
       <div
-        className="traffic-light traffic-close w-3 h-3 rounded-full flex items-center justify-center cursor-pointer border border-black/15 bg-[#FF5F57] relative"
+        className={`traffic-light traffic-close ${isMobile ? 'w-3.5 h-3.5' : 'w-3 h-3'} rounded-full flex items-center justify-center cursor-pointer border border-black/15 bg-[#FF5F57] relative`}
         onClick={(e) => {
           e.stopPropagation();
           onClose();
@@ -24,34 +26,38 @@ const TrafficLights: React.FC<TrafficLightsProps> = ({ onClose, onMin, onMax, is
           <path d="M1 1l4 4M5 1l-4 4" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
         </svg>
       </div>
-      <div
-        className="traffic-light traffic-min w-3 h-3 rounded-full flex items-center justify-center cursor-pointer border border-black/15 bg-[#FEBC2E] relative"
-        onClick={(e) => {
-          e.stopPropagation();
-          onMin();
-        }}
-      >
-        <svg viewBox="0 0 6 6" className="w-[6px] h-[6px] opacity-0 hover:opacity-100 text-black/65 absolute">
-          <path d="M1 3h4" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
-        </svg>
-      </div>
-      <div
-        className={`traffic-light traffic-max w-3 h-3 rounded-full flex items-center justify-center border border-black/15 bg-[#28C840] relative ${
-          isResizable === false ? 'opacity-50 pointer-events-none cursor-not-allowed' : 'cursor-pointer'
-        }`}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (isResizable !== false) {
-            onMax();
-          }
-        }}
-      >
-        {isResizable !== false && (
-          <svg viewBox="0 0 6 6" className="w-[6px] h-[6px] opacity-0 hover:opacity-100 text-black/65 absolute">
-            <path d="M1.5 1.5L4.5 1.5L4.5 4.5z M4.5 4.5L1.5 4.5L1.5 1.5z" fill="currentColor" />
-          </svg>
-        )}
-      </div>
+      {!isMobile && (
+        <>
+          <div
+            className="traffic-light traffic-min w-3 h-3 rounded-full flex items-center justify-center cursor-pointer border border-black/15 bg-[#FEBC2E] relative"
+            onClick={(e) => {
+              e.stopPropagation();
+              onMin();
+            }}
+          >
+            <svg viewBox="0 0 6 6" className="w-[6px] h-[6px] opacity-0 hover:opacity-100 text-black/65 absolute">
+              <path d="M1 3h4" stroke="currentColor" strokeWidth="1" strokeLinecap="round" />
+            </svg>
+          </div>
+          <div
+            className={`traffic-light traffic-max w-3 h-3 rounded-full flex items-center justify-center border border-black/15 bg-[#28C840] relative ${
+              isResizable === false ? 'opacity-50 pointer-events-none cursor-not-allowed' : 'cursor-pointer'
+            }`}
+            onClick={(e) => {
+              e.stopPropagation();
+              if (isResizable !== false) {
+                onMax();
+              }
+            }}
+          >
+            {isResizable !== false && (
+              <svg viewBox="0 0 6 6" className="w-[6px] h-[6px] opacity-0 hover:opacity-100 text-black/65 absolute">
+                <path d="M1.5 1.5L4.5 1.5L4.5 4.5z M4.5 4.5L1.5 4.5L1.5 1.5z" fill="currentColor" />
+              </svg>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
@@ -77,6 +83,7 @@ export const Window: React.FC<WindowProps> = ({
   focused,
   windowStyle,
 }) => {
+  const isMobile = useOSStore((state) => state.isMobile);
   const winRef = useRef<HTMLDivElement>(null);
   const { isDragging, startDrag, startResize } = useWindowDragResize(win, onChange, onFocus);
 
@@ -92,7 +99,13 @@ export const Window: React.FC<WindowProps> = ({
       } ${win.minimized ? 'minimized scale-0 translate-y-[400px] opacity-0 pointer-events-none' : ''} ${
         isDragging ? 'scale-[1.01] shadow-[0_30px_100px_rgba(0,0,0,0.5),0_0_0_1px_rgba(100,255,218,0.15)] opacity-95' : ''
       } style-${windowStyle}`}
-      style={{
+      style={isMobile ? {
+        left: '2%',
+        top: '36px',
+        width: '96%',
+        height: 'calc(100vh - 100px)',
+        zIndex: win.z,
+      } : {
         left: win.x,
         top: win.y,
         width: win.w,
@@ -103,12 +116,12 @@ export const Window: React.FC<WindowProps> = ({
     >
       {/* Titlebar */}
       <div
-        className={`titlebar h-[38px] flex items-center px-3 bg-paper-2 border-b border-rule flex-shrink-0 relative select-none cursor-grab ${
-          isDragging ? 'dragging cursor-grabbing' : ''
-        }`}
-        onMouseDown={startDrag}
+        className={`titlebar h-[38px] flex items-center px-3 bg-paper-2 border-b border-rule flex-shrink-0 relative select-none ${
+          isMobile ? '' : 'cursor-grab'
+        } ${isDragging && !isMobile ? 'dragging cursor-grabbing' : ''}`}
+        onMouseDown={isMobile ? undefined : startDrag}
       >
-        <TrafficLights onClose={onClose} onMin={onMin} onMax={onMax} isResizable={win.isResizable} />
+        <TrafficLights onClose={onClose} onMin={onMin} onMax={onMax} isResizable={win.isResizable} isMobile={isMobile} />
         <div className="window-title absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-[13px] font-semibold text-ink-2 tracking-tight pointer-events-none select-none">
           {win.title}
         </div>
@@ -120,7 +133,7 @@ export const Window: React.FC<WindowProps> = ({
       </div>
 
       {/* 8-Directional Resize handles */}
-      {win.isResizable !== false && (
+      {win.isResizable !== false && !isMobile && (
         <>
           <div className="resize-handle resize-n absolute z-[5] top-[-3px] left-0 right-0 h-1.5 cursor-ns-resize" onMouseDown={startResize('n')} />
           <div className="resize-handle resize-s absolute z-[5] bottom-[-3px] left-0 right-0 h-1.5 cursor-ns-resize" onMouseDown={startResize('s')} />

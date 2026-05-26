@@ -25,11 +25,15 @@ export const ZaloApp: React.FC = () => {
     };
   }, [language]);
 
-  // Clean phone number for URL (strip non-digits or spaces)
-  const cleanPhone = phone.replace(/\s+/g, '');
+  // Clean phone number for URL (strip 'tel:' prefix and non-digits/+)
+  const cleanPhone = phone.replace(/^tel:/i, '').replace(/[^\d+]/g, '');
   
   // Format phone number for display (e.g. 0911 818 016)
-  const displayPhone = cleanPhone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
+  let displayPhone = cleanPhone;
+  if (displayPhone.startsWith('+84')) {
+    displayPhone = '0' + displayPhone.slice(3);
+  }
+  displayPhone = displayPhone.replace(/(\d{4})(\d{3})(\d{3})/, '$1 $2 $3');
 
   const handleCopy = async () => {
     try {

@@ -17,7 +17,7 @@ export const profileVN: ProfileData = {
   name: 'Hoàng Minh Dương',
   title: 'Web Developer · IT Student',
   bio: 'Sinh viên IT tại Đại học Đà Lạt & Web Developer tại Song Phương Technology.',
-  email: 'duonghm.work@gmail.com',
+  email: 'hoanglong.workdl@gmail.com',
   githubUrl: 'https://github.com/hmduongdl',
   facebookUrl: 'https://facebook.com/',
   songphuongUrl: 'https://songphuong.vn',
