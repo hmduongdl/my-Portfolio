@@ -4,103 +4,103 @@ import { useOSStore } from '../../store/useOSStore';
 import { SOCIAL_APPS } from '../../apps';
 
 interface DockIconProps {
-  name: string;
-  icon: React.ReactNode;
-  onClick: () => void;
-  isRunning?: boolean;
+    name: string;
+    icon: React.ReactNode;
+    onClick: () => void;
+    isRunning?: boolean;
 }
 
 const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = false }) => {
-  return (
-    <div
-      className="group relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 flex-shrink-0"
-      onClick={onClick}
-      role="button"
-      tabIndex={0}
-    >
-      <div
-        className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 bg-paper-2/92 backdrop-blur-md text-ink text-xs font-medium px-2.5 py-1 rounded-md border border-black/15 shadow-[0_4px_12px_rgba(0,0,0,0.15)] opacity-0 pointer-events-none transition-all duration-150 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 whitespace-nowrap z-[910]"
-      >
-        {name}
-      </div>
+    return (
+        <div
+            className="group relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 flex-shrink-0"
+            onClick={onClick}
+            role="button"
+            tabIndex={0}
+        >
+            <div
+                className="absolute bottom-full mb-2.5 left-1/2 -translate-x-1/2 bg-paper-2/92 backdrop-blur-md text-ink text-xs font-medium px-2.5 py-1 rounded-md border border-black/15 shadow-[0_4px_12px_rgba(0,0,0,0.15)] opacity-0 pointer-events-none transition-all duration-150 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 whitespace-nowrap z-[910]"
+            >
+                {name}
+            </div>
 
-      <div
-        className="w-full h-full flex items-center justify-center overflow-hidden cursor-pointer will-change-transform"
-        style={{
-          background: 'transparent',
-          transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-        onMouseEnter={(e) => {
-          (e.currentTarget as HTMLElement).style.transform = 'scale(1.15) translateY(-5px)';
-        }}
-        onMouseLeave={(e) => {
-          (e.currentTarget as HTMLElement).style.transform = 'scale(1) translateY(0)';
-        }}
-      >
-        {icon}
-      </div>
+            <div
+                className="w-full h-full flex items-center justify-center overflow-hidden cursor-pointer will-change-transform"
+                style={{
+                    background: 'transparent',
+                    transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+                onMouseEnter={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = 'scale(1.15) translateY(-5px)';
+                }}
+                onMouseLeave={(e) => {
+                    (e.currentTarget as HTMLElement).style.transform = 'scale(1) translateY(0)';
+                }}
+            >
+                {icon}
+            </div>
 
-      <div
-        className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black/80 dark:bg-white/80 flex-shrink-0"
-        style={{
-          transform: isRunning ? 'scale(1)' : 'scale(0)',
-          opacity: isRunning ? 1 : 0,
-          transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
-          willChange: 'transform, opacity',
-        }}
-      />
-    </div>
-  );
+            <div
+                className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black/80 dark:bg-white/80 flex-shrink-0"
+                style={{
+                    transform: isRunning ? 'scale(1)' : 'scale(0)',
+                    opacity: isRunning ? 1 : 0,
+                    transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
+                    willChange: 'transform, opacity',
+                }}
+            />
+        </div>
+    );
 };
 
 interface DockProps {
-  apps: AppDefinition[];
-  onOpen: (id: AppID) => void;
+    apps: AppDefinition[];
+    onOpen: (id: AppID) => void;
 }
 
 export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
-  const windows = useOSStore((state) => state.windows);
-  const runningIds = useMemo(() => windows.map((w) => w.id), [windows]);
+    const windows = useOSStore((state) => state.windows);
+    const runningIds = useMemo(() => windows.map((w) => w.id), [windows]);
 
-  const handleSocialClick = (app: any) => {
-    const url = app.url || app.mailto;
-    if (url) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    }
-  };
+    const handleSocialClick = (app: any) => {
+        const url = app.url || app.mailto;
+        if (url) {
+            window.open(url, '_blank', 'noopener,noreferrer');
+        }
+    };
 
-  return (
-    <div className="dock-wrap fixed bottom-1.5 left-1/2 -translate-x-1/2 z-[900] flex items-end pointer-events-none">
-      <div
-        className="dock flex items-center gap-3 md:gap-4 p-1.5 h-12 md:h-[54px] bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/15 dark:border-white/5 shadow-2xl rounded-2xl pointer-events-auto will-change-transform"
-        style={{
-          transition: 'all 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
-        }}
-      >
-        {apps.map((app) => (
-          <DockIcon
-            key={app.id}
-            name={app.name}
-            icon={app.icon}
-            onClick={() => onOpen(app.id)}
-            isRunning={runningIds.includes(app.id)}
-          />
-        ))}
+    return (
+        <div className="dock-wrap fixed bottom-1.5 left-1/2 -translate-x-1/2 z-[900] flex items-end pointer-events-none">
+            <div
+                className="dock flex items-center gap-3 md:gap-4 p-1.5 h-12 md:h-[54px] bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/15 dark:border-white/5 shadow-2xl rounded-2xl pointer-events-auto will-change-transform"
+                style={{
+                    transition: 'all 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
+                }}
+            >
+                {apps.map((app) => (
+                    <DockIcon
+                        key={app.id}
+                        name={app.name}
+                        icon={app.icon}
+                        onClick={() => onOpen(app.id)}
+                        isRunning={runningIds.includes(app.id)}
+                    />
+                ))}
 
-        {apps.length > 0 && SOCIAL_APPS.length > 0 && (
-          <div className="w-px h-6 md:h-8 bg-gradient-to-b from-white/0 via-white/20 to-white/0 dark:via-white/10 self-center flex-shrink-0" />
-        )}
+                {apps.length > 0 && SOCIAL_APPS.length > 0 && (
+                    <div className="w-px h-6 md:h-8 bg-gradient-to-b from-white/0 via-white/20 to-white/0 dark:via-white/10 self-center flex-shrink-0" />
+                )}
 
-        {SOCIAL_APPS.map((app) => (
-          <DockIcon
-            key={app.id}
-            name={app.name}
-            icon={app.icon}
-            onClick={() => handleSocialClick(app)}
-            isRunning={false}
-          />
-        ))}
-      </div>
-    </div>
-  );
+                {SOCIAL_APPS.map((app) => (
+                    <DockIcon
+                        key={app.id}
+                        name={app.name}
+                        icon={app.icon}
+                        onClick={() => handleSocialClick(app)}
+                        isRunning={false}
+                    />
+                ))}
+            </div>
+        </div>
+    );
 };
