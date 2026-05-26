@@ -412,7 +412,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   }
 
   // -------------------------------------------------------------
-  // ADMIN ROUTES (MOCK - CẦN JWT)
+  // ADMIN ROUTES (CẦN JWT)
   // -------------------------------------------------------------
   if (path.startsWith('/admin')) {
     const isAuthorized = await verifyAdminJWT(req);
@@ -420,19 +420,39 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Token JWT không hợp lệ hoặc hết hạn.' });
     }
 
+    // --- 1. PROFILE ---
     if (req.method === 'PUT' && path === '/admin/profile') {
-      const body = req.body;
+      const b = req.body ?? {};
       try {
         await runQuery(
           `UPDATE tbl_profile SET 
-            name = $1, title_vn = $2, title_en = $3, bio_vn = $4, bio_en = $5, 
-            email = $6, phone = $7, github_url = $8, facebook_url = $9, 
-            zalo_url = $10, songphuong_url = $11, updated_at = NOW() 
+            name = $1,
+            title_en = $2,
+            title_vn = $3,
+            bio_en = $4,
+            bio_vn = $5,
+            avatar_url = $6,
+            email = $7,
+            phone = $8,
+            github_url = $9,
+            facebook_url = $10,
+            zalo_url = $11,
+            songphuong_url = $12,
+            updated_at = NOW() 
            WHERE id = 1`,
           [
-            body.name, body.titleVn, body.titleEn, body.bioVn, body.bioEn,
-            body.email, body.phone, body.githubUrl, body.facebookUrl,
-            body.zaloUrl, body.songphuongUrl
+            b.name ?? '',
+            b.title_en ?? b.titleEn ?? '',
+            b.title_vn ?? b.titleVn ?? '',
+            b.bio_en ?? b.bioEn ?? '',
+            b.bio_vn ?? b.bioVn ?? '',
+            b.avatar_url ?? b.avatarUrl ?? b.avatar ?? '',
+            b.email ?? '',
+            b.phone ?? '',
+            b.github_url ?? b.githubUrl ?? b.github ?? '',
+            b.facebook_url ?? b.facebookUrl ?? b.facebook ?? '',
+            b.zalo_url ?? b.zaloUrl ?? b.zalo ?? '',
+            b.songphuong_url ?? b.songPhuongUrl ?? ''
           ]
         );
         return res.status(200).json({ success: true, message: 'Cập nhật Profile thành công.' });
@@ -440,8 +460,398 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
       }
     }
-    
-    return res.status(404).json({ error: 'ADMIN_ENDPOINT_NOT_IMPLEMENTED', message: 'Endpoint admin cũ đã bị xóa trong quá trình cập nhật cấu trúc.' });
+    // --- 2. PRODUCTS ---
+    if (req.method === 'GET' && path === '/admin/products') {
+      try {
+        const rows = await runQuery('SELECT * FROM tbl_products ORDER BY order_index ASC, id DESC');
+        return res.status(200).json(rows);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'POST' && path === '/admin/products') {
+      const b = req.body ?? {};
+      try {
+        const rows = await runQuery(
+          `INSERT INTO tbl_products (
+            name, category, tag, price, old_price, discount, image_url, link, color, glyph, status,
+            override_name, override_price, override_image_url, override_status, override_tag,
+            visible, order_index
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18) RETURNING *`,
+          [
+            b.name || '',
+            b.category || '',
+            b.tag ?? null,
+            b.price ?? null,
+            b.old_price ?? b.oldPrice ?? null,
+            b.discount !== undefined && b.discount !== null ? Number(b.discount) : null,
+            b.image_url ?? b.imageUrl ?? null,
+            b.link ?? null,
+            b.color ?? '#3B82F6',
+            b.glyph ?? '📦',
+            b.status ?? null,
+            b.override_name ?? b.overrideName ?? null,
+            b.override_price ?? b.overridePrice ?? null,
+            b.override_image_url ?? b.overrideImageUrl ?? null,
+            b.override_status ?? b.overrideStatus ?? null,
+            b.override_tag ?? b.overrideTag ?? null,
+            b.visible !== false,
+            b.order_index !== undefined ? Number(b.order_index) : 0
+          ]
+        );
+        return res.status(201).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'PUT' && path === '/admin/products') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing product ID' });
+      }
+      try {
+        const rows = await runQuery(
+          `UPDATE tbl_products SET
+            name = $1,
+            category = $2,
+            tag = $3,
+            price = $4,
+            old_price = $5,
+            discount = $6,
+            image_url = $7,
+            link = $8,
+            color = $9,
+            glyph = $10,
+            status = $11,
+            override_name = $12,
+            override_price = $13,
+            override_image_url = $14,
+            override_status = $15,
+            override_tag = $16,
+            visible = $17,
+            order_index = $18
+          WHERE id = $19 RETURNING *`,
+          [
+            b.name || '',
+            b.category || '',
+            b.tag ?? null,
+            b.price ?? null,
+            b.old_price ?? b.oldPrice ?? null,
+            b.discount !== undefined && b.discount !== null ? Number(b.discount) : null,
+            b.image_url ?? b.imageUrl ?? null,
+            b.link ?? null,
+            b.color ?? '#3B82F6',
+            b.glyph ?? '📦',
+            b.status ?? null,
+            b.override_name ?? b.overrideName ?? null,
+            b.override_price ?? b.overridePrice ?? null,
+            b.override_image_url ?? b.overrideImageUrl ?? null,
+            b.override_status ?? b.overrideStatus ?? null,
+            b.override_tag ?? b.overrideTag ?? null,
+            b.visible !== false,
+            b.order_index !== undefined ? Number(b.order_index) : 0,
+            b.id
+          ]
+        );
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Product not found' });
+        }
+        return res.status(200).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'DELETE' && path === '/admin/products') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing product ID' });
+      }
+      try {
+        await runQuery('DELETE FROM tbl_products WHERE id = $1', [b.id]);
+        return res.status(200).json({ success: true });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    // --- 3. PROJECTS ---
+    if (req.method === 'GET' && path === '/admin/projects') {
+      try {
+        const rows = await runQuery('SELECT * FROM tbl_projects ORDER BY order_index ASC, id DESC');
+        return res.status(200).json(rows);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'POST' && path === '/admin/projects') {
+      const b = req.body ?? {};
+      if (!b.id || !b.name || !b.category) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'ID, Name, and Category are required' });
+      }
+      try {
+        const rows = await runQuery(
+          `INSERT INTO tbl_projects (
+            id, name, category, color, tags, desc_vn, desc_en, demo_url, github_url, order_index, visible
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+          [
+            b.id,
+            b.name,
+            b.category,
+            b.color || '#2563EB',
+            Array.isArray(b.tags) ? b.tags : [],
+            b.desc_vn || '',
+            b.desc_en || '',
+            b.demo_url || null,
+            b.github_url || null,
+            b.order_index !== undefined ? Number(b.order_index) : 0,
+            b.visible !== false
+          ]
+        );
+        return res.status(201).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'PUT' && path === '/admin/projects') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing project ID' });
+      }
+      try {
+        const rows = await runQuery(
+          `UPDATE tbl_projects SET
+            name = $1,
+            category = $2,
+            color = $3,
+            tags = $4,
+            desc_vn = $5,
+            desc_en = $6,
+            demo_url = $7,
+            github_url = $8,
+            order_index = $9,
+            visible = $10
+          WHERE id = $11 RETURNING *`,
+          [
+            b.name || '',
+            b.category || '',
+            b.color || '#2563EB',
+            Array.isArray(b.tags) ? b.tags : [],
+            b.desc_vn || '',
+            b.desc_en || '',
+            b.demo_url || null,
+            b.github_url || null,
+            b.order_index !== undefined ? Number(b.order_index) : 0,
+            b.visible !== false,
+            b.id
+          ]
+        );
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Project not found' });
+        }
+        return res.status(200).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'DELETE' && path === '/admin/projects') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing project ID' });
+      }
+      try {
+        await runQuery('DELETE FROM tbl_projects WHERE id = $1', [b.id]);
+        return res.status(200).json({ success: true });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    // --- 4. TIMELINE ---
+    if (req.method === 'POST' && path === '/admin/timeline') {
+      const b = req.body ?? {};
+      const safeDescVn = Array.isArray(b.desc_vn) ? JSON.stringify(b.desc_vn) : b.desc_vn;
+      const safeDescEn = Array.isArray(b.desc_en) ? JSON.stringify(b.desc_en) : b.desc_en;
+      try {
+        const rows = await runQuery(
+          `INSERT INTO tbl_timeline (
+            role_vn, role_en, company, company_url, period_vn, period_en, desc_vn, desc_en, type, order_index
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+          [
+            b.role_vn || '',
+            b.role_en || '',
+            b.company || '',
+            b.company_url || null,
+            b.period_vn || '',
+            b.period_en || '',
+            safeDescVn || '[]',
+            safeDescEn || '[]',
+            b.type || 'work',
+            b.order_index !== undefined ? Number(b.order_index) : 0
+          ]
+        );
+        return res.status(201).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'PUT' && path === '/admin/timeline') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing timeline item ID' });
+      }
+      const safeDescVn = Array.isArray(b.desc_vn) ? JSON.stringify(b.desc_vn) : b.desc_vn;
+      const safeDescEn = Array.isArray(b.desc_en) ? JSON.stringify(b.desc_en) : b.desc_en;
+      try {
+        const rows = await runQuery(
+          `UPDATE tbl_timeline SET
+            role_vn = $1,
+            role_en = $2,
+            company = $3,
+            company_url = $4,
+            period_vn = $5,
+            period_en = $6,
+            desc_vn = $7,
+            desc_en = $8,
+            type = $9,
+            order_index = $10
+          WHERE id = $11 RETURNING *`,
+          [
+            b.role_vn || '',
+            b.role_en || '',
+            b.company || '',
+            b.company_url || null,
+            b.period_vn || '',
+            b.period_en || '',
+            safeDescVn || '[]',
+            safeDescEn || '[]',
+            b.type || 'work',
+            b.order_index !== undefined ? Number(b.order_index) : 0,
+            b.id
+          ]
+        );
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Timeline item not found' });
+        }
+        return res.status(200).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'DELETE' && path === '/admin/timeline') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing timeline item ID' });
+      }
+      try {
+        await runQuery('DELETE FROM tbl_timeline WHERE id = $1', [b.id]);
+        return res.status(200).json({ success: true });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    // --- 5. SYSTEM & SEO SETTINGS ---
+    if (req.method === 'GET' && path === '/admin/settings') {
+      try {
+        await runQuery(`
+          CREATE TABLE IF NOT EXISTS tbl_settings (
+            key         VARCHAR(100) PRIMARY KEY,
+            value       TEXT         NOT NULL,
+            updated_at  TIMESTAMPTZ  DEFAULT NOW()
+          )
+        `);
+
+        const socialLinks = await runQuery('SELECT * FROM social_links ORDER BY order_index ASC, id ASC');
+        const seoRows = await runQuery('SELECT * FROM tbl_settings');
+
+        const seoSettings: Record<string, string> = {};
+        if (seoRows.length === 0) {
+          const defaults = [
+            { key: 'seo_title', value: 'Hoàng Minh Dương — Portfolio | Web Developer tại Song Phương Technology' },
+            { key: 'seo_description', value: 'Hoàng Minh Dương — Sinh viên IT Đại học Đà Lạt, Web Developer thực chiến tại Song Phương Technology, Freelance Designer. Chuyên React, TypeScript, Node.js và thiết kế UI/UX hiện đại.' },
+            { key: 'seo_keywords', value: 'Hoàng Minh Dương, Web Developer, Front End Developer, React, TypeScript, Node.js, Song Phương Technology, Đại học Đà Lạt, Freelance Designer, Portfolio' },
+            { key: 'og_image', value: 'https://hmduongdl.github.io/Minimalist-Design-Portfolio/songphuong-logo.png' },
+            { key: 'twitter_card', value: 'summary_large_image' }
+          ];
+          for (const d of defaults) {
+            await runQuery(
+              'INSERT INTO tbl_settings (key, value) VALUES ($1, $2) ON CONFLICT (key) DO NOTHING',
+              [d.key, d.value]
+            );
+            seoSettings[d.key] = d.value;
+          }
+        } else {
+          for (const r of seoRows) {
+            seoSettings[r.key] = r.value;
+          }
+        }
+
+        return res.status(200).json({
+          socialLinks,
+          seoSettings
+        });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'PUT' && path === '/admin/settings') {
+      const b = req.body ?? {};
+      const { socialLinks, seoSettings } = b;
+      try {
+        await runQuery(`
+          CREATE TABLE IF NOT EXISTS tbl_settings (
+            key         VARCHAR(100) PRIMARY KEY,
+            value       TEXT         NOT NULL,
+            updated_at  TIMESTAMPTZ  DEFAULT NOW()
+          )
+        `);
+
+        if (Array.isArray(socialLinks)) {
+          for (const link of socialLinks) {
+            if (link.platform) {
+              await runQuery(
+                `UPDATE social_links
+                 SET url = $1,
+                     visible = $2,
+                     updated_at = NOW()
+                 WHERE platform = $3`,
+                [link.url ?? '', link.visible !== false, link.platform]
+              );
+            }
+          }
+        }
+
+        if (seoSettings && typeof seoSettings === 'object') {
+          const keys = Object.keys(seoSettings);
+          for (const key of keys) {
+            const val = String(seoSettings[key] ?? '');
+            await runQuery(
+              `INSERT INTO tbl_settings (key, value)
+               VALUES ($1, $2)
+               ON CONFLICT (key) DO UPDATE SET
+                 value = EXCLUDED.value,
+                 updated_at = NOW()`,
+              [key, val]
+            );
+          }
+        }
+
+        return res.status(200).json({ success: true });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    return res.status(404).json({ error: 'ADMIN_ENDPOINT_NOT_IMPLEMENTED', message: 'Endpoint admin không được hỗ trợ.' });
   }
 
   return res.status(404).json({ error: 'ENDPOINT_NOT_FOUND', requestedPath: path });

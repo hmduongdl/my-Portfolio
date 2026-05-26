@@ -3,6 +3,7 @@ import { FinderApp } from './Finder';
 import { ProjectsApp } from './Projects';
 import { MailApp } from './Mail';
 import { WelcomeApp } from './Welcome';
+import { ZaloApp } from './Zalo';
 import { AppDefinition, SocialAppDefinition } from '../types';
 import { ImageWithFallback } from '../components/desktop/ImageWithFallback';
 import { Phone, MessageCircle } from 'lucide-react';
@@ -152,6 +153,21 @@ export const APP_DEFS: AppDefinition[] = [
     initial: { w: 540, h: 480, x: 600, y: 110 },
     Component: WelcomeApp,
   },
+  {
+    id: 'zalo',
+    name: 'Zalo',
+    title: 'Zalo Contact',
+    bg: '#ffffff',
+    icon: (
+      <div className="w-full h-full rounded-[22%] bg-gradient-to-b from-[#2083FF] to-[#0052FF] flex items-center justify-center border border-white/10 shadow-inner relative">
+        <MessageCircle className="w-[85%] h-[85%] text-white" strokeWidth={1.5} fill="currentColor" />
+        <span className="absolute text-[#0052FF] font-black text-[10px] mt-[-2px] tracking-tighter">Zalo</span>
+      </div>
+    ),
+    initial: { w: 540, h: 340, x: 250, y: 120 },
+    isResizable: false,
+    Component: ZaloApp,
+  },
 ];
 
-export { AboutApp, FinderApp, ProjectsApp, MailApp, WelcomeApp };
+export { AboutApp, FinderApp, ProjectsApp, MailApp, WelcomeApp, ZaloApp };

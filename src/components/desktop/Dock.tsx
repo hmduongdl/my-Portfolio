@@ -57,6 +57,10 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
     const runningIds = useMemo(() => windows.map((w) => w.id), [windows]);
 
     const handleSocialClick = (app: any) => {
+        if (app.id === 'zalo') {
+            onOpen('zalo');
+            return;
+        }
         const url = app.url || app.mailto;
         if (url) {
             window.open(url, '_blank', 'noopener,noreferrer');
@@ -91,7 +95,7 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                         name={app.name}
                         icon={app.icon}
                         onClick={() => handleSocialClick(app)}
-                        isRunning={false}
+                        isRunning={app.id === 'zalo' ? runningIds.includes('zalo') : false}
                     />
                 ))}
             </div>
