@@ -18,41 +18,41 @@ import projectsIcon from '../icons/Project-folder.png';
 export const SOCIAL_APPS: SocialAppDefinition[] = [
   {
     id: 'github', name: 'GitHub',
-    bg: '#1a1d2e',
+    bg: 'linear-gradient(to bottom, #2c2c2c, #111)',
     icon: (
-      <ImageWithFallback src={githubIcon} alt="GitHub icon" fallbackText="GH" className="w-[28px] h-[28px] object-contain" />
+      <ImageWithFallback src={githubIcon} alt="GitHub icon" fallbackText="GH" className="w-[80%] h-[80%] object-contain filter invert" />
     ),
     url: 'https://github.com/hmduongdl',
   },
   {
     id: 'facebook', name: 'Facebook',
-    bg: 'linear-gradient(135deg, #1877F2 0%, #0a5dc1 100%)',
+    bg: '#1877F2',
     icon: (
-      <ImageWithFallback src={facebookIcon} alt="Facebook icon" fallbackText="F" className="w-[28px] h-[28px] object-contain" />
+      <ImageWithFallback src={facebookIcon} alt="Facebook icon" fallbackText="F" className="w-[100%] h-[100%] object-contain" />
     ),
     url: 'https://facebook.com/hmd.Stewiclez',
   },
   {
     id: 'gmail', name: 'Gmail',
-    bg: 'white',
+    bg: '#ffffff',
     icon: (
-      <ImageWithFallback src={gmailIcon} alt="Gmail icon" fallbackText="G" className="w-[28px] h-[28px] object-contain" />
+      <ImageWithFallback src={gmailIcon} alt="Gmail icon" fallbackText="G" className="w-[80%] h-[80%] object-contain" />
     ),
     mailto: 'mailto:hoanglong.workdl@gmail.com',
   },
   {
     id: 'phone', name: 'Phone',
-    bg: 'linear-gradient(180deg, #4cd964 0%, #2eb84e 100%)',
+    bg: 'linear-gradient(to bottom, #60e052, #25b712)',
     icon: (
-      <ImageWithFallback src={phoneIcon} alt="Phone icon" fallbackText="P" className="w-[28px] h-[28px] object-contain" />
+      <ImageWithFallback src={phoneIcon} alt="Phone icon" fallbackText="P" className="w-[75%] h-[75%] object-contain" />
     ),
     url: 'tel:0911818016',
   },
   {
     id: 'zalo', name: 'Zalo',
-    bg: 'linear-gradient(135deg, #0068FF 0%, #0050cc 100%)',
+    bg: 'linear-gradient(to bottom, #2083FF, #0052FF)',
     icon: (
-      <ImageWithFallback src={zaloIcon} alt="Zalo icon" fallbackText="Z" className="w-[28px] h-[28px] object-contain" />
+      <ImageWithFallback src={zaloIcon} alt="Zalo icon" fallbackText="Z" className="w-[85%] h-[85%] object-contain" />
     ),
     url: 'https://zalo.me/0911818016',
   },
@@ -69,7 +69,7 @@ export const APP_DEFS: AppDefinition[] = [
         src={finderIcon}
         alt="Finder icon"
         fallbackText="S"
-        className="w-[28px] h-[28px] object-contain"
+        className="w-[75%] h-[75%] object-contain"
       />
     ),
     initial: { w: 760, h: 480, x: 140, y: 80 },
@@ -85,7 +85,7 @@ export const APP_DEFS: AppDefinition[] = [
         src={aboutIcon}
         alt="About icon"
         fallbackText="日"
-        className="w-[28px] h-[28px] object-contain"
+        className="w-[75%] h-[75%] object-contain"
       />
     ),
     initial: { w: 480, h: 580, x: 80, y: 60 },
@@ -101,7 +101,7 @@ export const APP_DEFS: AppDefinition[] = [
         src={projectsIcon}
         alt="Projects icon"
         fallbackText="▦"
-        className="w-[28px] h-[28px] object-contain"
+        className="w-[75%] h-[75%] object-contain"
       />
     ),
     initial: { w: 820, h: 540, x: 200, y: 70 },
@@ -111,13 +111,13 @@ export const APP_DEFS: AppDefinition[] = [
     id: 'mail',
     name: 'Mail',
     title: 'New Message',
-    bg: 'linear-gradient(135deg, #5DA9FF 0%, #1E63D8 100%)',
+    bg: '#ffffff',
     icon: (
       <ImageWithFallback
         src={gmailIcon}
         alt="Mail icon"
         fallbackText="M"
-        className="w-[28px] h-[28px] object-contain"
+        className="w-[80%] h-[80%] object-contain"
       />
     ),
     initial: { w: 600, h: 480, x: 320, y: 90 },
@@ -134,7 +134,7 @@ export const APP_DEFS: AppDefinition[] = [
         src={notesIcon}
         alt="Notes icon"
         fallbackText="≡"
-        className="w-[28px] h-[28px] object-contain"
+        className="w-[75%] h-[75%] object-contain"
       />
     ),
     initial: { w: 540, h: 480, x: 600, y: 110 },

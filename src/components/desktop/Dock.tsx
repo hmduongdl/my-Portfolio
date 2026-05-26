@@ -6,14 +6,15 @@ import { SOCIAL_APPS } from '../../apps';
 interface DockIconProps {
     name: string;
     icon: React.ReactNode;
+    bg?: string;
     onClick: () => void;
     isRunning?: boolean;
 }
 
-const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = false }) => {
+const DockIcon: React.FC<DockIconProps> = ({ name, icon, bg, onClick, isRunning = false }) => {
     return (
         <div
-            className="group relative flex items-center justify-center w-9 h-9 md:w-10 md:h-10 flex-shrink-0"
+            className="group relative flex items-center justify-center w-[38px] h-[38px] md:w-[46px] md:h-[46px] flex-shrink-0"
             onClick={onClick}
             role="button"
             tabIndex={0}
@@ -25,23 +26,17 @@ const DockIcon: React.FC<DockIconProps> = ({ name, icon, onClick, isRunning = fa
             </div>
 
             <div
-                className="w-full h-full flex items-center justify-center overflow-hidden cursor-pointer will-change-transform"
+                className="w-full h-full flex items-center justify-center overflow-hidden cursor-pointer will-change-transform rounded-[22%] border border-white/15 dark:border-white/5 shadow-[0_4px_6px_rgba(0,0,0,0.3),inset_0_1px_0_rgba(255,255,255,0.15)] group-hover:scale-[1.12] group-hover:-translate-y-1"
                 style={{
-                    background: 'transparent',
+                    background: bg || 'transparent',
                     transition: 'transform 0.22s cubic-bezier(0.16, 1, 0.3, 1)',
-                }}
-                onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = 'scale(1.15) translateY(-5px)';
-                }}
-                onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLElement).style.transform = 'scale(1) translateY(0)';
                 }}
             >
                 {icon}
             </div>
 
             <div
-                className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black/80 dark:bg-white/80 flex-shrink-0"
+                className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-black/80 dark:bg-white/80 flex-shrink-0"
                 style={{
                     transform: isRunning ? 'scale(1)' : 'scale(0)',
                     opacity: isRunning ? 1 : 0,
@@ -72,7 +67,7 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
     return (
         <div className="dock-wrap fixed bottom-1.5 left-1/2 -translate-x-1/2 z-[900] flex items-end pointer-events-none">
             <div
-                className="dock flex items-center gap-3 md:gap-4 p-1.5 h-12 md:h-[54px] bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/15 dark:border-white/5 shadow-2xl rounded-2xl pointer-events-auto will-change-transform"
+                className="dock flex items-center space-x-3 md:space-x-4 px-3 h-[48px] md:h-[54px] bg-white/10 dark:bg-black/25 backdrop-blur-xl border border-white/15 dark:border-white/5 shadow-2xl rounded-2xl pointer-events-auto will-change-transform"
                 style={{
                     transition: 'all 0.32s cubic-bezier(0.16, 1, 0.3, 1)',
                 }}
@@ -82,13 +77,14 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                         key={app.id}
                         name={app.name}
                         icon={app.icon}
+                        bg={app.bg}
                         onClick={() => onOpen(app.id)}
                         isRunning={runningIds.includes(app.id)}
                     />
                 ))}
 
                 {apps.length > 0 && SOCIAL_APPS.length > 0 && (
-                    <div className="w-px h-6 md:h-8 bg-gradient-to-b from-white/0 via-white/20 to-white/0 dark:via-white/10 self-center flex-shrink-0" />
+                    <div className="w-px h-7 md:h-8 bg-black/10 dark:bg-white/10 self-center flex-shrink-0" />
                 )}
 
                 {SOCIAL_APPS.map((app) => (
@@ -96,6 +92,7 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                         key={app.id}
                         name={app.name}
                         icon={app.icon}
+                        bg={app.bg}
                         onClick={() => handleSocialClick(app)}
                         isRunning={false}
                     />
