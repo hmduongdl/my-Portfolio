@@ -4,21 +4,17 @@ export const WelcomeApp: React.FC = () => {
   return (
     <div className="px-11 py-9 max-w-[600px] mx-auto select-text leading-relaxed font-sans">
       <h1 className="text-[26px] font-bold tracking-tight mb-5 text-ink flex items-center gap-2">
-        <span className="text-2xl">🖥️</span> Chào mừng bạn đến với Song Phương OS!
+        <span className="text-2xl">🖥️</span> Welcome to Hoàng Minh Dương!
       </h1>
-      
+
       <p className="text-[14px] text-ink-2 mb-6 leading-[1.6]">
-        Đây là Hệ điều hành Portfolio cá nhân của <b>Hoàng Minh Dương</b> - Web Developer tại <i>Song Phương Technology</i> & Sinh viên CNTT trường <i>Đại học Đà Lạt</i>.
+        Đây là Portfolio cá nhân của <b>Hoàng Minh Dương</b> - Web Developer tại <i>Song Phương Technology</i> & Sinh viên CNTT trường <i>Đại học Đà Lạt</i>.
       </p>
 
-      <p className="text-[14px] text-ink-2 mb-8 leading-[1.6]">
-        Hệ thống được thiết kế giả lập hoàn hảo giao diện macOS Big Sur/Sonoma mượt mà kết hợp cùng hạ tầng cơ sở dữ liệu thời gian thực <b>Neon SQL (PostgreSQL)</b>.
-      </p>
-      
       <h3 className="text-[16px] font-bold text-ink mb-4 flex items-center gap-2">
         <span className="text-lg">🚀</span> Các tính năng bạn có thể tương tác:
       </h3>
-      
+
       <ul className="space-y-4 mb-8">
         <li className="flex gap-3 text-[14px] text-ink-2 leading-[1.5]">
           <span className="text-lg shrink-0">📂</span>
@@ -38,9 +34,9 @@ export const WelcomeApp: React.FC = () => {
         </li>
 
       </ul>
-      
+
       <div className="p-4 bg-blue-500/10 dark:bg-blue-500/5 text-blue-700 dark:text-blue-200 border border-blue-500/20 rounded-xl text-[13px] leading-[1.6] italic">
-        Chúc bạn có những trải nghiệm tương tác thú vị trên hệ điều hành Portfolio của tôi!
+        Chúc bạn có những trải nghiệm tương tác thú vị trên Portfolio của tôi!
       </div>
     </div>
   );

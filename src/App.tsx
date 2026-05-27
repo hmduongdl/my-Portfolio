@@ -51,15 +51,10 @@ export const App: React.FC = () => {
     return () => document.removeEventListener('click', handleOutsideClick);
   }, [setOpenMenu]);
 
-  // Update browser document.title dynamically based on focused app
+  // Update browser document.title to a fixed string
   useEffect(() => {
-    const activeApp = APP_DEFS.find((a) => a.id === focusedId);
-    if (activeApp) {
-      document.title = `${activeApp.name} | ${baseSeoTitle}`;
-    } else {
-      document.title = baseSeoTitle;
-    }
-  }, [focusedId, baseSeoTitle]);
+    document.title = 'Hoàng Minh Dương';
+  }, []);
 
   // Warm shared data caches in the background without blocking first paint.
   useEffect(() => {
@@ -187,11 +182,11 @@ export const App: React.FC = () => {
           className="desktop-icon flex flex-col items-center gap-1 w-[80px] md:w-[76px] cursor-pointer p-1 rounded-md hover:bg-white/15 transition-colors"
         >
           <div className="desktop-icon-art w-[48px] h-[48px] md:w-12 md:h-12 rounded-md bg-transparent flex items-center justify-center overflow-visible">
-            <div className="w-full h-full bg-[#1853a1] rounded-[22%] flex items-center justify-center p-[3px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.25)] border border-[#124285]">
+            <div className="w-full h-full bg-[#1853a1] rounded-[22%] flex items-center justify-center p-[1.5px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.25)] border border-[#124285]">
               <img
                 src="/songphuong-logo.png"
                 alt="Song Phương"
-                className="w-[78%] h-[78%] object-contain pointer-events-none drop-shadow-md"
+                className="w-[95%] h-[95%] object-contain pointer-events-none drop-shadow-md"
               />
             </div>
           </div>

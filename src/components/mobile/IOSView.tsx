@@ -63,7 +63,7 @@ export const IOSView: React.FC<IOSViewProps> = ({
               <div
                 key={app.id}
                 onClick={() => onOpenApp(app.id)}
-                className={`${app.id === 'finder' ? 'w-[38px] h-[38px]' : 'w-[48px] h-[48px]'} flex items-center justify-center cursor-pointer hover:scale-95 transition-transform p-0 bg-transparent border-none shadow-none [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none`}
+                className="w-[48px] h-[48px] flex items-center justify-center cursor-pointer hover:scale-95 transition-transform p-0 bg-transparent border-none shadow-none [&>img]:w-full [&>img]:h-full [&>img]:object-contain [&>img]:pointer-events-none"
               >
                 {app.icon}
               </div>
