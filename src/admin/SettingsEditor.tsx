@@ -20,6 +20,18 @@ interface SeoSettings {
   seo_keywords: string;
   og_image: string;
   twitter_card: string;
+  tech_stack_options?: string;
+}
+
+interface TechOption {
+  name: string;
+  icon: string;
+  category: string;
+}
+
+interface TechStackOptionsData {
+  categories: string[];
+  techs: TechOption[];
 }
 
 type SaveStatus = 'idle' | 'saving' | 'ok' | 'error';
@@ -87,7 +99,12 @@ export const SettingsEditor: React.FC = () => {
     seo_keywords: '',
     og_image: '',
     twitter_card: 'summary_large_image',
+    tech_stack_options: '{"categories":[],"techs":[]}',
   });
+
+  const [techOptions, setTechOptions] = useState<TechStackOptionsData>({ categories: [], techs: [] });
+  const [newCategory, setNewCategory] = useState('');
+  const [newTech, setNewTech] = useState<TechOption>({ name: '', icon: '', category: '' });
 
   const [keywords, setKeywords]     = useState<string[]>([]);
   const [kwInput, setKwInput]       = useState('');
@@ -121,6 +138,13 @@ export const SettingsEditor: React.FC = () => {
         setSeo(data.seoSettings);
         const kwStr = data.seoSettings.seo_keywords || '';
         setKeywords(kwStr.split(',').map(s => s.trim()).filter(Boolean));
+        if (data.seoSettings.tech_stack_options) {
+          try {
+            setTechOptions(JSON.parse(data.seoSettings.tech_stack_options));
+          } catch (e) {
+            console.error('Failed to parse tech_stack_options');
+          }
+        }
       }
     } catch (e) {
       console.error(e);
@@ -177,7 +201,7 @@ export const SettingsEditor: React.FC = () => {
       // 2. Save SEO settings via /admin/settings
       await api.put('/admin/settings', {
         socialLinks: socialLinksToSend,
-        seoSettings: { ...seo, seo_keywords: keywords.join(', ') },
+        seoSettings: { ...seo, seo_keywords: keywords.join(', '), tech_stack_options: JSON.stringify(techOptions) },
       });
 
       setSaveStatus('ok');
@@ -388,6 +412,81 @@ export const SettingsEditor: React.FC = () => {
                   Kích thước khuyên dùng: 1200×630 px. Định dạng: JPG, PNG hoặc WebP.
                 </p>
               </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {/* ── Tech Stack Options Configuration ──────────────────────────────────── */}
+      <section className="space-y-2">
+        <h2 className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/70 px-1">
+          Quản lý Tech Stack
+        </h2>
+        <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm divide-y divide-outline-variant/20">
+          
+          <div className="p-4">
+            <label className="block text-[12px] font-bold text-on-surface mb-2">Danh mục (Categories)</label>
+            <div className="flex flex-wrap gap-1.5 mb-2.5">
+              {techOptions.categories.map((cat, idx) => (
+                <span key={idx} className="bg-primary/10 text-primary px-2.5 py-0.5 rounded-full text-[11px] flex items-center gap-1 font-medium select-none border border-primary/20">
+                  {cat}
+                  <button onClick={() => setTechOptions(prev => ({ ...prev, categories: prev.categories.filter(c => c !== cat) }))} className="hover:text-error transition-colors leading-none">
+                    <span className="material-symbols-outlined text-[12px]">close</span>
+                  </button>
+                </span>
+              ))}
+            </div>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newCategory}
+                onChange={e => setNewCategory(e.target.value)}
+                onKeyDown={e => {
+                  if (e.key === 'Enter' && newCategory.trim() && !techOptions.categories.includes(newCategory.trim())) {
+                    setTechOptions(prev => ({ ...prev, categories: [...prev.categories, newCategory.trim()] }));
+                    setNewCategory('');
+                  }
+                }}
+                placeholder="Thêm danh mục (VD: Frontend)..."
+                className="flex-1 bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-1.5 text-[13px] text-on-surface focus:border-primary outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="p-4">
+            <label className="block text-[12px] font-bold text-on-surface mb-2">Công nghệ (Tech Items)</label>
+            <div className="flex flex-wrap gap-2 mb-3">
+              {techOptions.techs.map((tech, idx) => (
+                <div key={idx} className="bg-surface-container border border-outline-variant/50 rounded-lg p-2 text-[11px] flex items-center gap-2">
+                  <div className="flex flex-col">
+                    <span className="font-bold text-on-surface">{tech.name}</span>
+                    <span className="text-on-surface-variant/70">{tech.category} | Icon: {tech.icon || 'none'}</span>
+                  </div>
+                  <button onClick={() => setTechOptions(prev => ({ ...prev, techs: prev.techs.filter((_, i) => i !== idx) }))} className="text-on-surface-variant hover:text-error transition-colors">
+                    <span className="material-symbols-outlined text-[16px]">delete</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+            <div className="flex gap-2 flex-col sm:flex-row">
+              <input type="text" value={newTech.name} onChange={e => setNewTech(prev => ({ ...prev, name: e.target.value }))} placeholder="Tên (VD: React)" className="flex-1 bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-1.5 text-[13px]" />
+              <input type="text" value={newTech.icon} onChange={e => setNewTech(prev => ({ ...prev, icon: e.target.value }))} placeholder="Icon name" className="w-24 bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-1.5 text-[13px]" />
+              <select value={newTech.category} onChange={e => setNewTech(prev => ({ ...prev, category: e.target.value }))} className="w-32 bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-1.5 text-[13px]">
+                <option value="">-- Chọn DM --</option>
+                {techOptions.categories.map(c => <option key={c} value={c}>{c}</option>)}
+              </select>
+              <button 
+                onClick={() => {
+                  if (newTech.name && newTech.category) {
+                    setTechOptions(prev => ({ ...prev, techs: [...prev.techs, newTech] }));
+                    setNewTech({ name: '', icon: '', category: '' });
+                  }
+                }}
+                className="bg-surface-container-high px-3 py-1.5 rounded-lg text-[13px] font-semibold hover:bg-surface-container-highest transition-colors border border-outline-variant/50"
+              >
+                Thêm
+              </button>
             </div>
           </div>
 

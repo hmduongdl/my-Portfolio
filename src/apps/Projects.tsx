@@ -2,7 +2,9 @@ import React, { useState, useMemo, useEffect } from 'react';
 import { useOSStore } from '../store/useOSStore';
 import { projectService } from '../services/projectService';
 import type { ProjectCategory, Project } from '../types/project';
-import { Code, Palette, Terminal } from 'lucide-react';
+import { ProjectDetail } from './ProjectDetail';
+import { DesignProjectDetail } from './DesignProjectDetail';
+import { ToolProjectDetail } from './ToolProjectDetail';
 
 type TabId = 'all' | ProjectCategory;
 
@@ -13,25 +15,6 @@ const TABS: { id: TabId; label: string; labelVN: string }[] = [
   { id: 'tools', label: 'Tools', labelVN: 'Công cụ' },
 ];
 
-const renderProjectIcon = (category: ProjectCategory) => {
-  let IconComponent = Code;
-  let gradientClasses = 'from-blue-500 to-indigo-600 dark:from-blue-600 dark:to-indigo-800';
-
-  if (category === 'design') {
-    IconComponent = Palette;
-    gradientClasses = 'from-purple-500 to-pink-500 dark:from-purple-600 dark:to-pink-700';
-  } else if (category === 'tools') {
-    IconComponent = Terminal;
-    gradientClasses = 'from-neutral-500 to-zinc-700 dark:from-neutral-600 dark:to-zinc-800';
-  }
-
-  return (
-    <div className={`w-11 h-11 rounded-full flex items-center justify-center text-white shadow-md bg-gradient-to-br ${gradientClasses}`}>
-      <IconComponent size={20} className="drop-shadow-[0_1.5px_2px_rgba(0,0,0,0.2)]" />
-    </div>
-  );
-};
-
 export const ProjectsApp: React.FC = () => {
   const language = useOSStore((s) => s.language);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -39,6 +22,7 @@ export const ProjectsApp: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | number | null>(null);
 
   const loadProjects = () => {
     setIsLoading(true);
@@ -68,6 +52,38 @@ export const ProjectsApp: React.FC = () => {
     };
   }, [language]);
 
+  // Handle URL routing based on browser History API
+  useEffect(() => {
+    const handlePopState = () => {
+      const match = window.location.pathname.match(/^\/projects\/(.+)$/);
+      if (match && match[1]) {
+        setSelectedProjectId(match[1]);
+      } else {
+        setSelectedProjectId(null);
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    
+    // Check initial URL on mount
+    const match = window.location.pathname.match(/^\/projects\/(.+)$/);
+    if (match && match[1]) {
+      // Small timeout to let projects load first
+      setTimeout(() => setSelectedProjectId(match[1]), 100);
+    }
+
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  const handleSelectProject = (id: string | number | null) => {
+    setSelectedProjectId(id);
+    if (id) {
+      window.history.pushState({ projectId: id }, '', `/projects/${id}`);
+    } else {
+      window.history.pushState({}, '', '/');
+    }
+  };
+
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return projects.filter((p) => {
@@ -93,7 +109,24 @@ export const ProjectsApp: React.FC = () => {
     </div>
   );
 
-  const activeIndex = TABS.findIndex((t) => t.id === activeTab);
+  if (selectedProjectId) {
+    const selectedProject = projects.find(p => String(p.id) === String(selectedProjectId));
+    if (selectedProject) {
+      // Update page title dynamically
+      document.title = `${selectedProject.name} · Song Phương Portfolio`;
+      
+      if (selectedProject.category === 'design') {
+        return <DesignProjectDetail project={selectedProject} onBack={() => handleSelectProject(null)} />;
+      }
+      if (selectedProject.category === 'tools') {
+        return <ToolProjectDetail project={selectedProject} onBack={() => handleSelectProject(null)} />;
+      }
+      return <ProjectDetail project={selectedProject} onBack={() => handleSelectProject(null)} />;
+    }
+  }
+
+  // Restore default title when returning to grid
+  document.title = 'Hoàng Minh Dương';
 
   return (
     <div className="h-full flex flex-col select-text bg-paper">
@@ -162,12 +195,12 @@ export const ProjectsApp: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-10">
             {filtered.map((p, index) => {
               const isFeatured = index === 0;
-              const cardClass = `group relative bg-[#0a1128] border border-white/10 rounded-xl overflow-hidden transition-transform duration-300 hover:-translate-y-[3px] flex ${isFeatured ? 'flex-col md:flex-row md:col-span-full' : 'flex-col'} h-full`;
+              const cardClass = `group relative bg-[#0a1128] border border-white/10 rounded-xl overflow-hidden transition-transform duration-300 hover:-translate-y-[3px] flex ${isFeatured ? 'flex-col md:flex-row md:col-span-full' : 'flex-col'} h-full cursor-pointer`;
 
               // ----- DESIGN CARD VARIANT -----
               if (p.category === 'design') {
                 return (
-                  <div key={p.id} className={cardClass}>
+                  <div key={p.id} onClick={() => handleSelectProject(p.id)} className={cardClass}>
                     {/* Visual Preview Area */}
                     <div className={`${isFeatured ? 'w-full md:w-[50%] md:aspect-auto' : 'w-full aspect-[4/3]'} bg-[#111a3a] relative overflow-hidden flex flex-col items-center justify-center p-4 border-b md:border-b-0 md:border-r border-white/10`}>
                       <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md text-white px-2.5 py-1 text-[10px] font-semibold rounded-full z-10 border border-white/10">
@@ -227,11 +260,11 @@ export const ProjectsApp: React.FC = () => {
                 );
               }
 
-              // ----- TOOLS / AUTOMATION CARD VARIANT -----
+              // ----- TOOLS CARD VARIANT -----
               if (p.category === 'tools') {
                 return (
-                  <div key={p.id} className={cardClass}>
-                    {/* Terminal preview area */}
+                  <div key={p.id} onClick={() => handleSelectProject(p.id)} className={cardClass}>
+                    {/* Terminal Preview Area */}
                     <div className={`${isFeatured ? 'w-full md:w-[50%]' : ''} bg-[#03050a] flex flex-col flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5`}>
                       <div className="px-3 py-2 flex items-center border-b border-white/5 bg-[#03050a]">
                         <div className="flex gap-1.5 flex-shrink-0">
@@ -300,10 +333,10 @@ export const ProjectsApp: React.FC = () => {
                 );
               }
 
-              // ----- CODE CARD VARIANT (Default) -----
+              // ----- DEFAULT / CODE CARD VARIANT -----
               return (
-                <div key={p.id} className={cardClass}>
-                  {/* 1. Preview area (Terminal style) */}
+                <div key={p.id} onClick={() => handleSelectProject(p.id)} className={cardClass}>
+                  {/* Preview area (Terminal style) */}
                   <div className={`${isFeatured ? 'w-full md:w-[50%]' : 'h-[160px]'} bg-[#050914] flex flex-col flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5`}>
                     <div className="px-3 py-2 flex items-center justify-between border-b border-white/5 bg-[#050914]">
                       <div className="flex gap-1.5">
@@ -369,6 +402,7 @@ export const ProjectsApp: React.FC = () => {
                       <span className="text-[11px] text-white/40">2026</span>
                     </div>
                   </div>
+                </div>
                 );
               })}
             </div>

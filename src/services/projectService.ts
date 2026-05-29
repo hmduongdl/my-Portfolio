@@ -11,6 +11,14 @@ interface ApiProject {
   desc: string;
   demoUrl?: string | null;
   githubUrl?: string | null;
+  duration?: string | null;
+  role?: string | null;
+  status?: string | null;
+  type?: string | null;
+  achievement?: string | null;
+  techStack?: any;
+  features?: any;
+  designDetails?: any;
 }
 
 function toProject(raw: ApiProject): Project {
@@ -23,6 +31,14 @@ function toProject(raw: ApiProject): Project {
     desc: raw.desc,
     demoUrl: raw.demoUrl ?? undefined,
     githubUrl: raw.githubUrl ?? undefined,
+    duration: raw.duration ?? undefined,
+    role: raw.role ?? undefined,
+    status: raw.status ?? undefined,
+    type: raw.type ?? undefined,
+    achievement: raw.achievement ?? undefined,
+    techStack: raw.techStack ?? undefined,
+    features: raw.features ?? undefined,
+    designDetails: raw.designDetails ?? undefined,
   };
 }
 

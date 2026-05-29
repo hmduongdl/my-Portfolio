@@ -384,7 +384,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             tags: tagsArray,
             desc: lang === 'en' ? proj.desc_en : proj.desc_vn,
             demoUrl: proj.demo_url,
-            githubUrl: proj.github_url
+            githubUrl: proj.github_url,
+            duration: lang === 'en' ? proj.duration_en : proj.duration_vn,
+            role: lang === 'en' ? proj.role_en : proj.role_vn,
+            status: proj.status,
+            type: lang === 'en' ? proj.type_en : proj.type_vn,
+            achievement: lang === 'en' ? proj.achievement_en : proj.achievement_vn,
+            techStack: proj.tech_stack,
+            features: lang === 'en' ? proj.features_en : proj.features_vn,
+            designDetails: lang === 'en' ? proj.design_details_en : proj.design_details_vn,
+            toolDetails: lang === 'en' ? proj.tool_details_en : proj.tool_details_vn
           };
         });
         return res.status(200).json(mappedProjects);
@@ -676,8 +685,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         const rows = await runQuery(
           `INSERT INTO tbl_projects (
-            id, name, category, color, tags, desc_vn, desc_en, demo_url, github_url, order_index, visible
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *`,
+            id, name, category, color, tags, desc_vn, desc_en, demo_url, github_url, order_index, visible,
+            duration_vn, duration_en, role_vn, role_en, status, type_vn, type_en,
+            achievement_vn, achievement_en, tech_stack, features_vn, features_en, design_details_vn, design_details_en, tool_details_vn, tool_details_en
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27) RETURNING *`,
           [
             b.id,
             b.name,
@@ -689,7 +700,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             b.demo_url || null,
             b.github_url || null,
             b.order_index !== undefined ? Number(b.order_index) : 0,
-            b.visible !== false
+            b.visible !== false,
+            b.duration_vn || null,
+            b.duration_en || null,
+            b.role_vn || null,
+            b.role_en || null,
+            b.status || null,
+            b.type_vn || null,
+            b.type_en || null,
+            b.achievement_vn || null,
+            b.achievement_en || null,
+            b.tech_stack || '[]',
+            b.features_vn || '[]',
+            b.features_en || '[]',
+            b.design_details_vn || '{}',
+            b.design_details_en || '{}',
+            b.tool_details_vn || '{}',
+            b.tool_details_en || '{}'
           ]
         );
         return res.status(201).json(rows[0]);
@@ -722,7 +749,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             demo_url = $7,
             github_url = $8,
             order_index = $9,
-            visible = $10
+            visible = $10,
+            duration_vn = $12,
+            duration_en = $13,
+            role_vn = $14,
+            role_en = $15,
+            status = $16,
+            type_vn = $17,
+            type_en = $18,
+            achievement_vn = $19,
+            achievement_en = $20,
+            tech_stack = $21,
+            features_vn = $22,
+            features_en = $23,
+            design_details_vn = $24,
+            design_details_en = $25,
+            tool_details_vn = $26,
+            tool_details_en = $27
           WHERE id = $11 RETURNING *`,
           [
             b.name || '',
@@ -735,7 +778,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             b.github_url || null,
             b.order_index !== undefined ? Number(b.order_index) : 0,
             b.visible !== false,
-            b.id
+            b.id,
+            b.duration_vn || null,
+            b.duration_en || null,
+            b.role_vn || null,
+            b.role_en || null,
+            b.status || null,
+            b.type_vn || null,
+            b.type_en || null,
+            b.achievement_vn || null,
+            b.achievement_en || null,
+            b.tech_stack || '[]',
+            b.features_vn || '[]',
+            b.features_en || '[]',
+            b.design_details_vn || '{}',
+            b.design_details_en || '{}',
+            b.tool_details_vn || '{}',
+            b.tool_details_en || '{}'
           ]
         );
         if (rows.length === 0) {

@@ -13,6 +13,33 @@ interface Project {
   github_url: string | null;
   order_index: number;
   visible: boolean;
+  duration_vn: string;
+  duration_en: string;
+  role_vn: string;
+  role_en: string;
+  status: string;
+  type_vn: string;
+  type_en: string;
+  achievement_vn: string;
+  achievement_en: string;
+  tech_stack: any[];
+  features_vn: any[];
+  features_en: any[];
+  design_details_vn?: any;
+  design_details_en?: any;
+  tool_details_vn?: any;
+  tool_details_en?: any;
+}
+
+interface TechOption {
+  name: string;
+  icon: string;
+  category: string;
+}
+
+interface TechStackOptionsData {
+  categories: string[];
+  techs: TechOption[];
 }
 
 type SaveStatus = 'idle' | 'saving' | 'ok' | 'error';
@@ -36,6 +63,7 @@ export const ProjectsEditor: React.FC = () => {
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [activeDescTab, setActiveDescTab] = useState<'vn' | 'en'>('vn');
   const [isNewProject, setIsNewProject] = useState(false);
+  const [techOptionsData, setTechOptionsData] = useState<TechStackOptionsData>({ categories: [], techs: [] });
 
   const loadProjects = async () => {
     setLoading(true);
@@ -43,9 +71,21 @@ export const ProjectsEditor: React.FC = () => {
       const data = await api.get<Project[]>('/admin/projects');
       const parsedData = (data ?? []).map(p => ({
         ...p,
-        tags: Array.isArray(p.tags) ? p.tags : []
+        tags: Array.isArray(p.tags) ? p.tags : [],
+        tech_stack: Array.isArray(p.tech_stack) ? p.tech_stack : (typeof p.tech_stack === 'string' ? JSON.parse(p.tech_stack || '[]') : []),
+        features_vn: Array.isArray(p.features_vn) ? p.features_vn : (typeof p.features_vn === 'string' ? JSON.parse(p.features_vn || '[]') : []),
+        features_en: Array.isArray(p.features_en) ? p.features_en : (typeof p.features_en === 'string' ? JSON.parse(p.features_en || '[]') : []),
+        design_details_vn: typeof p.design_details_vn === 'string' ? JSON.parse(p.design_details_vn || '{}') : (p.design_details_vn || {}),
+        design_details_en: typeof p.design_details_en === 'string' ? JSON.parse(p.design_details_en || '{}') : (p.design_details_en || {}),
+        tool_details_vn: typeof p.tool_details_vn === 'string' ? JSON.parse(p.tool_details_vn || '{}') : (p.tool_details_vn || {}),
+        tool_details_en: typeof p.tool_details_en === 'string' ? JSON.parse(p.tool_details_en || '{}') : (p.tool_details_en || {}),
       }));
       setProjects(parsedData);
+      
+      const settingsData = await api.get<any>('/admin/settings');
+      if (settingsData?.seoSettings?.tech_stack_options) {
+        setTechOptionsData(JSON.parse(settingsData.seoSettings.tech_stack_options));
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -70,6 +110,22 @@ export const ProjectsEditor: React.FC = () => {
       github_url: '',
       order_index: projects.length + 1,
       visible: true,
+      duration_vn: '',
+      duration_en: '',
+      role_vn: '',
+      role_en: '',
+      status: 'live',
+      type_vn: '',
+      type_en: '',
+      achievement_vn: '',
+      achievement_en: '',
+      tech_stack: [],
+      features_vn: [],
+      features_en: [],
+      design_details_vn: {},
+      design_details_en: {},
+      tool_details_vn: {},
+      tool_details_en: {},
     };
     setIsNewProject(true);
     setEditingProject(newProj);
@@ -377,6 +433,229 @@ export const ProjectsEditor: React.FC = () => {
                   )}
                 </div>
               </div>
+
+              {/* Advanced Details (Duration, Role, Type, Achievements) */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Advanced Details</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Thời gian (VN)</label>
+                      <input type="text" value={editingProject.duration_vn || ''} onChange={e => setEditingProject({ ...editingProject, duration_vn: e.target.value })} placeholder="VD: 3 tháng · Jan–Mar 2024" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary" />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Duration (EN)</label>
+                      <input type="text" value={editingProject.duration_en || ''} onChange={e => setEditingProject({ ...editingProject, duration_en: e.target.value })} placeholder="e.g. 3 months · Jan–Mar 2024" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary" />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Vai trò (VN)</label>
+                      <input type="text" value={editingProject.role_vn || ''} onChange={e => setEditingProject({ ...editingProject, role_vn: e.target.value })} placeholder="VD: Lập trình viên độc lập" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary" />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Role (EN)</label>
+                      <input type="text" value={editingProject.role_en || ''} onChange={e => setEditingProject({ ...editingProject, role_en: e.target.value })} placeholder="e.g. Solo developer" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary" />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Loại dự án (VN)</label>
+                      <input type="text" value={editingProject.type_vn || ''} onChange={e => setEditingProject({ ...editingProject, type_vn: e.target.value })} placeholder="VD: Dự án cá nhân" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary" />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Type (EN)</label>
+                      <input type="text" value={editingProject.type_en || ''} onChange={e => setEditingProject({ ...editingProject, type_en: e.target.value })} placeholder="e.g. Personal project" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary" />
+                    </div>
+                  </div>
+                  <div className="mt-4">
+                    <label className="text-[11px] font-semibold text-on-surface-variant mb-1 block">Project Status / Trạng thái</label>
+                    <select value={editingProject.status || 'live'} onChange={e => setEditingProject({ ...editingProject, status: e.target.value })} className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary">
+                      <option value="live">Live (Hoạt động)</option>
+                      <option value="in-progress">In progress (Đang phát triển)</option>
+                      <option value="archived">Archived (Lưu trữ)</option>
+                    </select>
+                  </div>
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Thành tựu nổi bật (VN)</label>
+                      <textarea rows={2} value={editingProject.achievement_vn || ''} onChange={e => setEditingProject({ ...editingProject, achievement_vn: e.target.value })} className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary resize-none" />
+                    </div>
+                    <div className="flex flex-col">
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Key Achievement (EN)</label>
+                      <textarea rows={2} value={editingProject.achievement_en || ''} onChange={e => setEditingProject({ ...editingProject, achievement_en: e.target.value })} className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] outline-none focus:border-primary resize-none" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Tech Stack Selector */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Tech Stack Selection</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="flex flex-wrap gap-2 mb-4">
+                    {editingProject.tech_stack?.map((t: any, idx: number) => (
+                      <span key={idx} className="bg-primary/10 text-primary px-2.5 py-1 rounded-lg text-[12px] flex items-center gap-1.5 font-medium border border-primary/20">
+                        <i className={`devicon-${t.icon}-plain`} /> {t.name}
+                        <button onClick={() => {
+                          const newStack = [...editingProject.tech_stack];
+                          newStack.splice(idx, 1);
+                          setEditingProject({ ...editingProject, tech_stack: newStack });
+                        }} className="hover:text-error ml-1 transition-colors leading-none"><span className="material-symbols-outlined text-[14px]">close</span></button>
+                      </span>
+                    ))}
+                    {!editingProject.tech_stack?.length && <span className="text-[12px] text-on-surface-variant/50">Chưa chọn công nghệ nào...</span>}
+                  </div>
+                  <div className="border-t border-outline-variant/40 pt-3">
+                    <label className="text-[11px] font-semibold text-on-surface-variant mb-2 block">Thêm từ thư viện Tech Stack Settings:</label>
+                    <div className="flex flex-wrap gap-2 max-h-40 overflow-y-auto custom-scrollbar">
+                      {techOptionsData.techs.map((tech, i) => {
+                        const isSelected = editingProject.tech_stack?.some((t: any) => t.name === tech.name);
+                        return (
+                          <button
+                            key={i}
+                            disabled={isSelected}
+                            onClick={() => setEditingProject({ ...editingProject, tech_stack: [...(editingProject.tech_stack || []), tech] })}
+                            className={`px-2 py-1 rounded-md text-[11px] font-medium border ${isSelected ? 'bg-surface-container-highest border-outline-variant/30 text-on-surface-variant/40 cursor-not-allowed' : 'bg-surface-container border-outline-variant/50 hover:border-primary hover:text-primary transition-colors'}`}
+                          >
+                            {tech.name}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Dynamic Features Builder */}
+              <div className="space-y-3">
+                <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Key Features / Tính năng chính</h4>
+                <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                  <div className="mb-4">
+                    <label className="text-[12px] font-semibold text-on-surface mb-2 block">Tính năng (VN)</label>
+                    <div className="space-y-2">
+                      {editingProject.features_vn?.map((f: any, i: number) => (
+                        <div key={i} className="flex gap-2">
+                          <input type="text" value={f.title} onChange={e => { const arr = [...editingProject.features_vn]; arr[i].title = e.target.value; setEditingProject({ ...editingProject, features_vn: arr }); }} placeholder="Title" className="w-1/3 bg-surface-container-low border border-outline-variant/50 rounded-lg px-2 py-1 text-[12px] outline-none" />
+                          <input type="text" value={f.desc} onChange={e => { const arr = [...editingProject.features_vn]; arr[i].desc = e.target.value; setEditingProject({ ...editingProject, features_vn: arr }); }} placeholder="Description" className="flex-1 bg-surface-container-low border border-outline-variant/50 rounded-lg px-2 py-1 text-[12px] outline-none" />
+                          <button onClick={() => { const arr = [...editingProject.features_vn]; arr.splice(i, 1); setEditingProject({ ...editingProject, features_vn: arr }); }} className="text-error hover:bg-error/10 p-1 rounded"><span className="material-symbols-outlined text-[16px]">delete</span></button>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={() => setEditingProject({ ...editingProject, features_vn: [...(editingProject.features_vn || []), { title: '', desc: '' }] })} className="mt-2 text-[11px] text-primary hover:underline font-semibold">+ Thêm tính năng (VN)</button>
+                  </div>
+                  <div className="border-t border-outline-variant/40 pt-4">
+                    <label className="text-[12px] font-semibold text-on-surface mb-2 block">Features (EN)</label>
+                    <div className="space-y-2">
+                      {editingProject.features_en?.map((f: any, i: number) => (
+                        <div key={i} className="flex gap-2">
+                          <input type="text" value={f.title} onChange={e => { const arr = [...editingProject.features_en]; arr[i].title = e.target.value; setEditingProject({ ...editingProject, features_en: arr }); }} placeholder="Title" className="w-1/3 bg-surface-container-low border border-outline-variant/50 rounded-lg px-2 py-1 text-[12px] outline-none" />
+                          <input type="text" value={f.desc} onChange={e => { const arr = [...editingProject.features_en]; arr[i].desc = e.target.value; setEditingProject({ ...editingProject, features_en: arr }); }} placeholder="Description" className="flex-1 bg-surface-container-low border border-outline-variant/50 rounded-lg px-2 py-1 text-[12px] outline-none" />
+                          <button onClick={() => { const arr = [...editingProject.features_en]; arr.splice(i, 1); setEditingProject({ ...editingProject, features_en: arr }); }} className="text-error hover:bg-error/10 p-1 rounded"><span className="material-symbols-outlined text-[16px]">delete</span></button>
+                        </div>
+                      ))}
+                    </div>
+                    <button onClick={() => setEditingProject({ ...editingProject, features_en: [...(editingProject.features_en || []), { title: '', desc: '' }] })} className="mt-2 text-[11px] text-primary hover:underline font-semibold">+ Add feature (EN)</button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Design Project Specifics */}
+              {editingProject.category === 'design' && (
+                <div className="space-y-3">
+                  <h4 className="text-[11px] font-bold text-[#9C27B0] px-1 uppercase tracking-wider">Design Details (Brand/UI)</h4>
+                  <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                    <p className="text-[12px] text-on-surface-variant mb-4">
+                      Vì đây là dự án thiết kế, hãy nhập cấu hình JSON chứa thông tin chi tiết:
+                      <br/>
+                      <code className="bg-surface-container text-[10px] p-1 mt-1 rounded block">
+                        {`{ "client": "", "deliverables": [], "tools": [], "beforeAfter": { "beforeImg": "", "afterImg": "", "caption": "" }, "gallery": [{ "url": "", "caption": "", "type": "image|palette|typography" }], "brief": "", "process": [{ "step": "", "desc": "" }], "outcome": "" }`}
+                      </code>
+                    </p>
+                    
+                    <div className="mb-4">
+                      <label className="text-[12px] font-semibold text-on-surface mb-2 block">Design Details (VN) - JSON Format</label>
+                      <textarea 
+                        value={typeof editingProject.design_details_vn === 'string' ? editingProject.design_details_vn : JSON.stringify(editingProject.design_details_vn || {}, null, 2)}
+                        onChange={e => {
+                          try {
+                            const parsed = JSON.parse(e.target.value);
+                            setEditingProject({ ...editingProject, design_details_vn: parsed });
+                          } catch (err) {
+                            // If invalid JSON, just store the string temporarily
+                            setEditingProject({ ...editingProject, design_details_vn: e.target.value });
+                          }
+                        }}
+                        rows={12}
+                        className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2 text-[11px] font-mono outline-none focus:border-primary"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-[12px] font-semibold text-on-surface mb-2 block">Design Details (EN) - JSON Format</label>
+                      <textarea 
+                        value={typeof editingProject.design_details_en === 'string' ? editingProject.design_details_en : JSON.stringify(editingProject.design_details_en || {}, null, 2)}
+                        onChange={e => {
+                          try {
+                            const parsed = JSON.parse(e.target.value);
+                            setEditingProject({ ...editingProject, design_details_en: parsed });
+                          } catch (err) {
+                            setEditingProject({ ...editingProject, design_details_en: e.target.value });
+                          }
+                        }}
+                        rows={12}
+                        className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2 text-[11px] font-mono outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Tool Project Specifics */}
+              {editingProject.category === 'tools' && (
+                <div className="space-y-3">
+                  <h4 className="text-[11px] font-bold text-[#FF9800] px-1 uppercase tracking-wider">Tool Details (CLI / Automation)</h4>
+                  <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4">
+                    <p className="text-[12px] text-on-surface-variant mb-4">
+                      Cấu hình JSON cho công cụ CLI/Automation:
+                      <br/>
+                      <code className="bg-surface-container text-[10px] p-1 mt-1 rounded block">
+                        {`{ "version": "", "platforms": [], "terminalDemo": { "command": "", "output": [{ "type": "success|error|info", "text": "" }] }, "installCmd": "", "usageCmds": [{ "cmd": "", "desc": "" }], "screenshots": [{ "url": "", "caption": "" }], "whyBuilt": "", "howItWorks": [{ "step": "", "desc": "" }] }`}
+                      </code>
+                    </p>
+                    
+                    <div className="mb-4">
+                      <label className="text-[12px] font-semibold text-on-surface mb-2 block">Tool Details (VN) - JSON Format</label>
+                      <textarea 
+                        value={typeof editingProject.tool_details_vn === 'string' ? editingProject.tool_details_vn : JSON.stringify(editingProject.tool_details_vn || {}, null, 2)}
+                        onChange={e => {
+                          try {
+                            const parsed = JSON.parse(e.target.value);
+                            setEditingProject({ ...editingProject, tool_details_vn: parsed });
+                          } catch (err) {
+                            setEditingProject({ ...editingProject, tool_details_vn: e.target.value });
+                          }
+                        }}
+                        rows={12}
+                        className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2 text-[11px] font-mono outline-none focus:border-primary"
+                      />
+                    </div>
+                    
+                    <div>
+                      <label className="text-[12px] font-semibold text-on-surface mb-2 block">Tool Details (EN) - JSON Format</label>
+                      <textarea 
+                        value={typeof editingProject.tool_details_en === 'string' ? editingProject.tool_details_en : JSON.stringify(editingProject.tool_details_en || {}, null, 2)}
+                        onChange={e => {
+                          try {
+                            const parsed = JSON.parse(e.target.value);
+                            setEditingProject({ ...editingProject, tool_details_en: parsed });
+                          } catch (err) {
+                            setEditingProject({ ...editingProject, tool_details_en: e.target.value });
+                          }
+                        }}
+                        rows={12}
+                        className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2 text-[11px] font-mono outline-none focus:border-primary"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
 
               {/* 4. Links */}
               <div className="space-y-3">

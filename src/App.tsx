@@ -15,7 +15,7 @@ import { projectService } from './services/projectService';
 import { chatbotService } from './services/chatbotService';
 
 export const App: React.FC = () => {
-  const [baseSeoTitle, setBaseSeoTitle] = useState('Song Phương');
+  const [, setBaseSeoTitle] = useState('Song Phương');
   const tweaks = useOSStore((state) => state.tweaks);
   const windows = useOSStore((state) => state.windows);
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
