@@ -52,38 +52,6 @@ export const ProjectsApp: React.FC = () => {
     };
   }, [language]);
 
-  // Handle URL routing based on browser History API
-  useEffect(() => {
-    const handlePopState = () => {
-      const match = window.location.pathname.match(/^\/projects\/(.+)$/);
-      if (match && match[1]) {
-        setSelectedProjectId(match[1]);
-      } else {
-        setSelectedProjectId(null);
-      }
-    };
-
-    window.addEventListener('popstate', handlePopState);
-    
-    // Check initial URL on mount
-    const match = window.location.pathname.match(/^\/projects\/(.+)$/);
-    if (match && match[1]) {
-      // Small timeout to let projects load first
-      setTimeout(() => setSelectedProjectId(match[1]), 100);
-    }
-
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  const handleSelectProject = (id: string | number | null) => {
-    setSelectedProjectId(id);
-    if (id) {
-      window.history.pushState({ projectId: id }, '', `/projects/${id}`);
-    } else {
-      window.history.pushState({}, '', '/');
-    }
-  };
-
   const filtered = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return projects.filter((p) => {
@@ -112,21 +80,15 @@ export const ProjectsApp: React.FC = () => {
   if (selectedProjectId) {
     const selectedProject = projects.find(p => String(p.id) === String(selectedProjectId));
     if (selectedProject) {
-      // Update page title dynamically
-      document.title = `${selectedProject.name} · Song Phương Portfolio`;
-      
       if (selectedProject.category === 'design') {
-        return <DesignProjectDetail project={selectedProject} onBack={() => handleSelectProject(null)} />;
+        return <DesignProjectDetail project={selectedProject} onBack={() => setSelectedProjectId(null)} />;
       }
       if (selectedProject.category === 'tools') {
-        return <ToolProjectDetail project={selectedProject} onBack={() => handleSelectProject(null)} />;
+        return <ToolProjectDetail project={selectedProject} onBack={() => setSelectedProjectId(null)} />;
       }
-      return <ProjectDetail project={selectedProject} onBack={() => handleSelectProject(null)} />;
+      return <ProjectDetail project={selectedProject} onBack={() => setSelectedProjectId(null)} />;
     }
   }
-
-  // Restore default title when returning to grid
-  document.title = 'Hoàng Minh Dương';
 
   return (
     <div className="h-full flex flex-col select-text bg-paper">
@@ -200,7 +162,7 @@ export const ProjectsApp: React.FC = () => {
               // ----- DESIGN CARD VARIANT -----
               if (p.category === 'design') {
                 return (
-                  <div key={p.id} onClick={() => handleSelectProject(p.id)} className={cardClass}>
+                  <div key={p.id} onClick={() => setSelectedProjectId(p.id)} className={cardClass}>
                     {/* Visual Preview Area */}
                     <div className={`${isFeatured ? 'w-full md:w-[50%] md:aspect-auto' : 'w-full aspect-[4/3]'} bg-[#111a3a] relative overflow-hidden flex flex-col items-center justify-center p-4 border-b md:border-b-0 md:border-r border-white/10`}>
                       <div className="absolute top-3 right-3 bg-black/40 backdrop-blur-md text-white px-2.5 py-1 text-[10px] font-semibold rounded-full z-10 border border-white/10">
@@ -263,7 +225,7 @@ export const ProjectsApp: React.FC = () => {
               // ----- TOOLS CARD VARIANT -----
               if (p.category === 'tools') {
                 return (
-                  <div key={p.id} onClick={() => handleSelectProject(p.id)} className={cardClass}>
+                  <div key={p.id} onClick={() => setSelectedProjectId(p.id)} className={cardClass}>
                     {/* Terminal Preview Area */}
                     <div className={`${isFeatured ? 'w-full md:w-[50%]' : ''} bg-[#03050a] flex flex-col flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5`}>
                       <div className="px-3 py-2 flex items-center border-b border-white/5 bg-[#03050a]">
@@ -335,7 +297,7 @@ export const ProjectsApp: React.FC = () => {
 
               // ----- DEFAULT / CODE CARD VARIANT -----
               return (
-                <div key={p.id} onClick={() => handleSelectProject(p.id)} className={cardClass}>
+                <div key={p.id} onClick={() => setSelectedProjectId(p.id)} className={cardClass}>
                   {/* Preview area (Terminal style) */}
                   <div className={`${isFeatured ? 'w-full md:w-[50%]' : 'h-[160px]'} bg-[#050914] flex flex-col flex-shrink-0 relative overflow-hidden border-b md:border-b-0 md:border-r border-white/5`}>
                     <div className="px-3 py-2 flex items-center justify-between border-b border-white/5 bg-[#050914]">

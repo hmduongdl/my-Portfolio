@@ -176,14 +176,7 @@ export const ProjectsEditor: React.FC = () => {
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this project?')) return;
     try {
-      await fetch('/api/admin/projects', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        },
-        body: JSON.stringify({ id })
-      });
+      await api.del('/admin/projects', { id });
       setEditingProject(null);
       await loadProjects();
       window.dispatchEvent(new Event('projects-updated'));

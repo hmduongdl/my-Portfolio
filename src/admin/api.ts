@@ -12,7 +12,17 @@ function headers(json = true): HeadersInit {
   return h;
 }
 
+let onUnauthorizedCallback: (() => void) | null = null;
+
 async function handle<T>(res: Response): Promise<T> {
+  if (res.status === 401 && !res.url.includes('/auth/login')) {
+    localStorage.removeItem('admin_token');
+    alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
+    if (onUnauthorizedCallback) {
+      onUnauthorizedCallback();
+    }
+    throw new Error('UNAUTHORIZED');
+  }
   if (!res.ok) {
     const text = await res.text().catch(() => `HTTP ${res.status}`);
     throw new Error(text);
@@ -22,6 +32,10 @@ async function handle<T>(res: Response): Promise<T> {
 }
 
 export const api = {
+  onUnauthorized(cb: () => void): void {
+    onUnauthorizedCallback = cb;
+  },
+
   async login(username: string, password: string): Promise<void> {
     const res = await fetch(`${BASE}/auth/login`, {
       method: 'POST',
@@ -68,3 +82,4 @@ export const api = {
     }));
   },
 };
+

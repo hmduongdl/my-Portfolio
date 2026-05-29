@@ -4,6 +4,9 @@ import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import crypto from 'crypto';
 
+const JWT_SECRET = process.env.JWT_SECRET || 'SongPhuongOS_Super_Secret_Key_2026';
+
+
 // SEO defaults are used only when optional SEO keys are missing in tbl_settings.
 // Public app data endpoints now fail visibly instead of serving static mock data.
 const DEFAULT_SEO = {
@@ -134,11 +137,11 @@ async function syncProfileFromSocialLinks(links: Array<{ platform: string; url?:
 // Helper xác thực (JWT admin bảo mật)
 async function verifyAdminJWT(req: VercelRequest): Promise<boolean> {
   try {
-    const authHeader = req.headers.authorization;
+    const authHeader = (req.headers.authorization || req.headers.Authorization) as string | undefined;
     if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
     const token = authHeader.split(' ')[1];
     
-    const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'default-secret-key-123456');
+    const secret = new TextEncoder().encode(JWT_SECRET);
     const { payload } = await jwtVerify(token, secret);
     return !!payload;
   } catch (err) {
@@ -222,7 +225,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Tài khoản hoặc mật khẩu không chính xác.' });
       }
 
-      const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'default-secret-key-123456');
+      const secret = new TextEncoder().encode(JWT_SECRET);
       const token = await new SignJWT({ id: user.id, username: user.username })
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
@@ -483,6 +486,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // ADMIN ROUTES (CẦN JWT)
   // -------------------------------------------------------------
   if (path.startsWith('/admin')) {
+    const authHeader = (req.headers.authorization || req.headers.Authorization) as string | undefined;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Thiếu token xác thực.' });
+    }
+
     const isAuthorized = await verifyAdminJWT(req);
     if (!isAuthorized) {
       return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Token JWT không hợp lệ hoặc hết hạn.' });

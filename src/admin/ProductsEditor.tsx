@@ -116,14 +116,7 @@ export const ProductsEditor: React.FC = () => {
     if (!window.confirm('Delete this product?')) return;
     showStatus('saving', 'Deleting product...');
     try {
-      await fetch('/api/admin/products', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('admin_token')}`
-        },
-        body: JSON.stringify({ id })
-      });
+      await api.del('/admin/products', { id });
       showStatus('saved', '✓ Deleted successfully');
       await loadProducts();
       window.dispatchEvent(new Event('products-updated'));

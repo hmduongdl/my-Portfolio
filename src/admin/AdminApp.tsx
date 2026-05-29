@@ -11,16 +11,25 @@ import { ChatbotEditor } from './ChatbotEditor';
 type Tab = 'profile' | 'products' | 'projects' | 'settings' | 'ui' | 'chatbot';
 
 export const AdminApp: React.FC = () => {
-  const [loggedIn, setLoggedIn] = useState(api.isLoggedIn());
+  const [isAuthenticated, setIsAuthenticated] = useState(api.isLoggedIn());
   const [tab, setTab] = useState<Tab>('profile');
 
-  if (!loggedIn) {
-    return <LoginPage onLogin={() => setLoggedIn(true)} />;
+  React.useEffect(() => {
+    api.onUnauthorized(() => {
+      setIsAuthenticated(false);
+    });
+    return () => {
+      api.onUnauthorized(() => {});
+    };
+  }, []);
+
+  if (!isAuthenticated) {
+    return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
   }
 
   const handleLogout = () => {
     api.logout();
-    setLoggedIn(false);
+    setIsAuthenticated(false);
   };
 
   const navItems: { id: Tab; label: string; icon: string; iconBg: string; iconColor: string; content: React.ReactNode }[] = [
