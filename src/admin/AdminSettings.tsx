@@ -331,7 +331,7 @@ export const AdminSettings: React.FC = () => {
         <SectionLabel>Đồng bộ dữ liệu liên hệ</SectionLabel>
         <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm">
           <div className="p-4 space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
               <div className="rounded-xl bg-surface-container-low/60 border border-outline-variant/30 p-3 min-w-0">
                 <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant/60">Gmail app</p>
                 <p className="mt-1 text-[12px] text-on-surface truncate">{mailtoPreview || 'Chưa có email'}</p>

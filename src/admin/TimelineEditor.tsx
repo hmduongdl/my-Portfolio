@@ -488,7 +488,7 @@ export const TimelineEditor: React.FC = () => {
                   <span className="material-symbols-outlined text-[14px]">info</span>
                   Thông tin cơ bản
                 </h4>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <FormField label="Vai trò (VN) *">
                     <input
                       value={editingItem.role_vn}

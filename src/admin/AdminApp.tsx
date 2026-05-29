@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { api } from './api';
 import { LoginPage } from './LoginPage';
 import { SettingsEditor } from './SettingsEditor';
@@ -7,7 +7,7 @@ import { ChatbotEditor } from './ChatbotEditor';
 import { DashboardView } from './components/DashboardView';
 import { ProfileView } from './components/ProfileView';
 import { ContentView } from './components/ContentView';
-import { LayoutDashboard, UserCircle, FolderDot, MessageSquare, Palette, Settings, LogOut, ChevronLeft, Loader2 } from 'lucide-react';
+import { LayoutDashboard, UserCircle, FolderDot, MessageSquare, Palette, Settings, LogOut, ChevronLeft, Loader2, Menu, X } from 'lucide-react';
 
 type Tab = 'dashboard' | 'profile' | 'content' | 'chatbot' | 'ui' | 'settings';
 
@@ -16,8 +16,9 @@ export const AdminApp: React.FC = () => {
   const [tab, setTab] = useState<Tab>('dashboard');
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-  React.useEffect(() => {
+  useEffect(() => {
     api.onUnauthorized(() => {
       setIsAuthenticated(false);
     });
@@ -84,17 +85,24 @@ export const AdminApp: React.FC = () => {
   return (
     <div className="admin-dark h-screen w-screen flex items-center justify-center bg-zinc-950 text-white font-['Inter'] overflow-hidden relative selection:bg-blue-500/30">
       
-      {/* 1100x680 Window */}
-      <div className="w-[1100px] h-[680px] bg-zinc-900 rounded-2xl shadow-2xl border border-white/10 flex flex-col overflow-hidden relative">
+      {/* Container Window */}
+      <div className="w-full h-full md:w-[1100px] md:h-[680px] bg-zinc-900 md:rounded-2xl shadow-2xl border-none md:border border-white/10 flex flex-col overflow-hidden relative">
         
         {/* NEW FLAT HEADER */}
         <header className="h-12 border-b border-white/5 px-4 flex items-center justify-between bg-zinc-900 shrink-0 z-30">
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-zinc-400 tracking-wider">CẤU HÌNH HỆ THỐNG PORTFOLIO</span>
+            <button 
+              className="md:hidden p-1 -ml-1 text-zinc-400 hover:text-white"
+              onClick={() => setIsSidebarOpen(true)}
+            >
+              <Menu size={20} />
+            </button>
+            <span className="text-[10px] md:text-xs font-bold text-zinc-400 tracking-wider hidden sm:inline-block">CẤU HÌNH HỆ THỐNG PORTFOLIO</span>
+            <span className="text-[10px] md:text-xs font-bold text-zinc-400 tracking-wider sm:hidden">ADMIN</span>
             {isDirty && (
               <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20">
                 <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
-                <span className="text-[10px] font-semibold text-orange-400/80">Chưa lưu thay đổi</span>
+                <span className="text-[10px] font-semibold text-orange-400/80 hidden sm:inline-block">Chưa lưu thay đổi</span>
               </div>
             )}
           </div>
@@ -110,9 +118,22 @@ export const AdminApp: React.FC = () => {
         </header>
 
         <div className="flex-1 flex overflow-hidden relative">
-          {/* Sidebar */}
-          <aside className="bg-zinc-900 border-r border-white/5 w-64 p-5 flex flex-col justify-between shrink-0 z-10">
+          
+          {/* Mobile Overlay */}
+          <div 
+            className={`fixed inset-0 bg-black/60 z-40 md:hidden transition-opacity duration-300 ${isSidebarOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`} 
+            onClick={() => setIsSidebarOpen(false)}
+          />
+
+          {/* Sidebar (Drawer on mobile) */}
+          <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-zinc-900 border-r border-white/5 p-5 flex flex-col justify-between transform transition-transform duration-300 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:relative md:translate-x-0 shrink-0 shadow-2xl md:shadow-none`}>
             <div className="flex flex-col">
+              <div className="flex items-center justify-between md:hidden mb-4">
+                <span className="text-xs font-bold text-zinc-400 tracking-wider">MENU</span>
+                <button onClick={() => setIsSidebarOpen(false)} className="text-zinc-400 hover:text-white p-1">
+                  <X size={20} />
+                </button>
+              </div>
               {/* Navigation Groups */}
             <nav className="flex flex-col gap-1 overflow-y-auto pr-2 custom-scrollbar">
               {navGroups.map((group, gIdx) => (
@@ -127,7 +148,10 @@ export const AdminApp: React.FC = () => {
                       return (
                         <button
                           key={item.id}
-                          onClick={() => setTab(item.id as Tab)}
+                          onClick={() => {
+                            setTab(item.id as Tab);
+                            setIsSidebarOpen(false);
+                          }}
                           className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all text-left w-full ${
                             isActive 
                               ? 'bg-blue-500/10 text-blue-400 font-medium' 
@@ -167,7 +191,7 @@ export const AdminApp: React.FC = () => {
         </main>
         
         {/* GLOBAL SAVE BAR */}
-        <div className={`absolute bottom-0 right-0 left-64 z-20 bg-zinc-900/95 backdrop-blur-md border-t border-white/5 py-3.5 px-6 flex items-center justify-end space-x-3 transition-transform duration-300 ${isDirty ? 'translate-y-0' : 'translate-y-full'}`}>
+        <div className={`absolute bottom-0 right-0 left-0 md:left-64 z-20 bg-zinc-900/95 backdrop-blur-md border-t border-white/5 py-3.5 px-4 md:px-6 flex items-center justify-end space-x-3 transition-transform duration-300 pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-3.5 ${isDirty ? 'translate-y-0' : 'translate-y-full'}`}>
           <button 
             onClick={() => {
               setIsDirty(false);
