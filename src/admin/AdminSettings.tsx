@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api';
 import { TimelineEditor } from './TimelineEditor';
-import { ImageWithFallback } from '../components/desktop/ImageWithFallback';
+import { useOSStore } from '../store/useOSStore';
+import { ProfileView } from './components/ProfileView';
+import { SEOSettingsView } from './components/SEOSettingsView';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -99,14 +101,6 @@ const InlineInput: React.FC<React.InputHTMLAttributes<HTMLInputElement>> = (prop
   />
 );
 
-/** Inline textarea for bio fields */
-const InlineTextarea: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement>> = (props) => (
-  <textarea
-    {...props}
-    className="w-full bg-surface-container-low/50 border border-outline-variant/30 rounded-lg p-2.5 text-[13px] text-on-surface focus:ring-1 focus:ring-primary focus:border-primary/50 outline-none resize-none placeholder:text-on-surface-variant/30 transition-all"
-  />
-);
-
 // ────────────────────────────────────────────────────────────────────────────
 // Toast notification (Apple-style pill)
 // ────────────────────────────────────────────────────────────────────────────
@@ -127,10 +121,17 @@ const Toast: React.FC<ToastProps> = ({ message, type }) => (
   </div>
 );
 
+const reloadRuntimeProfileState = async () => {
+  window.dispatchEvent(new Event('profile-updated'));
+  window.dispatchEvent(new Event('social-links-updated'));
+  await useOSStore.getState().fetchSocials();
+};
+
 // ────────────────────────────────────────────────────────────────────────────
 // Main Component
 // ────────────────────────────────────────────────────────────────────────────
 export const AdminSettings: React.FC = () => {
+  const [activeTab, setActiveTab] = useState<'profile' | 'seo'>('profile');
   const [data, setData] = useState<ProfileData>(EMPTY);
   const [original, setOriginal] = useState<ProfileData>(EMPTY);
   const [loading, setLoading] = useState(true);
@@ -200,8 +201,7 @@ export const AdminSettings: React.FC = () => {
     try {
       await api.put('/admin/profile', data);
       setOriginal(data);
-      window.dispatchEvent(new Event('profile-updated'));
-      window.dispatchEvent(new Event('social-links-updated'));
+      await reloadRuntimeProfileState();
       await runAudit();
       showToast('Đã đồng bộ thông tin liên hệ', 'ok');
     } catch (e: any) {
@@ -230,8 +230,7 @@ export const AdminSettings: React.FC = () => {
       setOriginal(data);
       setStatus('ok');
       showToast('Đã cập nhật hồ sơ và đồng bộ liên hệ', 'ok');
-      window.dispatchEvent(new Event('profile-updated'));
-      window.dispatchEvent(new Event('social-links-updated'));
+      await reloadRuntimeProfileState();
       void runAudit();
       setTimeout(() => setStatus('idle'), 2000);
     } catch (e: any) {
@@ -261,132 +260,35 @@ export const AdminSettings: React.FC = () => {
       {/* Toast */}
       {toast && <Toast {...toast} />}
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        
-        {/* LEFT COLUMN */}
-        <div className="space-y-6">
-          {/* ── Avatar & Name Card ─────────────────────────────────── */}
-          <section className="space-y-1.5">
-        <SectionLabel>Hồ sơ cá nhân</SectionLabel>
-        <SettingsCard>
-          {/* Avatar preview row */}
-          <div className="flex items-center gap-4 px-4 py-4">
-            <div className="relative shrink-0">
-              <div className="w-16 h-16 rounded-2xl bg-primary-container overflow-hidden ring-2 ring-outline-variant/30 shadow-sm">
-                <ImageWithFallback
-                  src={data.avatar_url}
-                  fallbackText={data.name}
-                  alt="Avatar"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-sm">
-                <span className="material-symbols-outlined text-on-primary text-[12px]" style={{ fontVariationSettings: "'FILL' 1" }}>edit</span>
-              </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-[15px] font-bold text-on-surface leading-snug truncate">{data.name || 'Chưa đặt tên'}</p>
-              <p className="text-[12px] text-on-surface-variant mt-0.5 truncate">{data.title_vn || data.title_en || 'Chưa có chức danh'}</p>
-              <p className="text-[11px] text-primary mt-1 truncate">{data.email || 'Chưa có email'}</p>
-            </div>
-          </div>
-
-          <Divider />
-
-          {/* Avatar URL */}
-          <SettingsRow icon="photo_camera" iconBg="bg-[#007AFF]" label="Avatar URL">
-            <InlineInput
-              value={data.avatar_url}
-              onChange={e => set('avatar_url')(e.target.value)}
-              placeholder="/my-avatar.jpg hoặc https://..."
-            />
-          </SettingsRow>
-
-          {/* Display Name */}
-          <SettingsRow icon="badge" iconBg="bg-[#34C759]" label="Tên hiển thị">
-            <InlineInput
-              value={data.name}
-              onChange={e => set('name')(e.target.value)}
-              placeholder="Hoàng Minh Dương"
-            />
-          </SettingsRow>
-
-          {/* Email */}
-          <SettingsRow icon="mail" iconBg="bg-[#FF3B30]" label="Email">
-            <InlineInput
-              type="email"
-              value={data.email}
-              onChange={e => set('email')(e.target.value)}
-              placeholder="example@gmail.com"
-            />
-          </SettingsRow>
-
-          {/* Phone */}
-          <SettingsRow icon="call" iconBg="bg-[#34C759]" label="Số điện thoại" last>
-            <InlineInput
-              value={data.phone}
-              onChange={e => set('phone')(e.target.value)}
-              placeholder="tel:+84xxx"
-            />
-          </SettingsRow>
-        </SettingsCard>
-      </section>
-
-      {/* ── Job Title ──────────────────────────────────────────── */}
-      <section className="space-y-1.5">
-        <SectionLabel>Chức danh nghề nghiệp</SectionLabel>
-        <SettingsCard>
-          <SettingsRow icon="work" iconBg="bg-[#FF9500]" label="Chức danh (Tiếng Việt)">
-            <InlineInput
-              value={data.title_vn}
-              onChange={e => set('title_vn')(e.target.value)}
-              placeholder="Nhà phát triển Web · Sinh viên CNTT"
-            />
-          </SettingsRow>
-          <SettingsRow icon="translate" iconBg="bg-[#5856D6]" label="Job Title (English)" last>
-            <InlineInput
-              value={data.title_en}
-              onChange={e => set('title_en')(e.target.value)}
-              placeholder="Web Developer · IT Student"
-            />
-          </SettingsRow>
-        </SettingsCard>
-      </section>
+      <div className="mb-6 inline-flex rounded-2xl border border-outline-variant/40 bg-surface-container-lowest p-1 shadow-sm">
+        <button
+          type="button"
+          onClick={() => setActiveTab('profile')}
+          className={`px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ${
+            activeTab === 'profile' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          }`}
+        >
+          Hồ sơ
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('seo')}
+          className={`px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ${
+            activeTab === 'seo' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          }`}
+        >
+          SEO
+        </button>
       </div>
 
-      {/* RIGHT COLUMN */}
-      <div className="space-y-6">
-          {/* ── Bio ────────────────────────────────────────────────── */}
-          <section className="space-y-1.5">
-        <SectionLabel>Giới thiệu bản thân</SectionLabel>
-        <div className="space-y-3">
-          <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm p-4 space-y-3">
-            <div>
-              <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                <span className="text-[16px]">🇻🇳</span> Bio (Tiếng Việt)
-              </label>
-              <InlineTextarea
-                value={data.bio_vn}
-                onChange={e => set('bio_vn')(e.target.value)}
-                rows={3}
-                placeholder="Giới thiệu ngắn gọn về bản thân bằng tiếng Việt..."
-              />
-            </div>
-            <div className="border-t border-outline-variant/20 pt-3">
-              <label className="text-[11px] font-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-1.5 mb-2">
-                <span className="text-[16px]">🇺🇸</span> Bio (English)
-              </label>
-              <InlineTextarea
-                value={data.bio_en}
-                onChange={e => set('bio_en')(e.target.value)}
-                rows={3}
-                placeholder="A brief introduction about yourself in English..."
-              />
-            </div>
-          </div>
-        </div>
-      </section>
+      {activeTab === 'seo' ? (
+        <SEOSettingsView />
+      ) : (
+        <>
+      <ProfileView initialData={data} />
 
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="space-y-6">
       {/* ── Social & Links ─────────────────────────────────────── */}
       <section className="space-y-1.5">
         <SectionLabel>Mạng xã hội &amp; Liên kết</SectionLabel>
@@ -549,6 +451,8 @@ export const AdminSettings: React.FC = () => {
           <TimelineEditor />
         </div>
       </section>
+        </>
+      )}
 
     </div>
   );

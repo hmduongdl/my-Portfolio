@@ -85,19 +85,50 @@ function toZaloUrl(zaloUrl: string, phone: string) {
   return cleanPhone ? `https://zalo.me/${cleanPhone}` : '';
 }
 
-function profileContactLinks(profile: Record<string, any>) {
+function readBoolean(value: unknown): boolean | undefined {
+  if (typeof value === 'boolean') return value;
+  if (typeof value === 'string') {
+    const normalized = value.trim().toLowerCase();
+    if (['true', '1', 'yes', 'on'].includes(normalized)) return true;
+    if (['false', '0', 'no', 'off'].includes(normalized)) return false;
+  }
+  return undefined;
+}
+
+function socialVisible(profile: Record<string, any>, platform: string): boolean | undefined {
+  const columnMap: Record<string, string[]> = {
+    github: ['github_visible', 'githubVisible'],
+    facebook: ['facebook_visible', 'facebookVisible'],
+    gmail: ['email_visible', 'emailVisible', 'gmail_visible', 'gmailVisible'],
+    phone: ['phone_visible', 'phoneVisible'],
+    zalo: ['zalo_visible', 'zaloVisible'],
+    songphuong: ['songphuong_visible', 'songphuongVisible', 'song_phuong_visible', 'songPhuongVisible'],
+  };
+
+  for (const key of columnMap[platform] || []) {
+    const visible = readBoolean(profile[key]);
+    if (visible !== undefined) return visible;
+  }
+  return undefined;
+}
+
+function profileContactLinks(profile: Record<string, any>, visibility: Record<string, boolean> = {}) {
   return [
-    { platform: 'github', label: 'GitHub', url: profile.github_url || profile.githubUrl || '', visible: true, order_index: 0 },
-    { platform: 'facebook', label: 'Facebook', url: profile.facebook_url || profile.facebookUrl || '', visible: true, order_index: 1 },
-    { platform: 'gmail', label: 'Gmail', url: toMailto(profile.email || ''), visible: true, order_index: 2 },
-    { platform: 'phone', label: 'Phone', url: toTel(profile.phone || ''), visible: true, order_index: 3 },
-    { platform: 'zalo', label: 'Zalo', url: toZaloUrl(profile.zalo_url || profile.zaloUrl || '', profile.phone || ''), visible: true, order_index: 4 },
-    { platform: 'songphuong', label: 'Song Phương Website', url: profile.songphuong_url || profile.songphuongUrl || '', visible: true, order_index: 5 }
+    { platform: 'github', label: 'GitHub', url: profile.github_url || profile.githubUrl || '', visible: visibility.github ?? socialVisible(profile, 'github') ?? true, order_index: 0 },
+    { platform: 'facebook', label: 'Facebook', url: profile.facebook_url || profile.facebookUrl || '', visible: visibility.facebook ?? socialVisible(profile, 'facebook') ?? true, order_index: 1 },
+    { platform: 'gmail', label: 'Gmail', url: toMailto(profile.email || ''), visible: visibility.gmail ?? socialVisible(profile, 'gmail') ?? true, order_index: 2 },
+    { platform: 'phone', label: 'Phone', url: toTel(profile.phone || ''), visible: visibility.phone ?? socialVisible(profile, 'phone') ?? true, order_index: 3 },
+    { platform: 'zalo', label: 'Zalo', url: toZaloUrl(profile.zalo_url || profile.zaloUrl || '', profile.phone || ''), visible: visibility.zalo ?? socialVisible(profile, 'zalo') ?? true, order_index: 4 },
+    { platform: 'songphuong', label: 'Song Phương Website', url: profile.songphuong_url || profile.songphuongUrl || '', visible: visibility.songphuong ?? socialVisible(profile, 'songphuong') ?? true, order_index: 5 }
   ];
 }
 
-async function syncSocialLinksFromProfile(profile: Record<string, any>) {
-  for (const link of profileContactLinks(profile)) {
+async function syncSocialLinksFromProfile(
+  profile: Record<string, any>,
+  visibility: Record<string, boolean> = {},
+  updateVisibility = false
+) {
+  for (const link of profileContactLinks(profile, visibility)) {
     await runQuery(
       `INSERT INTO tbl_social_links (platform, label, url, visible, order_index, updated_at)
        VALUES ($1, $2, $3, $4, $5, NOW())
@@ -105,10 +136,192 @@ async function syncSocialLinksFromProfile(profile: Record<string, any>) {
          url = EXCLUDED.url,
          label = EXCLUDED.label,
          order_index = EXCLUDED.order_index,
+         visible = CASE WHEN $6 THEN EXCLUDED.visible ELSE tbl_social_links.visible END,
          updated_at = NOW()`,
-      [link.platform, link.label, link.url, link.visible, link.order_index]
+      [link.platform, link.label, link.url, link.visible, link.order_index, updateVisibility]
     );
   }
+}
+
+function normalizeSocialVisibility(body: Record<string, any>): Record<string, boolean> {
+  const source = body.social_visibility || body.socialVisibility || {};
+  const pairs: Array<[string, unknown]> = [
+    ['github', source.github ?? body.github_visible ?? body.githubVisible],
+    ['facebook', source.facebook ?? body.facebook_visible ?? body.facebookVisible],
+    ['gmail', source.gmail ?? source.email ?? body.email_visible ?? body.emailVisible ?? body.gmail_visible ?? body.gmailVisible],
+    ['phone', source.phone ?? body.phone_visible ?? body.phoneVisible],
+    ['zalo', source.zalo ?? body.zalo_visible ?? body.zaloVisible],
+    ['songphuong', source.songphuong ?? source.songPhuong ?? body.songphuong_visible ?? body.songphuongVisible ?? body.song_phuong_visible ?? body.songPhuongVisible],
+  ];
+
+  return pairs.reduce<Record<string, boolean>>((acc, [platform, value]) => {
+    const visible = readBoolean(value);
+    if (visible !== undefined) acc[platform] = visible;
+    return acc;
+  }, {});
+}
+
+function normalizeJsonbStringArray(value: unknown): string {
+  if (Array.isArray(value)) {
+    return JSON.stringify(value.map((item) => String(item)).filter((item) => item.trim() !== ''));
+  }
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (!trimmed) return '[]';
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed)) {
+        return JSON.stringify(parsed.map((item) => String(item)).filter((item) => item.trim() !== ''));
+      }
+    } catch {
+      return JSON.stringify([trimmed]);
+    }
+    return JSON.stringify([trimmed]);
+  }
+  if (value === null || value === undefined) return '[]';
+  return JSON.stringify([String(value)]);
+}
+
+type AdminProjectType = 'code' | 'design' | 'tool';
+
+function normalizeProjectType(value: unknown, category: unknown): AdminProjectType {
+  const normalizedValue = String(value ?? '').trim().toLowerCase();
+  if (['code', 'coding', 'web', 'lap-trinh', 'lập trình'].includes(normalizedValue)) return 'code';
+  if (['design', 'thiet-ke', 'thiết kế'].includes(normalizedValue)) return 'design';
+  if (['tool', 'tools', 'cong-cu', 'công cụ'].includes(normalizedValue)) return 'tool';
+
+  const normalizedCategory = String(category ?? '').trim().toLowerCase();
+  if (normalizedCategory === 'design') return 'design';
+  if (normalizedCategory === 'tools' || normalizedCategory === 'tool') return 'tool';
+  return 'code';
+}
+
+function categoryFromProjectType(projectType: AdminProjectType): string {
+  if (projectType === 'design') return 'design';
+  if (projectType === 'tool') return 'tools';
+  return 'web';
+}
+
+function normalizeJsonObject(value: unknown): Record<string, any> {
+  if (value && typeof value === 'object' && !Array.isArray(value)) return value as Record<string, any>;
+  if (typeof value === 'string') {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) return parsed;
+    } catch {
+      return {};
+    }
+  }
+  return {};
+}
+
+const TECH_STACK_CATEGORIES = ['Frontend', 'Backend', 'Design', 'Tools'] as const;
+
+function normalizeTechStackCategory(value: unknown): string {
+  const normalized = String(value ?? '').trim().toLowerCase();
+  const match = TECH_STACK_CATEGORIES.find((category) => category.toLowerCase() === normalized);
+  return match || 'Frontend';
+}
+
+function normalizeLegacyTechStack(value: unknown): Array<{ name: string; category: string }> {
+  const parsed = normalizeJsonObject(value);
+  const source = Array.isArray(parsed.techs) ? parsed.techs : Array.isArray(value) ? value : [];
+  return source
+    .map((item: any) => ({
+      name: String(item?.name ?? '').trim(),
+      category: normalizeTechStackCategory(item?.category)
+    }))
+    .filter((item) => item.name);
+}
+
+async function ensureTechStackTable() {
+  await runQuery(`
+    CREATE TABLE IF NOT EXISTS tbl_tech_stack (
+      id          SERIAL PRIMARY KEY,
+      name        TEXT        NOT NULL,
+      category    VARCHAR(30) NOT NULL DEFAULT 'Frontend',
+      order_index INT         DEFAULT 0,
+      created_at  TIMESTAMPTZ DEFAULT NOW(),
+      updated_at  TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+
+  const countRows = await runQuery('SELECT COUNT(*)::int AS count FROM tbl_tech_stack');
+  if ((countRows[0]?.count ?? 0) > 0) return;
+
+  await runQuery(`
+    CREATE TABLE IF NOT EXISTS tbl_settings (
+      key         VARCHAR(100) PRIMARY KEY,
+      value       TEXT         NOT NULL,
+      updated_at  TIMESTAMPTZ  DEFAULT NOW()
+    )
+  `);
+
+  const legacyRows = await runQuery("SELECT value FROM tbl_settings WHERE key = 'tech_stack_options' LIMIT 1");
+  const legacyTechs = normalizeLegacyTechStack(legacyRows[0]?.value);
+  for (const [index, tech] of legacyTechs.entries()) {
+    await runQuery(
+      `INSERT INTO tbl_tech_stack (name, category, order_index, updated_at)
+       VALUES ($1, $2, $3, NOW())`,
+      [tech.name, tech.category, index]
+    );
+  }
+}
+
+function normalizeProjectPayload(body: Record<string, any>) {
+  const projectType = normalizeProjectType(body.project_type ?? body.projectType, body.category);
+  const category = categoryFromProjectType(projectType);
+  const parseTags = (tags: any): string[] => {
+    if (Array.isArray(tags)) return tags.map((tag) => String(tag).trim()).filter(Boolean);
+    if (typeof tags === 'string') return tags.split(',').map((tag: string) => tag.trim()).filter(Boolean);
+    return [];
+  };
+
+  const designDetailsVn = normalizeJsonObject(body.design_details_vn);
+  const designDetailsEn = normalizeJsonObject(body.design_details_en);
+  const toolDetailsVn = normalizeJsonObject(body.tool_details_vn);
+  const toolDetailsEn = normalizeJsonObject(body.tool_details_en);
+
+  if (projectType === 'design') {
+    const figmaUrl = String(body.figma_url ?? body.figmaUrl ?? designDetailsVn.figmaUrl ?? designDetailsVn.figma_url ?? '').trim();
+    const dribbbleUrl = String(body.dribbble_url ?? body.dribbbleUrl ?? designDetailsVn.dribbbleUrl ?? designDetailsVn.dribbble_url ?? '').trim();
+    Object.assign(designDetailsVn, { figmaUrl, dribbbleUrl });
+    Object.assign(designDetailsEn, { figmaUrl, dribbbleUrl });
+  }
+
+  if (projectType === 'tool') {
+    const platformsSource = body.platforms ?? body.compatible_environments ?? body.compatibleEnvironments ?? toolDetailsVn.platforms;
+    const platforms = Array.isArray(platformsSource)
+      ? platformsSource.map((item) => String(item).trim()).filter(Boolean)
+      : String(platformsSource ?? '').split(',').map((item) => item.trim()).filter(Boolean);
+    const installCmd = String(body.install_cmd ?? body.installCmd ?? toolDetailsVn.installCmd ?? toolDetailsVn.install_cmd ?? '').trim();
+    Object.assign(toolDetailsVn, { installCmd, platforms });
+    Object.assign(toolDetailsEn, { installCmd, platforms });
+  }
+
+  return {
+    projectType,
+    category,
+    tags: projectType === 'code' ? parseTags(body.tags) : [],
+    demoUrl: projectType === 'code' ? (body.demo_url || body.demoUrl || null) : null,
+    githubUrl: projectType === 'code' ? (body.github_url || body.githubUrl || null) : null,
+    techStack: projectType === 'code' ? (body.tech_stack || body.techStack || '[]') : '[]',
+    designDetailsVn: projectType === 'design' ? designDetailsVn : {},
+    designDetailsEn: projectType === 'design' ? designDetailsEn : {},
+    toolDetailsVn: projectType === 'tool' ? toolDetailsVn : {},
+    toolDetailsEn: projectType === 'tool' ? toolDetailsEn : {}
+  };
+}
+
+async function tableColumns(tableName: string): Promise<Set<string>> {
+  const rows = await runQuery(
+    `SELECT column_name
+       FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = $1`,
+    [tableName]
+  );
+  return new Set(rows.map((row: any) => row.column_name));
 }
 
 async function syncProfileFromSocialLinks(links: Array<{ platform: string; url?: string }>) {
@@ -500,6 +713,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'PUT' && path === '/admin/profile') {
       const b = req.body ?? {};
       try {
+        const socialVisibility = normalizeSocialVisibility(b);
         const nextProfile = {
           name: b.name ?? '',
           title_en: b.title_en ?? b.titleEn ?? '',
@@ -512,42 +726,53 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           github_url: b.github_url ?? b.githubUrl ?? b.github ?? '',
           facebook_url: b.facebook_url ?? b.facebookUrl ?? b.facebook ?? '',
           zalo_url: b.zalo_url ?? b.zaloUrl ?? b.zalo ?? '',
-          songphuong_url: b.songphuong_url ?? b.songPhuongUrl ?? ''
+          songphuong_url: b.songphuong_url ?? b.songphuongUrl ?? b.songPhuongUrl ?? '',
+          github_visible: socialVisibility.github,
+          facebook_visible: socialVisibility.facebook,
+          email_visible: socialVisibility.gmail,
+          phone_visible: socialVisibility.phone,
+          zalo_visible: socialVisibility.zalo,
+          songphuong_visible: socialVisibility.songphuong
         };
 
+        const columns = await tableColumns('tbl_profile');
+        const profilePatch: Record<string, any> = {
+          name: nextProfile.name,
+          title_en: nextProfile.title_en,
+          title_vn: nextProfile.title_vn,
+          bio_en: nextProfile.bio_en,
+          bio_vn: nextProfile.bio_vn,
+          avatar_url: nextProfile.avatar_url,
+          email: nextProfile.email,
+          phone: nextProfile.phone,
+          github_url: nextProfile.github_url,
+          facebook_url: nextProfile.facebook_url,
+          zalo_url: nextProfile.zalo_url,
+          songphuong_url: nextProfile.songphuong_url,
+          github_visible: nextProfile.github_visible,
+          facebook_visible: nextProfile.facebook_visible,
+          email_visible: nextProfile.email_visible,
+          phone_visible: nextProfile.phone_visible,
+          zalo_visible: nextProfile.zalo_visible,
+          songphuong_visible: nextProfile.songphuong_visible,
+        };
+        const keys = Object.keys(profilePatch).filter((key) => columns.has(key) && profilePatch[key] !== undefined);
+        const assignments = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
+        const values = keys.map((key) => profilePatch[key]);
+        values.push(1);
+
         await runQuery(
-          `UPDATE tbl_profile SET 
-            name = $1,
-            title_en = $2,
-            title_vn = $3,
-            bio_en = $4,
-            bio_vn = $5,
-            avatar_url = $6,
-            email = $7,
-            phone = $8,
-            github_url = $9,
-            facebook_url = $10,
-            zalo_url = $11,
-            songphuong_url = $12,
-            updated_at = NOW() 
-           WHERE id = 1`,
-          [
-            nextProfile.name,
-            nextProfile.title_en,
-            nextProfile.title_vn,
-            nextProfile.bio_en,
-            nextProfile.bio_vn,
-            nextProfile.avatar_url,
-            nextProfile.email,
-            nextProfile.phone,
-            nextProfile.github_url,
-            nextProfile.facebook_url,
-            nextProfile.zalo_url,
-            nextProfile.songphuong_url
-          ]
+          `UPDATE tbl_profile SET ${assignments}, updated_at = NOW() WHERE id = $${values.length}`,
+          values
         );
-        await syncSocialLinksFromProfile(nextProfile);
-        return res.status(200).json({ success: true, message: 'Cập nhật Profile và đồng bộ liên hệ thành công.' });
+        await syncSocialLinksFromProfile(nextProfile, socialVisibility, Object.keys(socialVisibility).length > 0);
+        const [updatedProfile] = await runQuery('SELECT * FROM tbl_profile WHERE id = 1');
+        return res.status(200).json({
+          success: true,
+          profile: updatedProfile,
+          socialVisibility,
+          message: 'Cập nhật Profile và đồng bộ liên hệ thành công.'
+        });
       } catch (e: any) {
         return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
       }
@@ -673,7 +898,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === 'GET' && path === '/admin/projects') {
       try {
         const rows = await runQuery('SELECT * FROM tbl_projects ORDER BY order_index ASC, id DESC');
-        return res.status(200).json(rows);
+        return res.status(200).json(rows.map((row: any) => ({
+          ...row,
+          project_type: normalizeProjectType(row.project_type, row.category)
+        })));
       } catch (e: any) {
         return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
       }
@@ -681,14 +909,10 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'POST' && path === '/admin/projects') {
       const b = req.body ?? {};
-      if (!b.id || !b.name || !b.category) {
-        return res.status(400).json({ error: 'BAD_REQUEST', message: 'ID, Name, and Category are required' });
+      if (!b.id || !b.name) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'ID and Name are required' });
       }
-      const parseTags = (tags: any): string[] => {
-        if (Array.isArray(tags)) return tags;
-        if (typeof tags === 'string') return tags.split(',').map((s: string) => s.trim()).filter(Boolean);
-        return [];
-      };
+      const projectPayload = normalizeProjectPayload(b);
 
       try {
         const rows = await runQuery(
@@ -700,13 +924,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           [
             b.id,
             b.name,
-            b.category,
+            projectPayload.category,
             b.color || '#2563EB',
-            parseTags(b.tags),
+            projectPayload.tags,
             b.desc_vn || '',
             b.desc_en || '',
-            b.demo_url || null,
-            b.github_url || null,
+            projectPayload.demoUrl,
+            projectPayload.githubUrl,
             b.order_index !== undefined ? Number(b.order_index) : 0,
             b.visible !== false,
             b.duration_vn || null,
@@ -718,13 +942,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             b.type_en || null,
             b.achievement_vn || null,
             b.achievement_en || null,
-            b.tech_stack || '[]',
+            projectPayload.techStack,
             b.features_vn || '[]',
             b.features_en || '[]',
-            b.design_details_vn || '{}',
-            b.design_details_en || '{}',
-            b.tool_details_vn || '{}',
-            b.tool_details_en || '{}'
+            projectPayload.designDetailsVn,
+            projectPayload.designDetailsEn,
+            projectPayload.toolDetailsVn,
+            projectPayload.toolDetailsEn
           ]
         );
         return res.status(201).json(rows[0]);
@@ -738,12 +962,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!b.id) {
         return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing project ID' });
       }
-
-      const parseTags = (tags: any): string[] => {
-        if (Array.isArray(tags)) return tags;
-        if (typeof tags === 'string') return tags.split(',').map((s: string) => s.trim()).filter(Boolean);
-        return [];
-      };
+      const projectPayload = normalizeProjectPayload(b);
 
       try {
         const rows = await runQuery(
@@ -777,13 +996,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           WHERE id = $11 RETURNING *`,
           [
             b.name || '',
-            b.category || '',
+            projectPayload.category,
             b.color || '#2563EB',
-            parseTags(b.tags),
+            projectPayload.tags,
             b.desc_vn || '',
             b.desc_en || '',
-            b.demo_url || null,
-            b.github_url || null,
+            projectPayload.demoUrl,
+            projectPayload.githubUrl,
             b.order_index !== undefined ? Number(b.order_index) : 0,
             b.visible !== false,
             b.id,
@@ -796,13 +1015,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             b.type_en || null,
             b.achievement_vn || null,
             b.achievement_en || null,
-            b.tech_stack || '[]',
+            projectPayload.techStack,
             b.features_vn || '[]',
             b.features_en || '[]',
-            b.design_details_vn || '{}',
-            b.design_details_en || '{}',
-            b.tool_details_vn || '{}',
-            b.tool_details_en || '{}'
+            projectPayload.designDetailsVn,
+            projectPayload.designDetailsEn,
+            projectPayload.toolDetailsVn,
+            projectPayload.toolDetailsEn
           ]
         );
         if (rows.length === 0) {
@@ -860,13 +1079,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'POST' && path === '/admin/timeline') {
       const b = req.body ?? {};
-      const safeDescVn = Array.isArray(b.desc_vn) ? JSON.stringify(b.desc_vn) : b.desc_vn;
-      const safeDescEn = Array.isArray(b.desc_en) ? JSON.stringify(b.desc_en) : b.desc_en;
+      const safeDescVn = normalizeJsonbStringArray(b.desc_vn ?? b.descVn ?? b.desc);
+      const safeDescEn = normalizeJsonbStringArray(b.desc_en ?? b.descEn ?? b.desc);
       try {
         const rows = await runQuery(
           `INSERT INTO tbl_timeline (
             role_vn, role_en, company, company_url, period_vn, period_en, desc_vn, desc_en, type, order_index
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *`,
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8::jsonb, $9, $10) RETURNING *`,
           [
             b.role_vn || '',
             b.role_en || '',
@@ -874,8 +1093,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             b.company_url || null,
             b.period_vn || '',
             b.period_en || '',
-            safeDescVn || '[]',
-            safeDescEn || '[]',
+            safeDescVn,
+            safeDescEn,
             b.type || 'work',
             b.order_index !== undefined ? Number(b.order_index) : 0
           ]
@@ -891,8 +1110,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       if (!b.id) {
         return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing timeline item ID' });
       }
-      const safeDescVn = Array.isArray(b.desc_vn) ? JSON.stringify(b.desc_vn) : b.desc_vn;
-      const safeDescEn = Array.isArray(b.desc_en) ? JSON.stringify(b.desc_en) : b.desc_en;
+      const safeDescVn = normalizeJsonbStringArray(b.desc_vn ?? b.descVn ?? b.desc);
+      const safeDescEn = normalizeJsonbStringArray(b.desc_en ?? b.descEn ?? b.desc);
       try {
         const rows = await runQuery(
           `UPDATE tbl_timeline SET
@@ -902,8 +1121,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             company_url = $4,
             period_vn = $5,
             period_en = $6,
-            desc_vn = $7,
-            desc_en = $8,
+            desc_vn = $7::jsonb,
+            desc_en = $8::jsonb,
             type = $9,
             order_index = $10
           WHERE id = $11 RETURNING *`,
@@ -914,8 +1133,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             b.company_url || null,
             b.period_vn || '',
             b.period_en || '',
-            safeDescVn || '[]',
-            safeDescEn || '[]',
+            safeDescVn,
+            safeDescEn,
             b.type || 'work',
             b.order_index !== undefined ? Number(b.order_index) : 0,
             b.id
@@ -1038,7 +1257,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (req.method === 'PUT' && path === '/admin/settings') {
       const b = req.body ?? {};
-      const { socialLinks, seoSettings } = b;
+      const { socialLinks, seoSettings, appSettings } = b;
       try {
         await runQuery(`
           CREATE TABLE IF NOT EXISTS tbl_settings (
@@ -1068,6 +1287,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           const keys = Object.keys(seoSettings);
           for (const key of keys) {
             const val = String(seoSettings[key] ?? '');
+            await runQuery(
+              `INSERT INTO tbl_settings (key, value)
+               VALUES ($1, $2)
+               ON CONFLICT (key) DO UPDATE SET
+                 value = EXCLUDED.value,
+                 updated_at = NOW()`,
+              [key, val]
+            );
+          }
+        }
+
+        if (appSettings && typeof appSettings === 'object') {
+          const keys = Object.keys(appSettings);
+          for (const key of keys) {
+            const val = String(appSettings[key] ?? '');
             await runQuery(
               `INSERT INTO tbl_settings (key, value)
                VALUES ($1, $2)
@@ -1122,7 +1356,100 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
     }
 
-    // --- 7. CHATBOT MANAGER ---
+    // --- 7. TECH STACK MANAGER ---
+    if (req.method === 'GET' && path === '/admin/tech-stack') {
+      try {
+        await ensureTechStackTable();
+        const rows = await runQuery('SELECT * FROM tbl_tech_stack ORDER BY order_index ASC, id ASC');
+        return res.status(200).json(rows);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'POST' && path === '/admin/tech-stack') {
+      const b = req.body ?? {};
+      const name = String(b.name ?? '').trim();
+      if (!name) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Tech name is required.' });
+      }
+      try {
+        await ensureTechStackTable();
+        const rows = await runQuery(
+          `INSERT INTO tbl_tech_stack (name, category, order_index, updated_at)
+           VALUES ($1, $2, $3, NOW())
+           RETURNING *`,
+          [name, normalizeTechStackCategory(b.category), Number.isFinite(Number(b.order_index)) ? Number(b.order_index) : 0]
+        );
+        return res.status(201).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'PUT' && path === '/admin/tech-stack') {
+      const b = req.body ?? {};
+      try {
+        await ensureTechStackTable();
+
+        if (Array.isArray(b.items)) {
+          await runQuery('DELETE FROM tbl_tech_stack');
+          const inserted = [];
+          for (const [index, item] of b.items.entries()) {
+            const name = String(item?.name ?? '').trim();
+            if (!name) continue;
+            const rows = await runQuery(
+              `INSERT INTO tbl_tech_stack (name, category, order_index, updated_at)
+               VALUES ($1, $2, $3, NOW())
+               RETURNING *`,
+              [name, normalizeTechStackCategory(item?.category), index]
+            );
+            inserted.push(rows[0]);
+          }
+          return res.status(200).json({ success: true, items: inserted });
+        }
+
+        if (!b.id) {
+          return res.status(400).json({ error: 'BAD_REQUEST', message: 'ID is required.' });
+        }
+        const name = String(b.name ?? '').trim();
+        if (!name) {
+          return res.status(400).json({ error: 'BAD_REQUEST', message: 'Tech name is required.' });
+        }
+        const rows = await runQuery(
+          `UPDATE tbl_tech_stack
+           SET name = $1,
+               category = $2,
+               order_index = $3,
+               updated_at = NOW()
+           WHERE id = $4
+           RETURNING *`,
+          [name, normalizeTechStackCategory(b.category), Number.isFinite(Number(b.order_index)) ? Number(b.order_index) : 0, b.id]
+        );
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Tech Stack item not found.' });
+        }
+        return res.status(200).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'DELETE' && path === '/admin/tech-stack') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing Tech Stack ID' });
+      }
+      try {
+        await ensureTechStackTable();
+        await runQuery('DELETE FROM tbl_tech_stack WHERE id = $1', [b.id]);
+        return res.status(200).json({ success: true });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    // --- 8. CHATBOT MANAGER ---
     if (req.method === 'GET' && path === '/admin/chatbot') {
       try {
         await runQuery(`

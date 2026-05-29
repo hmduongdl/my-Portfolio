@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
 import { api } from './api';
 import { LoginPage } from './LoginPage';
-import { AdminSettings } from './AdminSettings';
 import { SettingsEditor } from './SettingsEditor';
-import { ProductsEditor } from './ProductsEditor';
-import { ProjectsEditor } from './ProjectsEditor';
-import { WidgetSettings } from './WidgetSettings';
+import { AppearanceView } from './components/AppearanceView';
 import { ChatbotEditor } from './ChatbotEditor';
+import { DashboardView } from './components/DashboardView';
+import { ProfileView } from './components/ProfileView';
+import { ContentView } from './components/ContentView';
+import { LayoutDashboard, UserCircle, FolderDot, MessageSquare, Palette, Settings, LogOut, ChevronLeft, Loader2 } from 'lucide-react';
 
-type Tab = 'profile' | 'products' | 'projects' | 'settings' | 'ui' | 'chatbot';
+type Tab = 'dashboard' | 'profile' | 'content' | 'chatbot' | 'ui' | 'settings';
 
 export const AdminApp: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(api.isLoggedIn());
-  const [tab, setTab] = useState<Tab>('profile');
+  const [tab, setTab] = useState<Tab>('dashboard');
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   React.useEffect(() => {
     api.onUnauthorized(() => {
@@ -32,119 +35,168 @@ export const AdminApp: React.FC = () => {
     setIsAuthenticated(false);
   };
 
-  const navItems: { id: Tab; label: string; icon: string; iconBg: string; iconColor: string; content: React.ReactNode }[] = [
-    { id: 'profile', label: 'Profile & Timeline', icon: 'person', iconBg: 'bg-primary dark:bg-primary-container', iconColor: 'text-on-primary dark:text-on-primary-container', content: <AdminSettings /> },
-    { id: 'products', label: 'Products', icon: 'shopping_bag', iconBg: 'bg-[#64D2FF]', iconColor: 'text-white', content: <ProductsEditor /> },
-    { id: 'projects', label: 'Projects', icon: 'folder', iconBg: 'bg-[#FF9F0A]', iconColor: 'text-white', content: <ProjectsEditor /> },
-    { id: 'chatbot', label: 'Trợ lý ảo (Chatbot)', icon: 'forum', iconBg: 'bg-[#34C759]', iconColor: 'text-white', content: <ChatbotEditor /> },
-    { id: 'ui', label: 'Giao diện & Widget', icon: 'palette', iconBg: 'bg-[#FF3B30]', iconColor: 'text-white', content: <WidgetSettings /> },
-    { id: 'settings', label: 'System & SEO', icon: 'settings', iconBg: 'bg-[#8E8E93]', iconColor: 'text-white', content: <SettingsEditor /> },
+  const navGroups = [
+    {
+      title: 'TỔNG QUAN',
+      items: [
+        {
+          id: 'dashboard',
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+          content: <DashboardView setActiveTab={(nextTab) => setTab(nextTab === 'appearance' ? 'ui' : nextTab)} />,
+        },
+      ]
+    },
+    {
+      title: 'DANH TÍNH',
+      items: [
+        { id: 'profile', label: 'Hồ sơ cá nhân', icon: UserCircle, content: <ProfileView /> },
+      ]
+    },
+    {
+      title: 'NỘI DUNG',
+      items: [
+        { id: 'content', label: 'Nội dung & Dự án', icon: FolderDot, content: <ContentView /> },
+      ]
+    },
+    {
+      title: 'TƯƠNG TÁC',
+      items: [
+        { id: 'chatbot', label: 'Chatbot & Liên hệ', icon: MessageSquare, content: <ChatbotEditor /> },
+      ]
+    },
+    {
+      title: 'GIAO DIỆN',
+      items: [
+        { id: 'ui', label: 'Giao diện & Widget', icon: Palette, content: <AppearanceView /> },
+      ]
+    },
+    {
+      title: 'HỆ THỐNG',
+      items: [
+        { id: 'settings', label: 'Cài đặt & SEO', icon: Settings, content: <SettingsEditor /> },
+      ]
+    }
   ];
 
-  const currentTab = navItems.find(item => item.id === tab);
+  const currentTabItem = navGroups.flatMap(g => g.items).find(item => item.id === tab);
 
   return (
-    <div className="admin-dark h-screen w-screen flex flex-col bg-background text-on-surface font-['Inter'] overflow-hidden relative">
-      <div className="flex-1 w-full h-full bg-background flex flex-col overflow-hidden">
+    <div className="admin-dark h-screen w-screen flex items-center justify-center bg-zinc-950 text-white font-['Inter'] overflow-hidden relative selection:bg-blue-500/30">
+      
+      {/* 1100x680 Window */}
+      <div className="w-[1100px] h-[680px] bg-zinc-900 rounded-2xl shadow-2xl border border-white/10 flex flex-col overflow-hidden relative">
         
-        {/* Top Header */}
-        <header className="h-12 border-b border-outline-variant px-4 flex items-center justify-between bg-surface/95 shrink-0">
-          <div className="text-sm font-semibold text-on-surface">
-            Song Phương Admin Panel
+        {/* NEW FLAT HEADER */}
+        <header className="h-12 border-b border-white/5 px-4 flex items-center justify-between bg-zinc-900 shrink-0 z-30">
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-zinc-400 tracking-wider">CẤU HÌNH HỆ THỐNG PORTFOLIO</span>
+            {isDirty && (
+              <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-orange-500/10 border border-orange-500/20">
+                <div className="w-1.5 h-1.5 rounded-full bg-orange-400 animate-pulse" />
+                <span className="text-[10px] font-semibold text-orange-400/80">Chưa lưu thay đổi</span>
+              </div>
+            )}
           </div>
           <button 
-            onClick={() => window.location.href = '/'}
-            className="px-3 py-1.5 bg-surface-container-high hover:bg-surface-container-highest text-on-surface-variant border border-outline-variant backdrop-blur-md text-xs font-semibold rounded-lg flex items-center gap-1.5 transition-colors cursor-pointer"
+            onClick={() => {
+              // Close admin app logic
+              window.location.href = '/';
+            }}
+            className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 text-xs font-semibold rounded-lg border border-white/5 transition-colors"
           >
-            <span>🔙</span> Quay lại trang chủ
+            🔙 Quay lại trang chủ
           </button>
         </header>
 
-        {/* Content Wrapper */}
-        <div className="flex-1 flex overflow-hidden">
+        <div className="flex-1 flex overflow-hidden relative">
           {/* Sidebar */}
-          <aside className="w-[260px] h-full bg-surface-container-low/80 backdrop-blur-[40px] flex flex-col p-4 gap-2 border-r border-outline-variant relative shrink-0">
-
-          {/* Search Bar */}
-          <div className="relative px-2 mb-4">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-[16px]" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>search</span>
-            <input 
-              type="text" 
-              placeholder="Search" 
-              className="w-full bg-surface-container-highest/50 border-none rounded-lg py-1.5 pl-8 pr-2 text-[13px] text-on-surface focus:ring-1 focus:ring-primary outline-none transition-shadow"
-            />
+          <aside className="bg-zinc-900 border-r border-white/5 w-64 p-5 flex flex-col justify-between shrink-0 z-10">
+            <div className="flex flex-col">
+              {/* Navigation Groups */}
+            <nav className="flex flex-col gap-1 overflow-y-auto pr-2 custom-scrollbar">
+              {navGroups.map((group, gIdx) => (
+                <div key={gIdx} className="mb-4 last:mb-0">
+                  <h3 className="text-[10px] font-bold text-zinc-500 tracking-wider mb-2 mt-4 ml-2">
+                    {group.title}
+                  </h3>
+                  <div className="flex flex-col gap-1">
+                    {group.items.map((item) => {
+                      const isActive = tab === item.id;
+                      const Icon = item.icon;
+                      return (
+                        <button
+                          key={item.id}
+                          onClick={() => setTab(item.id as Tab)}
+                          className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-all text-left w-full ${
+                            isActive 
+                              ? 'bg-blue-500/10 text-blue-400 font-medium' 
+                              : 'text-zinc-400 hover:text-zinc-200 hover:bg-white/5 font-normal'
+                          }`}
+                        >
+                          <Icon size={16} className={isActive ? 'text-blue-400' : 'text-zinc-500'} />
+                          <span className="text-[13px]">{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
+            </nav>
           </div>
 
-          {/* Nav Items */}
-          <nav className="flex flex-col gap-1">
-            {navItems.map((item) => {
-              const isActive = tab === item.id;
-              return (
-                <div 
-                  key={item.id}
-                  onClick={() => setTab(item.id)}
-                  className={`flex items-center gap-3 px-3 py-1.5 rounded-lg cursor-pointer transition-all scale-100 active:scale-95 ${
-                    isActive 
-                      ? 'bg-primary text-on-primary font-semibold shadow-sm' 
-                      : 'text-on-surface-variant hover:bg-surface-container-highest/50'
-                  }`}
-                >
-                  <div className={`w-6 h-6 rounded-md flex items-center justify-center shrink-0 ${
-                    isActive ? 'bg-white/20' : item.iconBg + ' ' + item.iconColor
-                  }`}>
-                    <span className="material-symbols-outlined text-[16px]" style={{ fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>{item.icon}</span>
-                  </div>
-                  <span className={`text-[13px] leading-[18px] ${isActive ? 'font-semibold' : 'font-normal'}`}>
-                    {item.label}
-                  </span>
-                </div>
-              );
-            })}
-          </nav>
-
-          {/* Footer Action */}
-          <div className="mt-auto border-t border-outline-variant/30 pt-4">
-            <div 
+          {/* Footer / Logout */}
+          <div className="mt-auto pt-4 border-t border-white/5">
+            <button
               onClick={handleLogout}
-              className="flex items-center gap-3 px-3 py-1.5 text-on-surface-variant hover:bg-surface-container-highest/50 rounded-lg cursor-pointer transition-colors scale-100 active:scale-90"
+              className="flex items-center gap-3 px-3 py-2 text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg cursor-pointer transition-colors w-full text-left"
             >
-              <div className="w-6 h-6 rounded-md bg-secondary/20 flex items-center justify-center shrink-0">
-                <span className="material-symbols-outlined text-[16px] text-red-500" style={{ fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24" }}>logout</span>
-              </div>
-              <span className="text-[13px] leading-[18px] text-red-600 font-medium">Log out</span>
-            </div>
+              <LogOut size={16} />
+              <span className="text-[13px] font-medium">Đăng xuất</span>
+            </button>
           </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1 bg-background flex flex-col min-w-0">
-          <header className="h-12 shrink-0 border-b border-outline-variant flex justify-between items-center px-6 bg-surface/80 backdrop-blur-md sticky top-0 z-10">
-            <h1 className="text-[13px] font-bold text-on-surface leading-[16px] tracking-tight">{currentTab?.label}</h1>
-            <div className="flex items-center gap-4">
-              <button className="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
-                <span className="material-symbols-outlined text-[18px]">share</span>
-              </button>
-              <button className="text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center">
-                <span className="material-symbols-outlined text-[18px]">more_horiz</span>
-              </button>
-            </div>
-          </header>
-
-          <div className="flex-1 overflow-y-auto">
-            {currentTab?.content}
-          </div>
+        {/* Main Content Area */}
+        <main 
+          className="flex-1 bg-zinc-950 p-6 overflow-y-auto relative"
+          onChange={() => setIsDirty(true)}
+          onKeyUp={() => setIsDirty(true)}
+        >
+          {currentTabItem?.content}
         </main>
+        
+        {/* GLOBAL SAVE BAR */}
+        <div className={`absolute bottom-0 right-0 left-64 z-20 bg-zinc-900/95 backdrop-blur-md border-t border-white/5 py-3.5 px-6 flex items-center justify-end space-x-3 transition-transform duration-300 ${isDirty ? 'translate-y-0' : 'translate-y-full'}`}>
+          <button 
+            onClick={() => {
+              setIsDirty(false);
+              // In a real app we'd reset the form states here. For now we just reload to discard.
+              window.location.reload();
+            }} 
+            disabled={isSaving}
+            className="px-4 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50"
+          >
+            Hủy bỏ
+          </button>
+          <button 
+            onClick={() => {
+              setIsSaving(true);
+              // Fire an event that child components might listen to
+              window.dispatchEvent(new Event('global-save-triggered'));
+              // Mock API delay
+              setTimeout(() => {
+                setIsSaving(false);
+                setIsDirty(false);
+              }, 1000);
+            }}
+            disabled={isSaving}
+            className="bg-blue-600 hover:bg-blue-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors flex items-center justify-center min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSaving ? <Loader2 size={16} className="animate-spin" /> : 'Lưu thay đổi'}
+          </button>
         </div>
       </div>
-
-      {/* Add Material Symbols font to the document if not present */}
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
-        .material-symbols-outlined {
-          font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-      `}</style>
     </div>
   );
 };
