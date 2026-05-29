@@ -17,6 +17,22 @@ const DEFAULT_SEO = {
   twitterCard: 'summary_large_image'
 };
 
+const DEFAULT_PROFILE = {
+  id: 1,
+  name: 'Hoàng Minh Dương',
+  title_en: 'Web Developer · IT Student',
+  title_vn: 'Nhà phát triển Web · Sinh viên IT',
+  bio_en: 'IT Student at Da Lat University & Web Developer at Song Phương Technology. Passionate about creative UI design and optimizing user experience.',
+  bio_vn: 'Sinh viên IT tại Đại học Đà Lạt & Web Developer tại Song Phương Technology. Đam mê thiết kế giao diện sáng tạo và tối ưu hóa trải nghiệm người dùng.',
+  avatar_url: '/my-avatar.jpg',
+  email: 'duonghm.work@gmail.com',
+  phone: '',
+  github_url: 'https://github.com/hmduongdl',
+  facebook_url: 'https://facebook.com/',
+  zalo_url: 'https://zalo.me/',
+  songphuong_url: 'https://songphuong.vn'
+};
+
 // ============================================================================
 // 2. KẾT NỐI NEON SQL BẰNG PG POOL (Singleton Pattern)
 // ============================================================================
@@ -316,12 +332,80 @@ function normalizeProjectPayload(body: Record<string, any>) {
 async function tableColumns(tableName: string): Promise<Set<string>> {
   const rows = await runQuery(
     `SELECT column_name
-       FROM information_schema.columns
-      WHERE table_schema = 'public'
+     FROM information_schema.columns
+     WHERE table_schema = 'public'
         AND table_name = $1`,
     [tableName]
   );
   return new Set(rows.map((row: any) => row.column_name));
+}
+
+async function ensureProfileTable() {
+  await runQuery(`
+    CREATE TABLE IF NOT EXISTS tbl_profile (
+      id                 INT PRIMARY KEY DEFAULT 1,
+      name               VARCHAR(100) DEFAULT '',
+      title_en           VARCHAR(200) DEFAULT '',
+      title_vn           VARCHAR(200) DEFAULT '',
+      bio_en             TEXT DEFAULT '',
+      bio_vn             TEXT DEFAULT '',
+      avatar_url         TEXT DEFAULT '',
+      email              VARCHAR(200) DEFAULT '',
+      phone              VARCHAR(50) DEFAULT '',
+      github_url         TEXT DEFAULT '',
+      facebook_url       TEXT DEFAULT '',
+      zalo_url           TEXT DEFAULT '',
+      songphuong_url     TEXT DEFAULT '',
+      github_visible     BOOLEAN DEFAULT TRUE,
+      facebook_visible   BOOLEAN DEFAULT TRUE,
+      email_visible      BOOLEAN DEFAULT TRUE,
+      phone_visible      BOOLEAN DEFAULT TRUE,
+      zalo_visible       BOOLEAN DEFAULT TRUE,
+      songphuong_visible BOOLEAN DEFAULT TRUE,
+      updated_at         TIMESTAMPTZ DEFAULT NOW()
+    )
+  `);
+
+  const columns = await tableColumns('tbl_profile');
+  const optionalColumns: Record<string, string> = {
+    github_visible: 'BOOLEAN DEFAULT TRUE',
+    facebook_visible: 'BOOLEAN DEFAULT TRUE',
+    email_visible: 'BOOLEAN DEFAULT TRUE',
+    phone_visible: 'BOOLEAN DEFAULT TRUE',
+    zalo_visible: 'BOOLEAN DEFAULT TRUE',
+    songphuong_visible: 'BOOLEAN DEFAULT TRUE',
+    updated_at: 'TIMESTAMPTZ DEFAULT NOW()'
+  };
+
+  for (const [column, definition] of Object.entries(optionalColumns)) {
+    if (!columns.has(column)) {
+      await runQuery(`ALTER TABLE tbl_profile ADD COLUMN IF NOT EXISTS ${column} ${definition}`);
+    }
+  }
+
+  await runQuery(
+    `INSERT INTO tbl_profile (
+      id, name, title_en, title_vn, bio_en, bio_vn, avatar_url, email, phone,
+      github_url, facebook_url, zalo_url, songphuong_url, updated_at
+    )
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
+    ON CONFLICT (id) DO NOTHING`,
+    [
+      DEFAULT_PROFILE.id,
+      DEFAULT_PROFILE.name,
+      DEFAULT_PROFILE.title_en,
+      DEFAULT_PROFILE.title_vn,
+      DEFAULT_PROFILE.bio_en,
+      DEFAULT_PROFILE.bio_vn,
+      DEFAULT_PROFILE.avatar_url,
+      DEFAULT_PROFILE.email,
+      DEFAULT_PROFILE.phone,
+      DEFAULT_PROFILE.github_url,
+      DEFAULT_PROFILE.facebook_url,
+      DEFAULT_PROFILE.zalo_url,
+      DEFAULT_PROFILE.songphuong_url
+    ]
+  );
 }
 
 async function syncProfileFromSocialLinks(links: Array<{ platform: string; url?: string }>) {
@@ -492,6 +576,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     // /PROFILE
     if (path === '/profile') {
       try {
+        await ensureProfileTable();
         const rows = await runQuery('SELECT * FROM tbl_profile LIMIT 1');
         if (rows.length === 0) throw new Error('EMPTY_TABLE');
         const p = rows[0];
@@ -512,7 +597,13 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           titleEn: p.title_en,
           titleVn: p.title_vn,
           bioEn: p.bio_en,
-          bioVn: p.bio_vn
+          bioVn: p.bio_vn,
+          githubVisible: p.github_visible !== false,
+          facebookVisible: p.facebook_visible !== false,
+          emailVisible: p.email_visible !== false,
+          phoneVisible: p.phone_visible !== false,
+          zaloVisible: p.zalo_visible !== false,
+          songphuongVisible: p.songphuong_visible !== false
         });
       } catch (e) {
         return sendDatabaseError(res, '/profile', e);
@@ -710,9 +801,23 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     // --- 1. PROFILE ---
+    if (req.method === 'GET' && path === '/admin/profile') {
+      try {
+        await ensureProfileTable();
+        const [profile] = await runQuery('SELECT * FROM tbl_profile WHERE id = 1 LIMIT 1');
+        if (profile) {
+          await syncSocialLinksFromProfile(profile);
+        }
+        return res.status(200).json(profile || DEFAULT_PROFILE);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
     if (req.method === 'PUT' && path === '/admin/profile') {
       const b = req.body ?? {};
       try {
+        await ensureProfileTable();
         const socialVisibility = normalizeSocialVisibility(b);
         const nextProfile = {
           name: b.name ?? '',
@@ -757,14 +862,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           songphuong_visible: nextProfile.songphuong_visible,
         };
         const keys = Object.keys(profilePatch).filter((key) => columns.has(key) && profilePatch[key] !== undefined);
-        const assignments = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
-        const values = keys.map((key) => profilePatch[key]);
-        values.push(1);
+        if (keys.length > 0) {
+          const assignments = keys.map((key, index) => `${key} = $${index + 1}`).join(', ');
+          const values = keys.map((key) => profilePatch[key]);
+          values.push(1);
 
-        await runQuery(
-          `UPDATE tbl_profile SET ${assignments}, updated_at = NOW() WHERE id = $${values.length}`,
-          values
-        );
+          await runQuery(
+            `UPDATE tbl_profile SET ${assignments}, updated_at = NOW() WHERE id = $${values.length}`,
+            values
+          );
+        }
         await syncSocialLinksFromProfile(nextProfile, socialVisibility, Object.keys(socialVisibility).length > 0);
         const [updatedProfile] = await runQuery('SELECT * FROM tbl_profile WHERE id = 1');
         return res.status(200).json({

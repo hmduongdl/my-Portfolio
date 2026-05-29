@@ -4,6 +4,7 @@ import { TimelineEditor } from './TimelineEditor';
 import { useOSStore } from '../store/useOSStore';
 import { ProfileView } from './components/ProfileView';
 import { SEOSettingsView } from './components/SEOSettingsView';
+import { ContentView } from './components/ContentView';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -131,7 +132,7 @@ const reloadRuntimeProfileState = async () => {
 // Main Component
 // ────────────────────────────────────────────────────────────────────────────
 export const AdminSettings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'seo'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'seo' | 'content'>('profile');
   const [data, setData] = useState<ProfileData>(EMPTY);
   const [original, setOriginal] = useState<ProfileData>(EMPTY);
   const [loading, setLoading] = useState(true);
@@ -272,6 +273,15 @@ export const AdminSettings: React.FC = () => {
         </button>
         <button
           type="button"
+          onClick={() => setActiveTab('content')}
+          className={`px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ${
+            activeTab === 'content' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          }`}
+        >
+          Nội dung & Dự án
+        </button>
+        <button
+          type="button"
           onClick={() => setActiveTab('seo')}
           className={`px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ${
             activeTab === 'seo' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
@@ -283,6 +293,8 @@ export const AdminSettings: React.FC = () => {
 
       {activeTab === 'seo' ? (
         <SEOSettingsView />
+      ) : activeTab === 'content' ? (
+        <ContentView />
       ) : (
         <>
       <ProfileView initialData={data} />

@@ -73,6 +73,28 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
   const defaultTimeline: TimelineItem = { id: '', role: '', organization: '', date: '', type: 'Work', description: '' };
   const [modalForm, setModalForm] = useState<TimelineItem>(defaultTimeline);
 
+  const applyProfileData = (profile: any) => {
+    setFormData(prev => ({
+      ...prev,
+      name: profile?.name || '',
+      email: profile?.email || '',
+      phone: profile?.phone || '',
+      avatarUrl: profile?.avatar_url || profile?.avatarUrl || '',
+      titleVn: profile?.title_vn || profile?.titleVn || '',
+      titleEn: profile?.title_en || profile?.titleEn || '',
+      bioVn: profile?.bio_vn || profile?.bioVn || '',
+      bioEn: profile?.bio_en || profile?.bioEn || '',
+      websiteUrl: profile?.songphuong_url || profile?.songphuongUrl || profile?.websiteUrl || '',
+      githubUrl: profile?.github_url || profile?.githubUrl || '',
+      facebookUrl: profile?.facebook_url || profile?.facebookUrl || '',
+      zaloUrl: profile?.zalo_url || profile?.zaloUrl || '',
+      websiteVisible: profile?.songphuong_visible ?? profile?.songphuongVisible ?? true,
+      githubVisible: profile?.github_visible ?? profile?.githubVisible ?? true,
+      facebookVisible: profile?.facebook_visible ?? profile?.facebookVisible ?? true,
+      zaloVisible: profile?.zalo_visible ?? profile?.zaloVisible ?? true
+    }));
+  };
+
   useEffect(() => {
     // Load timeline from API
     api.get<any[]>('/admin/timeline').then(data => {
@@ -92,26 +114,11 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
       .catch(console.error);
 
     if (initialData) {
-      setFormData(prev => ({
-        ...prev,
-        name: initialData.name || '',
-        email: initialData.email || '',
-        phone: initialData.phone || '',
-        avatarUrl: initialData.avatar_url || initialData.avatarUrl || '',
-        titleVn: initialData.title_vn || initialData.titleVn || '',
-        titleEn: initialData.title_en || initialData.titleEn || '',
-        bioVn: initialData.bio_vn || initialData.bioVn || '',
-        bioEn: initialData.bio_en || initialData.bioEn || '',
-        websiteUrl: initialData.songphuong_url || '',
-        githubUrl: initialData.github_url || '',
-        facebookUrl: initialData.facebook_url || '',
-        zaloUrl: initialData.zalo_url || '',
-        // Initialize visibility if provided in initialData or set default to true
-        websiteVisible: initialData.songphuong_visible ?? true,
-        githubVisible: initialData.github_visible ?? true,
-        facebookVisible: initialData.facebook_visible ?? true,
-        zaloVisible: initialData.zalo_visible ?? true
-      }));
+      applyProfileData(initialData);
+    } else {
+      api.get<any>('/admin/profile')
+        .then(applyProfileData)
+        .catch(console.error);
     }
   }, [initialData]);
 
