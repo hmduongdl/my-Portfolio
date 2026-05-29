@@ -189,6 +189,7 @@ export const AdminApp: React.FC = () => {
         >
           {currentTabItem?.content}
         </main>
+        </div>
         
         {/* GLOBAL SAVE BAR */}
         <div className={`absolute bottom-0 right-0 left-0 md:left-64 z-20 bg-zinc-900/95 backdrop-blur-md border-t border-white/5 py-3.5 px-4 md:px-6 flex items-center justify-end space-x-3 transition-transform duration-300 pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-3.5 ${isDirty ? 'translate-y-0' : 'translate-y-full'}`}>

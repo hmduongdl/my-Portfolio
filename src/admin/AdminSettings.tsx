@@ -405,7 +405,7 @@ export const AdminSettings: React.FC = () => {
       </div>
 
       {/* ── Action Bar ─────────────────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 px-6 py-3 flex items-center justify-between z-40">
+      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/30 px-6 py-3 pb-[max(env(safe-area-inset-bottom,16px),12px)] md:pb-3 flex items-center justify-between z-40">
         <div className="text-[12px] text-on-surface-variant">
           {isDirty ? (
             <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">

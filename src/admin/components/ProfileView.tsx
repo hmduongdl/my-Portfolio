@@ -535,7 +535,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
       </section>
 
       {/* ── ACTION BAR ─────────────────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 bg-zinc-900/90 backdrop-blur-xl border-t border-white/10 px-6 py-4 flex items-center justify-end z-40">
+      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-zinc-900/90 backdrop-blur-xl border-t border-white/10 px-6 py-4 pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-4 flex items-center justify-end z-40">
         <div className="flex items-center gap-4">
           <div className="text-[12px] text-zinc-400 mr-2 hidden sm:block">
             Hãy chắc chắn dữ liệu đã chính xác trước khi lưu.

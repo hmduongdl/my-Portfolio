@@ -213,7 +213,7 @@ export const SEOSettingsView: React.FC = () => {
         </section>
       )}
 
-      <footer className="fixed bottom-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/40 px-window-padding flex items-center justify-between z-40">
+      <footer className="fixed bottom-0 left-0 right-0 md:left-64 h-16 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/40 px-window-padding flex items-center justify-between z-40 pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-0">
         <div className="text-[12px] text-on-surface-variant">
           {isDirty ? 'Có thay đổi SEO chưa lưu' : 'SEO Metadata đã đồng bộ'}
         </div>

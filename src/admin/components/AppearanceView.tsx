@@ -334,7 +334,7 @@ export const AppearanceView: React.FC = () => {
               </p>
 
               {/* Focus */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Focus Title</label>
                   <input type="text" value={widgetForm.focusTitle} onChange={e => wf('focusTitle', e.target.value)}
@@ -358,7 +358,7 @@ export const AppearanceView: React.FC = () => {
               </div>
 
               {/* Status */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Status Title</label>
                   <input type="text" value={widgetForm.statusTitle} onChange={e => wf('statusTitle', e.target.value)}
@@ -374,7 +374,7 @@ export const AppearanceView: React.FC = () => {
               </div>
 
               {/* Location */}
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Location</label>
                   <input type="text" value={widgetForm.locationTitle} onChange={e => wf('locationTitle', e.target.value)}
@@ -426,7 +426,7 @@ export const AppearanceView: React.FC = () => {
                 </div>
 
                 {/* 2. Sub-cards Row 1 */}
-                <div className="grid grid-cols-3 gap-2 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-2 w-full">
                   {/* Focus */}
                   <div className="bg-indigo-950/30 p-2.5 rounded-2xl flex flex-col justify-between">
                     <span className="text-[8px] font-bold text-indigo-300 tracking-wider">FOCUS</span>
@@ -456,7 +456,7 @@ export const AppearanceView: React.FC = () => {
                 </div>
 
                 {/* 3. Row 2: Location + Tools */}
-                <div className="grid grid-cols-2 gap-2 w-full">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-2 w-full">
                   {/* Location */}
                   <div className="bg-zinc-800/40 p-3 rounded-2xl border border-zinc-800/50 flex items-center justify-between">
                     <div className="flex flex-col min-w-0">
@@ -575,7 +575,7 @@ export const AppearanceView: React.FC = () => {
       </section>
 
       {/* ── Sticky Save Bar ────────────────────────────────────── */}
-      <footer className="fixed bottom-0 left-0 right-0 h-16 bg-zinc-950/80 backdrop-blur-xl flex items-center justify-end px-6 gap-3 border-t border-white/5 z-40">
+      <footer className="fixed bottom-0 left-0 right-0 md:left-64 h-16 bg-zinc-950/80 backdrop-blur-xl flex items-center justify-end px-6 gap-3 border-t border-white/5 z-40 pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-0">
         <button
           onClick={handleGlobalSave}
           disabled={globalSaveStatus === 'saving'}

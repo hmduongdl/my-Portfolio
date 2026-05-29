@@ -98,7 +98,7 @@ export const WidgetSettings: React.FC = () => {
         </h2>
         <div className="bg-surface-container-lowest border border-outline-variant/50 rounded-2xl overflow-hidden shadow-sm">
           
-          <div className="p-4 grid grid-cols-2 gap-4">
+          <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             
             {/* Focus */}
             <div className="space-y-1">
@@ -136,7 +136,7 @@ export const WidgetSettings: React.FC = () => {
       </section>
 
       {/* ── Sticky Save Bar ────────────────────────────────────── */}
-      <footer className="fixed bottom-0 left-0 right-0 h-16 bg-surface/90 backdrop-blur-xl flex items-center justify-end px-window-padding gap-3 border-t border-outline-variant/40 z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.04)]">
+      <footer className="fixed bottom-0 left-0 right-0 md:left-64 h-16 md:h-16 bg-surface/90 backdrop-blur-xl flex items-center justify-end px-window-padding gap-3 border-t border-outline-variant/40 z-40 shadow-[0_-4px_16px_rgba(0,0,0,0.04)] pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-0">
         <button
           onClick={handleSave}
           disabled={saveStatus === 'saving'}
