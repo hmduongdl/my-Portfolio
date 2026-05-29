@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useOSStore } from '../../store/useOSStore';
-import { Image, Film, SunMoon, Monitor, MapPin, Save, Palette as PaletteIcon, Moon, Sun } from 'lucide-react';
+import { Image, Film, SunMoon, Monitor, MapPin, Save, Moon, Sun } from 'lucide-react';
 import { api } from '../api';
 
 type WallpaperMode = 'image' | 'video' | 'time-shifting';
@@ -39,8 +39,6 @@ export const AppearanceView: React.FC = () => {
     locationSub:   existingStats.locationSub   || '',
     tools:         (tweaks as any).aboutWidgetTools    || 'Figma, VS Code, Git',
   });
-  const [widgetSaveStatus, setWidgetSaveStatus] = useState<'idle' | 'saving' | 'ok'>('idle');
-
   // ── Section 3 state (Theme & Accent Color) ───────────
   const [accentColor, setAccentColor] = useState((tweaks as any).accentColor || '#007AFF');
   const [isDarkMode, setIsDarkMode] = useState((tweaks as any).themeMode !== 'light');
@@ -51,7 +49,7 @@ export const AppearanceView: React.FC = () => {
 
   const toolsList = widgetForm.tools
     .split(',')
-    .map(t => t.trim())
+    .map((t: string) => t.trim())
     .filter(Boolean);
 
   const applyAccentColor = (color: string) => {
@@ -100,8 +98,6 @@ export const AppearanceView: React.FC = () => {
       console.error(e);
       setGlobalSaveStatus('error');
     }
-  };
-
   };
 
   // Keep local state in sync when store changes externally
@@ -471,7 +467,7 @@ export const AppearanceView: React.FC = () => {
                   <div className="bg-zinc-800/40 p-3 rounded-2xl border border-zinc-800/50 flex flex-col justify-between">
                     <span className="text-[8px] font-bold text-zinc-500 tracking-wider">TOOLS</span>
                     <div className="flex items-center flex-wrap gap-1 mt-1">
-                      {toolsList.length > 0 ? toolsList.map((tool, i) => {
+                      {toolsList.length > 0 ? toolsList.map((tool: string, i: number) => {
                         const color = TOOL_COLORS[i % TOOL_COLORS.length];
                         return (
                           <span key={i} className={`${color.bg} ${color.text} text-[8px] font-bold px-1.5 py-0.5 rounded-md inline-block`}>

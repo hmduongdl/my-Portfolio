@@ -7,7 +7,7 @@ import { ChatbotEditor } from './ChatbotEditor';
 import { DashboardView } from './components/DashboardView';
 import { ProfileView } from './components/ProfileView';
 import { ContentView } from './components/ContentView';
-import { LayoutDashboard, UserCircle, FolderDot, MessageSquare, Palette, Settings, LogOut, ChevronLeft, Loader2, Menu, X } from 'lucide-react';
+import { LayoutDashboard, UserCircle, FolderDot, MessageSquare, Palette, Settings, LogOut, Loader2, Menu, X } from 'lucide-react';
 
 type Tab = 'dashboard' | 'profile' | 'content' | 'chatbot' | 'ui' | 'settings';
 
