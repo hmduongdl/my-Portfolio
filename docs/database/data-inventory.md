@@ -15,7 +15,7 @@ Nguồn: mã nguồn trong repository (About, Finder, Projects, Mail, MenuBar, i
 | title_vn | VARCHAR(200) | Title (Tiếng Việt) | Nhà phát triển Web · Sinh viên IT |
 | bio_en | TEXT | Mô tả dài (EN) | IT Student at Da Lat University & Web Developer at Song Phương Technology. Passionate about creative UI design and optimizing user experience. |
 | bio_vn | TEXT | Mô tả dài (VN) | Sinh viên IT tại Đại học Đà Lạt & Web Developer tại Song Phương Technology. Đam mê thiết kế giao diện sáng tạo và tối ưu hóa trải nghiệm người dùng. |
-| avatar_url | TEXT | Đường dẫn avatar | /images/profile/my-avatar.jpg |
+| avatar_url | TEXT | Đường dẫn avatar | /images/profile/my-avatar.png |
 | email | VARCHAR(200) | Email liên hệ | duonghm.work@gmail.com |
 | phone | VARCHAR(50) | Số điện thoại | (empty in seed) |
 | github_url | TEXT | Link GitHub | https://github.com/hmduongdl |

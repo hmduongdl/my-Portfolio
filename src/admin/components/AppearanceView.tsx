@@ -5,6 +5,22 @@ import { api } from '../api';
 
 type WallpaperMode = 'image' | 'video' | 'time-shifting';
 
+const lightWallpaperUrl = '/images/wallpapers/mobile-background.jpg';
+const darkWallpaperUrl = '/images/profile/profile-background.jpg';
+
+function normalizeAssetUrl(url?: string): string {
+  if (!url) return '';
+  const legacyMap: Record<string, string> = {
+    '/mobile-background.jpg': lightWallpaperUrl,
+    '/profile-background.jpg': darkWallpaperUrl,
+    '/wallpapers/sonoma-light.jpg': lightWallpaperUrl,
+    '/wallpapers/sonoma-dark.jpg': darkWallpaperUrl,
+    '/images/wallpapers/sonoma-light.jpg': lightWallpaperUrl,
+    '/images/wallpapers/sonoma-dark.jpg': darkWallpaperUrl,
+  };
+  return legacyMap[url] || url;
+}
+
 /* ── Badge color palette for Tools preview ─────────────── */
 const TOOL_COLORS = [
   { bg: 'bg-purple-950/40', text: 'text-purple-300' },
@@ -20,7 +36,7 @@ export const AppearanceView: React.FC = () => {
 
   // ── Section 1 state (Wallpaper) ──────────────────────
   const [mode, setMode] = useState<WallpaperMode>(tweaks.wallpaperType || 'image');
-  const [url, setUrl] = useState(tweaks.wallpaperUrl || '');
+  const [url, setUrl] = useState(normalizeAssetUrl(tweaks.wallpaperUrl));
   const videoRef = useRef<HTMLVideoElement>(null);
 
   // ── Section 2 state (About Me Widget) ────────────────
@@ -77,7 +93,7 @@ export const AppearanceView: React.FC = () => {
       await api.put('/admin/settings', {
         appSettings: {
           wallpaperType: mode,
-          wallpaperUrl: url,
+          wallpaperUrl: normalizeAssetUrl(url),
           aboutWidgetStats: JSON.stringify({
             focusTitle: widgetForm.focusTitle,
             focusSub: widgetForm.focusSub,
@@ -112,14 +128,15 @@ export const AppearanceView: React.FC = () => {
   // Keep local state in sync when store changes externally
   useEffect(() => {
     setMode(tweaks.wallpaperType || 'image');
-    setUrl(tweaks.wallpaperUrl || '');
+    setUrl(normalizeAssetUrl(tweaks.wallpaperUrl));
   }, [tweaks.wallpaperType, tweaks.wallpaperUrl]);
 
   const applyPreset = (presetMode: WallpaperMode, presetUrl: string) => {
     setMode(presetMode);
-    setUrl(presetUrl);
+    const nextUrl = normalizeAssetUrl(presetUrl);
+    setUrl(nextUrl);
     setTweak('wallpaperType', presetMode);
-    setTweak('wallpaperUrl', presetUrl);
+    setTweak('wallpaperUrl', nextUrl);
   };
 
   const handleModeChange = (newMode: WallpaperMode) => {
@@ -128,8 +145,9 @@ export const AppearanceView: React.FC = () => {
   };
 
   const handleUrlChange = (newUrl: string) => {
-    setUrl(newUrl);
-    setTweak('wallpaperUrl', newUrl);
+    const nextUrl = normalizeAssetUrl(newUrl);
+    setUrl(nextUrl);
+    setTweak('wallpaperUrl', nextUrl);
   };
 
   const isVideo = mode === 'video' || url.endsWith('.webm') || url.endsWith('.mp4');
@@ -141,8 +159,8 @@ export const AppearanceView: React.FC = () => {
   ];
 
   const presets = [
-    { label: 'Sonoma Light', mode: 'image' as WallpaperMode, url: '/images/wallpapers/mobile-background.jpg' },
-    { label: 'Sonoma Dark',  mode: 'image' as WallpaperMode, url: '/images/profile/profile-background.jpg' },
+    { label: 'Sonoma Light', mode: 'image' as WallpaperMode, url: lightWallpaperUrl },
+    { label: 'Sonoma Dark',  mode: 'image' as WallpaperMode, url: darkWallpaperUrl },
     { label: 'Video Wave',   mode: 'video' as WallpaperMode, url: '/bkgr.mp4' },
   ];
 
@@ -208,7 +226,7 @@ export const AppearanceView: React.FC = () => {
                     value={url}
                     onChange={e => handleUrlChange(e.target.value)}
                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                    placeholder={mode === 'video' ? '/wallpapers/wave.webm' : '/wallpapers/sonoma-light.jpg'}
+                    placeholder={mode === 'video' ? '/bkgr.mp4' : lightWallpaperUrl}
                   />
                 </div>
               )}
@@ -251,11 +269,11 @@ export const AppearanceView: React.FC = () => {
                   <div className="absolute inset-0 flex">
                     <div
                       className="w-1/2 h-full bg-cover bg-center"
-                      style={{ backgroundImage: `url(/wallpapers/sonoma-light.jpg)` }}
+                      style={{ backgroundImage: `url(${lightWallpaperUrl})` }}
                     />
                     <div
                       className="w-1/2 h-full bg-cover bg-center border-l border-white/10"
-                      style={{ backgroundImage: `url(/wallpapers/sonoma-dark.jpg)` }}
+                      style={{ backgroundImage: `url(${darkWallpaperUrl})` }}
                     />
                     <div className="absolute inset-0 flex items-center justify-center">
                       <div className="bg-black/60 backdrop-blur-sm rounded-full px-2.5 py-1 flex items-center gap-1.5">

@@ -3,6 +3,7 @@ import { useOSStore } from '../../store/useOSStore';
 
 const lightWallpaperUrl = '/images/wallpapers/mobile-background.jpg';
 const darkWallpaperUrl = '/images/profile/profile-background.jpg';
+const mobileWallpaperUrl = '/images/wallpapers/mobile-background.jpg';
 
 export const Wallpaper: React.FC = () => {
   const isMobile = useOSStore(state => state.isMobile);
@@ -35,7 +36,7 @@ export const Wallpaper: React.FC = () => {
     <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none bg-black">
       {/* Mobile specific background */}
       <img 
-        src={lightWallpaperUrl} 
+        src={mobileWallpaperUrl} 
         alt="Mobile Wallpaper" 
         className="block md:hidden w-full h-full object-cover absolute inset-0 select-none pointer-events-none"
       />

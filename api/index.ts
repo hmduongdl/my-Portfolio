@@ -24,7 +24,7 @@ const DEFAULT_PROFILE = {
   title_vn: 'Nhà phát triển Web · Sinh viên IT',
   bio_en: 'IT Student at Da Lat University & Web Developer at Song Phương Technology. Passionate about creative UI design and optimizing user experience.',
   bio_vn: 'Sinh viên IT tại Đại học Đà Lạt & Web Developer tại Song Phương Technology. Đam mê thiết kế giao diện sáng tạo và tối ưu hóa trải nghiệm người dùng.',
-  avatar_url: '/images/profile/my-avatar.jpg',
+  avatar_url: '/images/profile/my-avatar.png',
   email: 'duonghm.work@gmail.com',
   phone: '',
   github_url: 'https://github.com/hmduongdl',
@@ -32,6 +32,13 @@ const DEFAULT_PROFILE = {
   zalo_url: 'https://zalo.me/',
   songphuong_url: 'https://songphuong.vn'
 };
+
+function normalizeAvatarUrl(url?: string | null): string {
+  if (!url || url === '/images/profile/my-avatar.jpg' || url === '/my-avatar.jpg' || url === '/img/my-avatar.jpg') {
+    return '/images/profile/my-avatar.png';
+  }
+  return url;
+}
 
 // ============================================================================
 // 2. KẾT NỐI NEON SQL BẰNG PG POOL (Singleton Pattern)
@@ -587,7 +594,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           name: p.name,
           title: lang === 'en' ? (p.title_en || p.title_vn) : (p.title_vn || p.title_en),
           bio: lang === 'en' ? (p.bio_en || p.bio_vn) : (p.bio_vn || p.bio_en),
-          avatarUrl: p.avatar_url || '/images/profile/my-avatar.jpg',
+          avatarUrl: normalizeAvatarUrl(p.avatar_url),
           email: p.email,
           phone: p.phone,
           githubUrl: p.github_url,

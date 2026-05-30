@@ -21,19 +21,40 @@ const TWEAK_DEFAULTS: Tweaks = {
   }
 };
 
+function normalizeAssetUrl(url?: string): string | undefined {
+  if (!url) return url;
+  const legacyMap: Record<string, string> = {
+    '/mobile-background.jpg': '/images/wallpapers/mobile-background.jpg',
+    '/profile-background.jpg': '/images/profile/profile-background.jpg',
+    '/wallpapers/sonoma-light.jpg': '/images/wallpapers/mobile-background.jpg',
+    '/wallpapers/sonoma-dark.jpg': '/images/profile/profile-background.jpg',
+    '/images/wallpapers/sonoma-light.jpg': '/images/wallpapers/mobile-background.jpg',
+    '/images/wallpapers/sonoma-dark.jpg': '/images/profile/profile-background.jpg',
+  };
+  return legacyMap[url] || url;
+}
+
+function normalizeTweaks(tweaks: Tweaks): Tweaks {
+  return {
+    ...tweaks,
+    wallpaperUrl: normalizeAssetUrl(tweaks.wallpaperUrl),
+  };
+}
 
 function loadTweaks(): Tweaks {
   if (typeof window !== 'undefined') {
     try {
       const saved = localStorage.getItem('os_tweaks');
       if (saved) {
-        return { ...TWEAK_DEFAULTS, ...JSON.parse(saved) };
+        const normalized = normalizeTweaks({ ...TWEAK_DEFAULTS, ...JSON.parse(saved) });
+        persistTweaks(normalized);
+        return normalized;
       }
     } catch (e) {
       console.warn('Failed to load tweaks from local storage', e);
     }
   }
-  return { ...TWEAK_DEFAULTS };
+  return normalizeTweaks({ ...TWEAK_DEFAULTS });
 }
 
 function persistTweaks(t: Tweaks): void {
@@ -246,7 +267,8 @@ export const useOSStore = create<OSState>((set, get) => {
 
     setTweak: (key, value) =>
       set((state) => {
-        const tweaks = { ...state.tweaks, [key]: value };
+        const nextValue = key === 'wallpaperUrl' ? normalizeAssetUrl(value as string) : value;
+        const tweaks = normalizeTweaks({ ...state.tweaks, [key]: nextValue });
         persistTweaks(tweaks);
         return { tweaks };
       }),
