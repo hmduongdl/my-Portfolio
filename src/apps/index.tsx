@@ -6,14 +6,14 @@ import { WelcomeApp } from './Welcome';
 import { ZaloApp } from './Zalo';
 import { AppDefinition, SocialAppDefinition } from '../types';
 
-import aboutIcon from '../icons/About.png';
-import notesIcon from '../icons/Notes.png';
-import projectsIcon from '../icons/Project-folder.png';
-import githubIcon from '../icons/github.png';
-import facebookIcon from '../icons/facebook.png';
-import phoneIcon from '../icons/phone.png';
-import zaloIcon from '../icons/zalo.png';
-import gmailIcon from '../icons/gmail.png';
+import aboutIcon from '../assets/icons/apps/About.png';
+import notesIcon from '../assets/icons/apps/Notes.png';
+import projectsIcon from '../assets/icons/apps/Project-folder.png';
+import githubIcon from '../assets/icons/apps/github.png';
+import facebookIcon from '../assets/icons/apps/facebook.png';
+import phoneIcon from '../assets/icons/apps/phone.png';
+import zaloIcon from '../assets/icons/apps/zalo.png';
+import gmailIcon from '../assets/icons/apps/gmail.png';
 
 export const SOCIAL_APPS: SocialAppDefinition[] = [
   {
@@ -54,7 +54,7 @@ export const APP_DEFS: AppDefinition[] = [
     bg: '#ffffff',
     icon: (
       <div className="w-full h-full bg-[#1853a1] rounded-[22%] flex items-center justify-center p-[1.5px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.2)] border border-[#124285]">
-        <img src="/songphuong-logo.png" alt="Song Phương" className="w-[95%] h-[95%] object-contain pointer-events-none" />
+        <img src="/images/brand/songphuong-logo.png" alt="Song Phương" className="w-[95%] h-[95%] object-contain pointer-events-none" />
       </div>
     ),
     initial: { w: 760, h: 480, x: 140, y: 80 },

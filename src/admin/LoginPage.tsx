@@ -33,7 +33,7 @@ export const LoginPage: React.FC<Props> = ({ onLogin }) => {
       {/* Blurred desktop wallpaper background */}
       <div 
         className="absolute inset-0 bg-cover bg-center filter blur-md opacity-40 pointer-events-none"
-        style={{ backgroundImage: `url('/my-avatar.jpg')` }}
+        style={{ backgroundImage: `url('/images/profile/my-avatar.jpg')` }}
       />
       <div className="absolute inset-0 bg-black/40 backdrop-blur-2xl" />
 
@@ -41,7 +41,7 @@ export const LoginPage: React.FC<Props> = ({ onLogin }) => {
         {/* Rounded Avatar */}
         <div className="w-[84px] h-[84px] rounded-full overflow-hidden border border-white/20 shadow-lg mb-3.5 bg-zinc-800 shrink-0">
           <img 
-            src="/my-avatar.jpg" 
+            src="/images/profile/my-avatar.jpg" 
             alt="Hoàng Minh Dương" 
             className="w-full h-full object-cover"
             draggable={false}

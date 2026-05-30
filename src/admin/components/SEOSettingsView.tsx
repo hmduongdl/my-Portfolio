@@ -131,6 +131,16 @@ export const SEOSettingsView: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const handleSaveRequest = (event: Event) => {
+      if (!isDirty || saveStatus === 'saving') return;
+      (event as CustomEvent<{ promises: Promise<unknown>[] }>).detail?.promises.push(saveSettings());
+    };
+
+    window.addEventListener('global-save-triggered', handleSaveRequest);
+    return () => window.removeEventListener('global-save-triggered', handleSaveRequest);
+  }, [isDirty, saveStatus, seo]);
+
   if (loading) {
     return (
       <div className="min-h-[320px] p-8 flex flex-col items-center justify-center gap-3 text-on-surface-variant">
@@ -212,35 +222,6 @@ export const SEOSettingsView: React.FC = () => {
           </div>
         </section>
       )}
-
-      <footer className="fixed bottom-0 left-0 right-0 md:left-64 h-16 bg-surface/90 backdrop-blur-xl border-t border-outline-variant/40 px-window-padding flex items-center justify-between z-40 pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-0">
-        <div className="text-[12px] text-on-surface-variant">
-          {isDirty ? 'Có thay đổi SEO chưa lưu' : 'SEO Metadata đã đồng bộ'}
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={loadSettings}
-            disabled={!isDirty || saveStatus === 'saving'}
-            className="px-4 py-1.5 rounded-xl border border-outline-variant/50 bg-surface-container-lowest text-[13px] font-semibold text-on-surface disabled:opacity-40"
-          >
-            Hủy
-          </button>
-          <button
-            type="button"
-            onClick={saveSettings}
-            disabled={!isDirty || saveStatus === 'saving'}
-            className={`px-6 py-1.5 rounded-xl text-[13px] font-bold shadow-sm active:scale-95 transition-all disabled:opacity-50 flex items-center gap-1.5 ${
-              saveStatus === 'ok' ? 'bg-green-600 text-white' :
-              saveStatus === 'error' ? 'bg-error text-on-error' :
-              'bg-primary text-on-primary hover:brightness-105'
-            }`}
-          >
-            {saveStatus === 'saving' && <div className="w-3.5 h-3.5 border-2 border-white/40 border-t-white rounded-full animate-spin" />}
-            {saveStatus === 'saving' ? 'Đang lưu...' : saveStatus === 'ok' ? 'Đã lưu' : saveStatus === 'error' ? 'Thử lại' : 'Lưu SEO'}
-          </button>
-        </div>
-      </footer>
     </div>
   );
 };

@@ -35,3 +35,4 @@ stitch_macos_portfolio_admin_settings.zip
 *.md
 !README.md
 !ROADMAP.md
+!docs/**/*.md

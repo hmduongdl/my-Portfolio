@@ -7,7 +7,7 @@ import { Window } from './components/desktop/Window';
 import { IOSView } from './components/mobile/IOSView';
 import { MobilePreview } from './components/mobile/MobilePreview';
 import { APP_DEFS, SOCIAL_APPS } from './apps';
-import notesIcon from './icons/Notes.png';
+import notesIcon from './assets/icons/apps/Notes.png';
 import { MascotChat } from './components/desktop/MascotChat';
 import { profileService } from './services/profileService';
 import { productService } from './services/productService';
@@ -184,7 +184,7 @@ export const App: React.FC = () => {
           <div className="desktop-icon-art w-[48px] h-[48px] md:w-12 md:h-12 rounded-md bg-transparent flex items-center justify-center overflow-visible">
             <div className="w-full h-full bg-[#1853a1] rounded-[22%] flex items-center justify-center p-[1.5px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.25)] border border-[#124285]">
               <img
-                src="/songphuong-logo.png"
+                src="/images/brand/songphuong-logo.png"
                 alt="Song Phương"
                 className="w-[95%] h-[95%] object-contain pointer-events-none drop-shadow-md"
               />

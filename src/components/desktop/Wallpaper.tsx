@@ -1,23 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { useOSStore } from '../../store/useOSStore';
-import mobileBg from '../../assets/wallpapers/mobile-background.jpg';
+
+const lightWallpaperUrl = '/images/wallpapers/mobile-background.jpg';
+const darkWallpaperUrl = '/images/profile/profile-background.jpg';
 
 export const Wallpaper: React.FC = () => {
   const isMobile = useOSStore(state => state.isMobile);
   const tweaks = useOSStore(state => state.tweaks);
   const wallpaperType = isMobile ? 'image' : (tweaks.wallpaperType || 'image');
-  const wallpaperUrl = tweaks.wallpaperUrl || '/wallpapers/sonoma-light.jpg';
+  const wallpaperUrl = tweaks.wallpaperUrl || lightWallpaperUrl;
   
-  const [timeShiftUrl, setTimeShiftUrl] = useState('/wallpapers/sonoma-light.jpg');
+  const [timeShiftUrl, setTimeShiftUrl] = useState(lightWallpaperUrl);
 
   useEffect(() => {
     if (wallpaperType === 'time-shifting') {
       const checkTime = () => {
         const hour = new Date().getHours();
         if (hour >= 6 && hour < 18) {
-          setTimeShiftUrl('/wallpapers/sonoma-light.jpg');
+          setTimeShiftUrl(lightWallpaperUrl);
         } else {
-          setTimeShiftUrl('/wallpapers/sonoma-dark.jpg');
+          setTimeShiftUrl(darkWallpaperUrl);
         }
       };
       
@@ -33,7 +35,7 @@ export const Wallpaper: React.FC = () => {
     <div className="absolute inset-0 z-0 overflow-hidden select-none pointer-events-none bg-black">
       {/* Mobile specific background */}
       <img 
-        src={mobileBg} 
+        src={lightWallpaperUrl} 
         alt="Mobile Wallpaper" 
         className="block md:hidden w-full h-full object-cover absolute inset-0 select-none pointer-events-none"
       />
