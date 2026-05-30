@@ -1,4 +1,5 @@
 import React from 'react';
+import { ArrowLeft, Code2, ExternalLink, Play } from 'lucide-react';
 import type { Project } from '../types/project';
 import { useOSStore } from '../store/useOSStore';
 
@@ -19,7 +20,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
           onClick={onBack}
           className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-[13px] font-semibold mb-6 group w-fit"
         >
-          <span className="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
           {isVn ? 'Tất cả dự án' : 'All projects'}
         </button>
 
@@ -43,7 +44,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
                 rel="noopener noreferrer"
                 className="bg-[#64FFDA] hover:bg-[#88ffeb] text-[#050914] px-5 py-2.5 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]">open_in_new</span>
+                <ExternalLink size={18} />
                 {isVn ? 'Xem thực tế' : 'View Live Demo'}
               </a>
             )}
@@ -54,7 +55,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
                 rel="noopener noreferrer"
                 className="bg-white/5 hover:bg-white/10 text-white border border-white/20 px-5 py-2.5 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 transition-colors"
               >
-                <i className="devicon-github-original text-[18px]"></i>
+                <Code2 size={18} />
                 {isVn ? 'Mã nguồn' : 'GitHub Code'}
               </a>
             )}
@@ -160,7 +161,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
                   <div key={i} className="flex items-center justify-between group">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center border border-white/10 group-hover:border-[#64FFDA]/50 transition-colors">
-                        <span className="material-symbols-outlined text-[16px] text-white/70 group-hover:text-[#64FFDA] transition-colors">code</span>
+                        <Code2 size={16} className="text-white/70 group-hover:text-[#64FFDA] transition-colors" />
                       </div>
                       <span className="text-[14px] font-medium text-white/90">{tag}</span>
                     </div>
@@ -175,7 +176,7 @@ export const ProjectDetail: React.FC<ProjectDetailProps> = ({ project, onBack })
               {project.demoUrl ? (
                 <a href={project.demoUrl} target="_blank" rel="noopener noreferrer" className="z-10 flex flex-col items-center gap-3 cursor-pointer">
                   <div className="w-12 h-12 rounded-full bg-[#64FFDA] text-[#050914] flex items-center justify-center shadow-[0_0_20px_rgba(100,255,218,0.4)] group-hover:scale-110 transition-transform">
-                    <span className="material-symbols-outlined text-[24px] ml-1">play_arrow</span>
+                    <Play size={24} className="ml-1" fill="currentColor" />
                   </div>
                   <span className="text-[12px] font-bold text-white uppercase tracking-wider">{isVn ? 'Xem dự án' : 'View Project'}</span>
                 </a>

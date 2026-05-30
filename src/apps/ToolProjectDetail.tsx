@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ArrowLeft, CheckCircle2, ClipboardCopy, Code2 } from 'lucide-react';
 import type { Project, ToolDetails } from '../types/project';
 import { useOSStore } from '../store/useOSStore';
 
@@ -62,7 +63,7 @@ export const ToolProjectDetail: React.FC<ToolProjectDetailProps> = ({ project, o
           onClick={onBack}
           className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-[13px] font-semibold mb-6 group w-fit"
         >
-          <span className="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
           {isVn ? 'Tất cả dự án' : 'All projects'}
         </button>
 
@@ -86,7 +87,7 @@ export const ToolProjectDetail: React.FC<ToolProjectDetailProps> = ({ project, o
                 rel="noopener noreferrer"
                 className="bg-[#FF9800] hover:bg-[#ffb74d] text-[#050914] px-5 py-2.5 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 transition-colors"
               >
-                <i className="devicon-github-original text-[18px]"></i>
+                <Code2 size={18} />
                 {isVn ? 'Mã nguồn' : 'GitHub Repo'}
               </a>
             )}
@@ -177,7 +178,7 @@ export const ToolProjectDetail: React.FC<ToolProjectDetailProps> = ({ project, o
                 className="w-8 h-8 rounded-full bg-white/5 hover:bg-[#FF9800]/20 text-white/50 hover:text-[#FF9800] flex items-center justify-center transition-colors"
                 title="Copy to clipboard"
               >
-                <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                <ClipboardCopy size={16} />
               </button>
             </div>
           </div>
@@ -249,7 +250,7 @@ export const ToolProjectDetail: React.FC<ToolProjectDetailProps> = ({ project, o
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {project.features.map((f: any, i: number) => (
                 <div key={i} className="p-5 rounded-xl border border-white/5 bg-white/[0.02] flex items-start gap-3">
-                  <span className="material-symbols-outlined text-[#FF9800] text-[20px] mt-0.5">verified</span>
+                  <CheckCircle2 size={20} className="text-[#FF9800] mt-0.5 shrink-0" />
                   <div>
                     <h3 className="font-bold text-[14px] text-white mb-1">{f.title}</h3>
                     <p className="text-[13px] text-white/60">{f.desc}</p>
@@ -295,7 +296,7 @@ export const ToolProjectDetail: React.FC<ToolProjectDetailProps> = ({ project, o
                       onClick={() => copyToClipboard(uc.cmd)}
                       className="absolute top-3 right-3 w-8 h-8 rounded-lg bg-white/10 hover:bg-[#FF9800] text-white/60 hover:text-white flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
                     >
-                      <span className="material-symbols-outlined text-[16px]">content_copy</span>
+                      <ClipboardCopy size={16} />
                     </button>
                   </div>
                 </div>
