@@ -8,6 +8,7 @@
 - Admin dashboard để quản lý nội dung profile, sản phẩm và mạng xã hội.
 - API serverless (`api/`) xử lý dữ liệu và xác thực.
 - Database mẫu với Neon Serverless.
+![alt text](image.png)
 
 ## Công nghệ chính
 
