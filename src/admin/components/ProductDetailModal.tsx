@@ -47,7 +47,7 @@ interface ProductFormState {
 }
 
 const STATUSES: Array<ProductStatus | ''> = ['', 'New', 'Hot', 'Sale'];
-const GLYPHS = ['🖥', '💻', '⌨', '🎧', '🎮', '🧩', '⚡', '📦'];
+const GLYPHS = ['🖥️', '🏢', '💻', '🧩', '🎮', '⌨️', '🎧', '📦'];
 
 function valueToString(value: unknown): string {
   if (value === null || value === undefined) return '';
@@ -372,7 +372,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                 <div className="flex h-28 items-center justify-center rounded-lg border border-outline-variant/50 bg-white p-2">
                   <img
                     src={form.image_url}
-                    alt="Product preview"
+                    alt={`${form.name || 'Product'} image preview`}
                     className="max-h-full max-w-full object-contain"
                     onError={event => {
                       event.currentTarget.style.display = 'none';

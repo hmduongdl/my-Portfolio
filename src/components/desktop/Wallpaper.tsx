@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useOSStore } from '../../store/useOSStore';
 
-const lightWallpaperUrl = '/images/wallpapers/mobile-background.jpg';
-const darkWallpaperUrl = '/images/profile/profile-background.jpg';
-const mobileWallpaperUrl = '/images/wallpapers/mobile-background.jpg';
+const lightWallpaperUrl = '/images/wallpapers/mobile-background.webp';
+const darkWallpaperUrl = '/images/profile/profile-background.webp';
+const mobileWallpaperUrl = '/images/wallpapers/mobile-background.webp';
 
 export const Wallpaper: React.FC = () => {
   const isMobile = useOSStore(state => state.isMobile);
@@ -37,7 +37,7 @@ export const Wallpaper: React.FC = () => {
       {/* Mobile specific background */}
       <img 
         src={mobileWallpaperUrl} 
-        alt="Mobile Wallpaper" 
+        alt="Sonoma mobile wallpaper background" 
         className="block md:hidden w-full h-full object-cover absolute inset-0 select-none pointer-events-none"
       />
 
@@ -46,7 +46,7 @@ export const Wallpaper: React.FC = () => {
         {wallpaperType === 'image' && (
           <img 
             src={wallpaperUrl} 
-            alt="Wallpaper" 
+            alt="Desktop wallpaper background" 
             className="w-full h-full object-cover absolute inset-0 z-[-1] select-none pointer-events-none"
           />
         )}
@@ -63,7 +63,7 @@ export const Wallpaper: React.FC = () => {
         {wallpaperType === 'time-shifting' && (
           <img 
             src={timeShiftUrl} 
-            alt="Time Shifting Wallpaper" 
+            alt="Time shifting desktop wallpaper background" 
             className="w-full h-full object-cover absolute inset-0 z-[-1] select-none pointer-events-none transition-opacity duration-1000"
           />
         )}

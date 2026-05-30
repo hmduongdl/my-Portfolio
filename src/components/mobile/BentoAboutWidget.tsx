@@ -54,9 +54,9 @@ export const BentoAboutWidget: React.FC<BentoAboutWidgetProps> = ({ onClick, sca
       <div className="flex items-center justify-between w-full">
         <div className="flex items-center space-x-3">
           <img
-            src={profile?.avatarUrl || '/images/brand/songphuong-logo.png'}
+            src={profile?.avatarUrl || '/images/brand/songphuong-logo.webp'}
             className="w-12 h-12 rounded-full border border-white/50 object-cover shadow-sm bg-neutral-100"
-            alt="Avatar"
+            alt="Hoàng Minh Dương - Web Developer Song Phương Technology"
             loading="eager"
             decoding="async"
           />

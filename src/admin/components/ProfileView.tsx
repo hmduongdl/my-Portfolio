@@ -380,7 +380,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
             <div className="flex gap-4 items-center">
               <div className="shrink-0 w-16 h-16 rounded-full border border-white/10 overflow-hidden bg-zinc-800 flex items-center justify-center">
                 {formData.avatarUrl ? (
-                  <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                  <img src={formData.avatarUrl} alt={`${formData.name || 'Profile'} avatar preview`} className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
                 ) : (
                   <span className="text-zinc-500 text-[10px]">No img</span>
                 )}

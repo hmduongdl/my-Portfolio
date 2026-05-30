@@ -133,7 +133,7 @@ export const DesignProjectDetail: React.FC<DesignProjectDetailProps> = ({ projec
             onTouchStart={handleDragStart}
           >
             {/* Before Image (Base) */}
-            <img src={details.beforeAfter.beforeImg} alt="Before" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+            <img src={details.beforeAfter.beforeImg} alt={`${project.name} before design preview`} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
             <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-md px-3 py-1 rounded-full text-white text-[11px] font-bold tracking-widest uppercase border border-white/10">Before</div>
             
             {/* After Image (Clipped) */}
@@ -141,7 +141,7 @@ export const DesignProjectDetail: React.FC<DesignProjectDetailProps> = ({ projec
               className="absolute inset-0 w-full h-full pointer-events-none"
               style={{ clipPath: `inset(0 0 0 ${sliderPos}%)` }}
             >
-              <img src={details.beforeAfter.afterImg} alt="After" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+              <img src={details.beforeAfter.afterImg} alt={`${project.name} after design preview`} className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
               <div className="absolute top-4 right-4 bg-[#9C27B0] px-3 py-1 rounded-full text-white text-[11px] font-bold tracking-widest uppercase shadow-lg">After</div>
             </div>
 
@@ -282,7 +282,7 @@ export const DesignProjectDetail: React.FC<DesignProjectDetailProps> = ({ projec
           className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 sm:p-8 backdrop-blur-sm cursor-zoom-out"
           onClick={() => setLightboxImage(null)}
         >
-          <img src={lightboxImage} alt="Expanded" className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
+          <img src={lightboxImage} alt={`${project.name} expanded design asset`} className="max-w-full max-h-full object-contain rounded-xl shadow-2xl" />
         </div>
       )}
 

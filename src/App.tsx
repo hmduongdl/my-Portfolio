@@ -184,8 +184,8 @@ export const App: React.FC = () => {
           <div className="desktop-icon-art w-[48px] h-[48px] md:w-12 md:h-12 rounded-md bg-transparent flex items-center justify-center overflow-visible">
             <div className="w-full h-full bg-[#1853a1] rounded-[22%] flex items-center justify-center p-[1.5px] shadow-[inset_0_1px_1px_rgba(255,255,255,0.4),0_2px_4px_rgba(0,0,0,0.25)] border border-[#124285]">
               <img
-                src="/images/brand/songphuong-logo.png"
-                alt="Song Phương"
+                src="/images/brand/songphuong-logo.webp"
+                alt="Song Phương Technology logo"
                 className="w-[95%] h-[95%] object-contain pointer-events-none drop-shadow-md"
               />
             </div>

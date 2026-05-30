@@ -564,7 +564,7 @@ export const ProductsEditor: React.FC = () => {
 
                     {editingProduct.image_url && (
                       <div className="p-3 flex justify-center bg-surface-container-low/30 rounded-lg border border-outline-variant/30">
-                        <img src={editingProduct.image_url} alt="Base Preview" className="max-h-24 object-contain rounded-lg bg-white p-1" />
+                        <img src={editingProduct.image_url} alt={`${editingProduct.name} product image preview`} className="max-h-24 object-contain rounded-lg bg-white p-1" />
                       </div>
                     )}
 
@@ -650,7 +650,7 @@ export const ProductsEditor: React.FC = () => {
 
                     {editingProduct.override_image_url && (
                       <div className="sm:col-span-2 p-3 flex justify-center bg-surface-container-low/30 rounded-lg border border-outline-variant/30">
-                        <img src={editingProduct.override_image_url} alt="Override Preview" className="max-h-24 object-contain rounded-lg bg-white p-1" />
+                        <img src={editingProduct.override_image_url} alt={`${editingProduct.override_name || editingProduct.name} override product image preview`} className="max-h-24 object-contain rounded-lg bg-white p-1" />
                       </div>
                     )}
                   </div>

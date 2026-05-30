@@ -24,12 +24,14 @@ const TWEAK_DEFAULTS: Tweaks = {
 function normalizeAssetUrl(url?: string): string | undefined {
   if (!url) return url;
   const legacyMap: Record<string, string> = {
-    '/mobile-background.jpg': '/images/wallpapers/mobile-background.jpg',
-    '/profile-background.jpg': '/images/profile/profile-background.jpg',
-    '/wallpapers/sonoma-light.jpg': '/images/wallpapers/mobile-background.jpg',
-    '/wallpapers/sonoma-dark.jpg': '/images/profile/profile-background.jpg',
-    '/images/wallpapers/sonoma-light.jpg': '/images/wallpapers/mobile-background.jpg',
-    '/images/wallpapers/sonoma-dark.jpg': '/images/profile/profile-background.jpg',
+    '/mobile-background.jpg': '/images/wallpapers/mobile-background.webp',
+    '/profile-background.jpg': '/images/profile/profile-background.webp',
+    '/wallpapers/sonoma-light.jpg': '/images/wallpapers/mobile-background.webp',
+    '/wallpapers/sonoma-dark.jpg': '/images/profile/profile-background.webp',
+    '/images/wallpapers/sonoma-light.jpg': '/images/wallpapers/mobile-background.webp',
+    '/images/wallpapers/sonoma-dark.jpg': '/images/profile/profile-background.webp',
+    '/images/wallpapers/mobile-background.jpg': '/images/wallpapers/mobile-background.webp',
+    '/images/profile/profile-background.jpg': '/images/profile/profile-background.webp',
   };
   return legacyMap[url] || url;
 }

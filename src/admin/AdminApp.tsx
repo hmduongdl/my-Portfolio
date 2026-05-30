@@ -102,7 +102,7 @@ export const AdminApp: React.FC = () => {
     <div className="admin-dark h-screen w-screen flex items-center justify-center bg-zinc-950 text-white font-['Inter'] overflow-hidden relative selection:bg-blue-500/30">
       
       {/* Container Window */}
-      <div className="w-full h-full md:w-[1100px] md:h-[680px] bg-zinc-900 md:rounded-2xl shadow-2xl border-none md:border border-white/10 flex flex-col overflow-hidden relative">
+      <div className="w-full h-full md:w-[min(1500px,96vw)] md:h-[min(900px,92vh)] bg-zinc-900 md:rounded-2xl shadow-2xl border-none md:border border-white/10 flex flex-col overflow-hidden relative">
         
         {/* NEW FLAT HEADER */}
         <header className="h-12 border-b border-white/5 px-4 flex items-center justify-between bg-zinc-900 shrink-0 z-30">

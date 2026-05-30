@@ -5,8 +5,8 @@ import { api } from '../api';
 
 type WallpaperMode = 'image' | 'video' | 'time-shifting';
 
-const lightWallpaperUrl = '/images/wallpapers/mobile-background.jpg';
-const darkWallpaperUrl = '/images/profile/profile-background.jpg';
+const lightWallpaperUrl = '/images/wallpapers/mobile-background.webp';
+const darkWallpaperUrl = '/images/profile/profile-background.webp';
 
 function normalizeAssetUrl(url?: string): string {
   if (!url) return '';
@@ -437,7 +437,7 @@ export const AppearanceView: React.FC = () => {
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-full border border-white/50 bg-zinc-700 flex items-center justify-center overflow-hidden">
-                      <img src="/images/brand/songphuong-logo.png" className="w-full h-full object-cover" alt="" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                      <img src="/images/brand/songphuong-logo.webp" className="w-full h-full object-cover" alt="Song Phương Technology logo preview" onError={e => { e.currentTarget.style.display = 'none'; }} />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] font-bold text-zinc-500 tracking-wider">ABOUT ME</span>
