@@ -47,6 +47,8 @@ if (typeof window !== 'undefined') {
     window.addEventListener('timeline-updated', () => {
         delete cache.timeline_vn;
         delete cache.timeline_en;
+        delete pending.timeline_vn;
+        delete pending.timeline_en;
     });
 }
 
@@ -78,11 +80,24 @@ export const profileService = {
     async getTimeline(lang: 'en' | 'vn' = 'vn'): Promise<TimelineItem[]> {
         const key = `timeline_${lang}`;
         if (cache[key]) return cache[key];
-        const res = await fetch(`${API_BASE_URL}/timeline?lang=${lang}`);
-        if (!res.ok) throw new Error('Failed to fetch SQL timeline');
-        const data = await res.json();
-        cache[key] = data;
-        return data;
+        if (pending[key]) return pending[key];
+
+        pending[key] = fetch(`${API_BASE_URL}/timeline?lang=${lang}`)
+            .then(async (res) => {
+                if (!res.ok) throw new Error('Failed to fetch SQL timeline');
+                const data = await res.json();
+                cache[key] = data;
+                return data;
+            })
+            .finally(() => {
+                delete pending[key];
+            });
+
+        return pending[key];
+    },
+
+    getCachedTimeline(lang: 'en' | 'vn' = 'vn'): TimelineItem[] | null {
+        return cache[`timeline_${lang}`] || null;
     },
 
     clearCache() {

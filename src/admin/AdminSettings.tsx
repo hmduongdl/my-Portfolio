@@ -309,28 +309,28 @@ export const AdminSettings: React.FC = () => {
             <InlineInput
               value={data.songphuong_url}
               onChange={e => set('songphuong_url')(e.target.value)}
-              placeholder="https://songphuong.vn"
+              placeholder="Đường dẫn website"
             />
           </SettingsRow>
           <SettingsRow icon="code" iconBg="bg-[#1A1C1E]" label="GitHub">
             <InlineInput
               value={data.github_url}
               onChange={e => set('github_url')(e.target.value)}
-              placeholder="https://github.com/username"
+              placeholder="Đường dẫn GitHub"
             />
           </SettingsRow>
           <SettingsRow icon="thumb_up" iconBg="bg-[#1877F2]" label="Facebook">
             <InlineInput
               value={data.facebook_url}
               onChange={e => set('facebook_url')(e.target.value)}
-              placeholder="https://facebook.com/page"
+              placeholder="Đường dẫn Facebook"
             />
           </SettingsRow>
           <SettingsRow icon="chat" iconBg="bg-[#0068FF]" label="Zalo" last>
             <InlineInput
               value={data.zalo_url}
               onChange={e => set('zalo_url')(e.target.value)}
-              placeholder="https://zalo.me/..."
+              placeholder="Đường dẫn Zalo"
             />
           </SettingsRow>
         </SettingsCard>

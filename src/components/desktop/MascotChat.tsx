@@ -10,7 +10,7 @@ interface Message {
 export const MascotChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showBubble, setShowBubble] = useState(true);
-  const [qaList, setQaList] = useState<ChatbotQA[]>([]);
+  const [qaList, setQaList] = useState<ChatbotQA[]>(() => chatbotService.getCachedQAList() || []);
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'bot',
@@ -20,13 +20,17 @@ export const MascotChat: React.FC = () => {
   const [askedIds, setAskedIds] = useState<number[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isResponding, setIsResponding] = useState(false);
-  const [hotline, setHotline] = useState('');
+  const [hotline, setHotline] = useState(() => profileService.getCachedProfile('vn')?.phone || '');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Fetch Q&A List on mount
   useEffect(() => {
-    chatbotService.getQAList()
+    const loadQAList = () => {
+      const cachedQAList = chatbotService.getCachedQAList();
+      if (cachedQAList) setQaList(cachedQAList);
+
+      chatbotService.getQAList()
       .then(data => setQaList(data))
       .catch(err => {
         console.error('Error fetching Q&As:', err);
@@ -36,9 +40,18 @@ export const MascotChat: React.FC = () => {
           { sender: 'bot', text: 'Không tải được danh sách câu hỏi từ database. Vui lòng kiểm tra kết nối hoặc dữ liệu chatbot trong admin.' }
         ]);
       });
+    };
+
+    loadQAList();
+
+    window.addEventListener('chatbot-updated', loadQAList);
+    return () => window.removeEventListener('chatbot-updated', loadQAList);
   }, []);
 
   useEffect(() => {
+    const cachedProfile = profileService.getCachedProfile('vn');
+    if (cachedProfile?.phone) setHotline(cachedProfile.phone);
+
     profileService.getProfile('vn')
       .then((profile) => setHotline(profile?.phone || ''))
       .catch((err) => {

@@ -54,7 +54,7 @@ function valueToString(value: unknown): string {
 }
 
 function parseNumber(value: string): number | null {
-  const normalized = value.replace(/[^\d.-]/g, '');
+  const normalized = value.replace(/\D/g, '');
   if (!normalized) return null;
   const parsed = Number(normalized);
   return Number.isFinite(parsed) ? parsed : null;
@@ -109,6 +109,11 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
 
     if (form.priceMode === 'number' && currentPrice === null) {
       setError('Vui lòng nhập giá bán hiện tại hợp lệ.');
+      return;
+    }
+
+    if (form.priceMode === 'number' && oldPrice !== null && currentPrice !== null && oldPrice < currentPrice) {
+      setError('Giá gốc không được thấp hơn giá bán hiện tại. Vui lòng kiểm tra lại.');
       return;
     }
 
@@ -187,7 +192,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                   value={form.name}
                   onChange={event => updateForm('name', event.target.value)}
                   className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                  placeholder="SP PC Gaming i5 RTX 4060"
+                  placeholder="Tên sản phẩm"
                 />
               </label>
 
@@ -293,36 +298,59 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
 
               {form.priceMode === 'contact' ? (
                 <div className="rounded-lg border border-outline-variant/50 bg-surface-container-low px-3 py-2 text-[13px] font-semibold text-on-surface-variant">
-                  price = "Liên hệ"
+                  Giá sản phẩm hiển thị dạng liên hệ
                 </div>
               ) : (
                 <div className="space-y-3">
                   <label className="block">
-                    <span className="mb-1 block text-[12px] font-semibold text-on-surface-variant">Giá bán hiện tại</span>
+                    <span className="mb-1 block text-[12px] font-semibold text-on-surface-variant">Giá gốc (trước khi giảm)</span>
                     <input
-                      type="number"
-                      min="0"
-                      value={form.price}
-                      onChange={event => updateForm('price', event.target.value)}
+                      type="text"
+                      value={form.old_price}
+                      onChange={event => {
+                        const val = event.target.value;
+                        const digits = val.replace(/\D/g, '');
+                        if (!digits) updateForm('old_price', '');
+                        else updateForm('old_price', new Intl.NumberFormat('vi-VN').format(Number(digits)));
+                      }}
                       className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                      placeholder="15390000"
+                      placeholder="Nhập giá gốc (bỏ trống nếu không có giảm giá)"
                     />
                   </label>
 
                   <label className="block">
-                    <span className="mb-1 block text-[12px] font-semibold text-on-surface-variant">Giá bán cũ</span>
+                    <span className="mb-1 block text-[12px] font-semibold text-on-surface-variant">Giá bán hiện tại *</span>
                     <input
-                      type="number"
-                      min="0"
-                      value={form.old_price}
-                      onChange={event => updateForm('old_price', event.target.value)}
-                      className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                      placeholder="16390000"
+                      type="text"
+                      value={form.price}
+                      onChange={event => {
+                        const val = event.target.value;
+                        const digits = val.replace(/\D/g, '');
+                        if (!digits) updateForm('price', '');
+                        else updateForm('price', new Intl.NumberFormat('vi-VN').format(Number(digits)));
+                      }}
+                      className={`w-full rounded-lg border bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:ring-1 ${
+                        oldPrice !== null && currentPrice !== null && oldPrice < currentPrice
+                          ? 'border-red-400 focus:border-red-500 focus:ring-red-400'
+                          : 'border-outline-variant/60 focus:border-primary focus:ring-primary'
+                      }`}
+                      placeholder="15.390.000"
                     />
+                    {oldPrice !== null && currentPrice !== null && oldPrice < currentPrice && (
+                      <p className="mt-1 text-[11px] font-semibold text-red-500">
+                        ⚠️ Giá hiện tại không được cao hơn giá gốc!
+                      </p>
+                    )}
                   </label>
 
-                  <div className="min-h-6 rounded-md bg-surface-container-low px-3 py-1.5 text-[12px] font-semibold text-on-surface-variant">
-                    {discount ? `Discount tự động: ${discount}%` : 'Discount sẽ hiển thị khi old_price > price.'}
+                  <div className={`min-h-6 rounded-md px-3 py-1.5 text-[12px] font-semibold ${
+                    discount
+                      ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400'
+                      : 'bg-surface-container-low text-on-surface-variant'
+                  }`}>
+                    {discount
+                      ? `✅ Giảm giá tự động: ${discount}% (giá gốc → giá bán)`
+                      : 'Nhập giá gốc cao hơn giá bán để tự động tính phần trăm giảm.'}
                   </div>
                 </div>
               )}
@@ -334,7 +362,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                   value={form.image_url}
                   onChange={event => updateForm('image_url', event.target.value)}
                   className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                  placeholder="https://songphuong.vn/..."
+                  placeholder="Đường dẫn ảnh sản phẩm"
                 />
               </label>
 
@@ -358,7 +386,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                   value={form.link}
                   onChange={event => updateForm('link', event.target.value)}
                   className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                  placeholder="https://songphuong.vn/..."
+                  placeholder="Đường dẫn chi tiết sản phẩm"
                 />
               </label>
             </section>

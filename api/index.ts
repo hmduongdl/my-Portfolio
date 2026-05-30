@@ -668,7 +668,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           color: p.color,
           glyph: p.glyph,
           status: p.status,
-          visible: p.visible
+          visible: p.visible,
+          updatedAt: p.updated_at
         }));
         return res.status(200).json(mappedProducts);
       } catch (e) {

@@ -79,7 +79,7 @@ const SocialRow = ({
         value={formData[urlKey] as string}
         onChange={(e) => handleChange(urlKey, e.target.value)}
         className="w-full bg-transparent border-none p-0 text-[13px] text-white focus:ring-0 outline-none placeholder:text-zinc-600"
-        placeholder="https://..."
+        placeholder={`Đường dẫn ${label}`}
       />
     </div>
     <div className="shrink-0 ml-4 flex items-center gap-3">
@@ -350,7 +350,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                 value={formData.name}
                 onChange={(e) => handleChange('name', e.target.value)}
                 className={inputClass}
-                placeholder="VD: Hoàng Minh Dương"
+                placeholder="Họ và tên hiển thị"
               />
             </div>
             <div>
@@ -360,7 +360,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                 value={formData.email}
                 onChange={(e) => handleChange('email', e.target.value)}
                 className={inputClass}
-                placeholder="example@email.com"
+                placeholder="Địa chỉ email"
               />
             </div>
             <div>
@@ -370,7 +370,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                 value={formData.phone}
                 onChange={(e) => handleChange('phone', e.target.value)}
                 className={inputClass}
-                placeholder="tel:+84xxx"
+                placeholder="Số điện thoại"
               />
             </div>
           </div>
@@ -391,7 +391,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                   value={formData.avatarUrl}
                   onChange={(e) => handleChange('avatarUrl', e.target.value)}
                   className={`${inputClass} flex-1`}
-                  placeholder="Dán link hình hoặc tải lên..."
+                  placeholder="Đường dẫn ảnh đại diện"
                 />
                 <label className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[13px] font-semibold text-zinc-300 hover:text-white cursor-pointer transition-colors">
                   <Upload size={15} />
@@ -431,7 +431,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                 value={formData.titleEn}
                 onChange={(e) => handleChange('titleEn', e.target.value)}
                 className={inputClass}
-                placeholder="Job title in English"
+                placeholder="Chức danh tiếng Anh"
               />
             </div>
           </div>
@@ -456,7 +456,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                 value={formData.bioEn}
                 onChange={(e) => handleChange('bioEn', e.target.value)}
                 className={`${inputClass} resize-none h-24`}
-                placeholder="A brief introduction in English..."
+                placeholder="Giới thiệu ngắn gọn bằng tiếng Anh..."
               />
               <span className="absolute bottom-2 right-3 text-[10px] text-zinc-500">{formData.bioEn.length}</span>
             </div>
@@ -499,7 +499,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                 value={newTech.name}
                 onChange={(e) => setNewTech(prev => ({ ...prev, name: e.target.value }))}
                 className={inputClass}
-                placeholder="Tên công nghệ, ví dụ: React"
+                placeholder="Tên công nghệ"
               />
               <select
                 value={newTech.category}
@@ -652,7 +652,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                   value={modalForm.role}
                   onChange={(e) => setModalForm(prev => ({ ...prev, role: e.target.value }))}
                   className={inputClass}
-                  placeholder="VD: Senior Developer"
+                  placeholder="Vai trò hoặc chức danh"
                 />
               </div>
               
@@ -663,7 +663,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                   value={modalForm.organization}
                   onChange={(e) => setModalForm(prev => ({ ...prev, organization: e.target.value }))}
                   className={inputClass}
-                  placeholder="VD: Google"
+                  placeholder="Đơn vị hoặc tổ chức"
                 />
               </div>
 
@@ -674,7 +674,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
                   value={modalForm.date}
                   onChange={(e) => setModalForm(prev => ({ ...prev, date: e.target.value }))}
                   className={inputClass}
-                  placeholder="VD: 2021 - Hiện tại"
+                  placeholder="Thời gian"
                 />
               </div>
 

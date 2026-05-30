@@ -493,7 +493,7 @@ export const TimelineEditor: React.FC = () => {
                     <input
                       value={editingItem.role_vn}
                       onChange={e => setEditingItem({ ...editingItem, role_vn: e.target.value })}
-                      placeholder="vd: Web Developer"
+                      placeholder="Vai trò tiếng Việt"
                       className={inputCls}
                     />
                   </FormField>
@@ -501,7 +501,7 @@ export const TimelineEditor: React.FC = () => {
                     <input
                       value={editingItem.role_en}
                       onChange={e => setEditingItem({ ...editingItem, role_en: e.target.value })}
-                      placeholder="e.g. Web Developer"
+                      placeholder="Vai trò tiếng Anh"
                       className={inputCls}
                     />
                   </FormField>
@@ -509,7 +509,7 @@ export const TimelineEditor: React.FC = () => {
                     <input
                       value={editingItem.company}
                       onChange={e => setEditingItem({ ...editingItem, company: e.target.value })}
-                      placeholder="vd: Song Phương Technology"
+                      placeholder="Đơn vị hoặc công ty"
                       className={inputCls}
                     />
                   </FormField>
@@ -517,7 +517,7 @@ export const TimelineEditor: React.FC = () => {
                     <input
                       value={editingItem.company_url || ''}
                       onChange={e => setEditingItem({ ...editingItem, company_url: e.target.value })}
-                      placeholder="https://..."
+                      placeholder="URL đơn vị"
                       className={inputCls}
                     />
                   </FormField>
@@ -525,7 +525,7 @@ export const TimelineEditor: React.FC = () => {
                     <input
                       value={editingItem.period_vn}
                       onChange={e => setEditingItem({ ...editingItem, period_vn: e.target.value })}
-                      placeholder="vd: Tháng 3, 2025 - Hiện tại"
+                      placeholder="Khoảng thời gian tiếng Việt"
                       className={inputCls}
                     />
                   </FormField>
@@ -533,7 +533,7 @@ export const TimelineEditor: React.FC = () => {
                     <input
                       value={editingItem.period_en}
                       onChange={e => setEditingItem({ ...editingItem, period_en: e.target.value })}
-                      placeholder="e.g. Mar 2025 - Present"
+                      placeholder="Khoảng thời gian tiếng Anh"
                       className={inputCls}
                     />
                   </FormField>
@@ -580,7 +580,7 @@ export const TimelineEditor: React.FC = () => {
                       label="🇺🇸 English Description (desc_en)"
                       items={editingItem.desc_en || []}
                       onChange={updated => setEditingItem({ ...editingItem, desc_en: updated })}
-                      placeholder="Description of work or study..."
+                      placeholder="Mô tả tiếng Anh..."
                     />
                   </div>
                 </div>

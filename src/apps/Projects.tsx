@@ -17,15 +17,17 @@ const TABS: { id: TabId; label: string; labelVN: string }[] = [
 
 export const ProjectsApp: React.FC = () => {
   const language = useOSStore((s) => s.language);
-  const [projects, setProjects] = useState<Project[]>([]);
+  const [projects, setProjects] = useState<Project[]>(() => projectService.getCachedProjects(language) || []);
   const [activeTab, setActiveTab] = useState<TabId>('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(() => !projectService.getCachedProjects(language));
   const [error, setError] = useState<string | null>(null);
   const [selectedProjectId, setSelectedProjectId] = useState<string | number | null>(null);
 
   const loadProjects = () => {
-    setIsLoading(true);
+    const cachedProjects = projectService.getCachedProjects(language);
+    if (cachedProjects) setProjects(cachedProjects);
+    setIsLoading(!cachedProjects);
     setError(null);
     projectService
       .getProjects(language)
