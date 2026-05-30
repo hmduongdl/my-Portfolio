@@ -151,7 +151,12 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean; viewMode?: 'g
           )}
         </div>
         <div className="text-xs font-medium text-center leading-tight line-clamp-2 text-ink">{product.name}</div>
-        <div className={`text-[10px] font-semibold ${priceColor}`}>{priceText}</div>
+        <div className="flex flex-col items-center gap-0.5">
+          {hasDiscount && (
+            <div className="text-[9px] text-ink-3 line-through leading-none">{formatVND(product.oldPrice!)}</div>
+          )}
+          <div className={`text-[10px] font-semibold leading-none ${priceColor}`}>{priceText}</div>
+        </div>
       </div>
     );
   }
@@ -187,10 +192,10 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean; viewMode?: 'g
           </div>
         </div>
         <div className="flex flex-col items-end gap-0.5 min-w-[120px]">
-          <div className={`text-[14px] font-bold ${priceColor}`}>{priceText}</div>
           {hasDiscount && (
             <div className="text-[11px] text-ink-3 line-through">{formatVND(product.oldPrice!)}</div>
           )}
+          <div className={`text-[14px] font-bold ${priceColor}`}>{priceText}</div>
         </div>
       </div>
     );
@@ -225,10 +230,10 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean; viewMode?: 'g
       </div>
       <div className="text-[13px] font-medium text-center text-ink leading-tight line-clamp-2">{product.name}</div>
       <div className="flex flex-col items-center gap-0.5">
-        <div className={`text-[12px] font-semibold ${priceColor}`}>{priceText}</div>
         {hasDiscount && (
           <div className="text-[11px] text-ink-3 line-through">{formatVND(product.oldPrice!)}</div>
         )}
+        <div className={`text-[12px] font-semibold ${priceColor}`}>{priceText}</div>
       </div>
     </div>
   );
