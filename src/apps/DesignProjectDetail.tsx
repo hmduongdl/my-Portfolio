@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { ArrowLeft, CheckCircle2, Eye, MoveHorizontal } from 'lucide-react';
 import type { Project, DesignDetails } from '../types/project';
 import { useOSStore } from '../store/useOSStore';
 
@@ -60,7 +61,7 @@ export const DesignProjectDetail: React.FC<DesignProjectDetailProps> = ({ projec
           onClick={onBack}
           className="flex items-center gap-2 text-white/50 hover:text-white transition-colors text-[13px] font-semibold mb-6 group w-fit"
         >
-          <span className="material-symbols-outlined text-[18px] group-hover:-translate-x-1 transition-transform">arrow_back</span>
+          <ArrowLeft size={18} className="group-hover:-translate-x-1 transition-transform" />
           {isVn ? 'Tất cả dự án' : 'All projects'}
         </button>
 
@@ -86,7 +87,7 @@ export const DesignProjectDetail: React.FC<DesignProjectDetailProps> = ({ projec
                 rel="noopener noreferrer"
                 className="bg-[#9C27B0] hover:bg-[#b83bcc] text-white px-5 py-2.5 rounded-lg text-[13px] font-bold flex items-center justify-center gap-2 transition-colors"
               >
-                <span className="material-symbols-outlined text-[18px]">visibility</span>
+                <Eye size={18} />
                 {isVn ? 'Xem Case Study' : 'View full case study'}
               </a>
             )}
@@ -151,7 +152,7 @@ export const DesignProjectDetail: React.FC<DesignProjectDetailProps> = ({ projec
               style={{ left: `${sliderPos}%`, transform: 'translateX(-50%)' }}
             >
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-xl border-2 border-[#9C27B0]/20 pointer-events-auto">
-                <span className="material-symbols-outlined text-[#050914] text-[20px] select-none">swap_horiz</span>
+                <MoveHorizontal size={20} className="text-[#050914] select-none" />
               </div>
             </div>
           </div>
@@ -263,7 +264,7 @@ export const DesignProjectDetail: React.FC<DesignProjectDetailProps> = ({ projec
                   <ul className="space-y-2">
                     {details.deliverables.map((item, i) => (
                       <li key={i} className="flex items-start gap-2 text-[14px] text-white/70">
-                        <span className="material-symbols-outlined text-[#9C27B0] text-[18px]">check_circle</span>
+                        <CheckCircle2 size={18} className="text-[#9C27B0] shrink-0 mt-0.5" />
                         {item}
                       </li>
                     ))}
