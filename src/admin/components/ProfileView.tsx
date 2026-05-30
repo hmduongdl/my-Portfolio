@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Code2, MessageCircle, Edit2, Trash2, Plus, X, Save } from 'lucide-react';
+import { Globe, Code2, MessageCircle, Edit2, Trash2, Plus, X, Save, Upload } from 'lucide-react';
 import { api } from '../api';
 import { useOSStore } from '../../store/useOSStore';
 
@@ -124,6 +124,43 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
 
   const handleChange = (field: keyof ProfileData, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_WIDTH = 400;
+        const MAX_HEIGHT = 400;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL('image/webp', 0.8);
+        handleChange('avatarUrl', dataUrl);
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleModalSave = () => {
@@ -313,21 +350,30 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
           </div>
 
           <div>
-            <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Avatar URL</label>
+            <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Avatar</label>
             <div className="flex gap-4 items-center">
-              <div className="shrink-0 w-16 h-16 rounded-full border border-white/10 overflow-hidden bg-zinc-800 flex items-center justify-center">
+              <div className="relative group shrink-0 w-16 h-16 rounded-full border border-white/10 overflow-hidden bg-zinc-800 flex items-center justify-center cursor-pointer">
                 {formData.avatarUrl ? (
-                  <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                  <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" onError={(e) => (e.currentTarget.style.display = 'none')} />
                 ) : (
                   <span className="text-zinc-500 text-[10px]">No img</span>
                 )}
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50">
+                  <Upload size={18} className="text-white" />
+                </div>
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                  onChange={handleImageUpload}
+                />
               </div>
               <input 
                 type="text" 
                 value={formData.avatarUrl}
                 onChange={(e) => handleChange('avatarUrl', e.target.value)}
                 className={`${inputClass} flex-1`}
-                placeholder="https://..."
+                placeholder="Hoặc dán link hình (https://...)"
               />
             </div>
           </div>

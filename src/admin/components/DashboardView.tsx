@@ -34,10 +34,10 @@ interface ProfileRow {
 }
 
 const DEFAULT_PROFILE = {
-  name: 'Hoàng Minh Dương',
-  avatarUrl: '/my-avatar.jpg',
-  email: 'duonghm.work@gmail.com',
-  phone: 'Liên hệ: 0385 505 879',
+  name: 'Chưa cập nhật',
+  avatarUrl: '',
+  email: 'Chưa cập nhật',
+  phone: 'Chưa cập nhật',
 };
 
 const cardClass = 'rounded-2xl bg-zinc-900/40 border border-white/5 p-5';
