@@ -16,7 +16,10 @@ if (!password) {
 }
 
 const hash = await bcrypt.hash(password, 10);
+const sqlString = (value) => `'${String(value).replace(/'/g, "''")}'`;
 
 console.log(`-- Paste vào NeonSQL SQL Editor:
-INSERT INTO tbl_users (username, password_hash, created_at) VALUES ('${username}', '${hash}', NOW());
+INSERT INTO tbl_users (username, password_hash, created_at)
+VALUES (${sqlString(username)}, ${sqlString(hash)}, NOW())
+ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 `);

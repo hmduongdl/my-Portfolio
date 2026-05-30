@@ -2,9 +2,26 @@ import { VercelRequest, VercelResponse } from '@vercel/node';
 import { Pool } from 'pg';
 import bcrypt from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
-import crypto from 'crypto';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'SongPhuongOS_Super_Secret_Key_2026';
+const JWT_SECRET = process.env.JWT_SECRET;
+const DEFAULT_ALLOWED_ORIGINS = [
+  'https://sp-hoangminhduong.id.vn',
+  'http://localhost:5173',
+  'http://localhost:4173'
+];
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_LOCK_MS = 15 * 60 * 1000;
+const MAX_LOGIN_ATTEMPTS = 5;
+const AUTH_COOKIE_NAME = 'admin_token';
+const AUTH_COOKIE_MAX_AGE = 24 * 60 * 60;
+
+type LoginAttempt = {
+  count: number;
+  firstAttemptAt: number;
+  blockedUntil: number;
+};
+
+const loginAttempts = new Map<string, LoginAttempt>();
 
 
 // SEO defaults are used only when optional SEO keys are missing in tbl_settings.
@@ -38,6 +55,123 @@ function normalizeAvatarUrl(url?: string | null): string {
     return '/images/profile/my-avatar.webp';
   }
   return url;
+}
+
+function getJwtSecret(): Uint8Array | null {
+  if (!JWT_SECRET || JWT_SECRET.length < 32) {
+    console.error('[Security] JWT_SECRET is missing or too short.');
+    return null;
+  }
+  return new TextEncoder().encode(JWT_SECRET);
+}
+
+function getAllowedOrigins(): Set<string> {
+  const origins = new Set(DEFAULT_ALLOWED_ORIGINS);
+  const configuredOrigin = process.env.FRONTEND_URL?.trim();
+  const vercelUrl = process.env.VERCEL_URL?.trim();
+
+  if (configuredOrigin) origins.add(configuredOrigin.replace(/\/$/, ''));
+  if (vercelUrl) origins.add(`https://${vercelUrl.replace(/^https?:\/\//, '').replace(/\/$/, '')}`);
+
+  return origins;
+}
+
+function applyCorsHeaders(req: VercelRequest, res: VercelResponse) {
+  const origin = req.headers.origin;
+  const allowedOrigins = getAllowedOrigins();
+
+  if (typeof origin === 'string' && allowedOrigins.has(origin)) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+    res.setHeader('Vary', 'Origin');
+  }
+
+  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
+  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+}
+
+function getClientIp(req: VercelRequest): string {
+  const forwardedFor = req.headers['x-forwarded-for'];
+  if (typeof forwardedFor === 'string' && forwardedFor.length > 0) {
+    return forwardedFor.split(',')[0].trim();
+  }
+  if (Array.isArray(forwardedFor) && forwardedFor[0]) {
+    return forwardedFor[0].split(',')[0].trim();
+  }
+  return req.socket.remoteAddress || 'unknown';
+}
+
+function loginRateLimitKey(req: VercelRequest, username: string): string {
+  return `${getClientIp(req)}:${username.trim().toLowerCase()}`;
+}
+
+function getLoginBlockMs(key: string): number {
+  const attempt = loginAttempts.get(key);
+  if (!attempt) return 0;
+  const now = Date.now();
+
+  if (attempt.blockedUntil > now) return attempt.blockedUntil - now;
+  if (now - attempt.firstAttemptAt > LOGIN_WINDOW_MS) {
+    loginAttempts.delete(key);
+  }
+  return 0;
+}
+
+function recordLoginFailure(key: string) {
+  const now = Date.now();
+  const current = loginAttempts.get(key);
+
+  if (!current || now - current.firstAttemptAt > LOGIN_WINDOW_MS) {
+    loginAttempts.set(key, { count: 1, firstAttemptAt: now, blockedUntil: 0 });
+    return;
+  }
+
+  const nextCount = current.count + 1;
+  loginAttempts.set(key, {
+    count: nextCount,
+    firstAttemptAt: current.firstAttemptAt,
+    blockedUntil: nextCount >= MAX_LOGIN_ATTEMPTS ? now + LOGIN_LOCK_MS : current.blockedUntil
+  });
+}
+
+function clearLoginFailures(key: string) {
+  loginAttempts.delete(key);
+}
+
+function isBcryptHash(hash: string): boolean {
+  return /^\$2[aby]\$/.test(hash);
+}
+
+function parseCookies(req: VercelRequest): Record<string, string> {
+  const header = req.headers.cookie;
+  if (!header) return {};
+
+  return header.split(';').reduce<Record<string, string>>((cookies, part) => {
+    const [rawName, ...rawValue] = part.trim().split('=');
+    if (!rawName) return cookies;
+    cookies[rawName] = decodeURIComponent(rawValue.join('='));
+    return cookies;
+  }, {});
+}
+
+function getAuthToken(req: VercelRequest): string | null {
+  const authHeader = (req.headers.authorization || req.headers.Authorization) as string | undefined;
+  if (authHeader?.startsWith('Bearer ')) return authHeader.split(' ')[1];
+
+  return parseCookies(req)[AUTH_COOKIE_NAME] || null;
+}
+
+function authCookie(value: string, maxAge: number): string {
+  const secure = process.env.NODE_ENV === 'production' ? '; Secure' : '';
+  return `${AUTH_COOKIE_NAME}=${encodeURIComponent(value)}; Max-Age=${maxAge}; Path=/api; HttpOnly; SameSite=Strict${secure}`;
+}
+
+function setAuthCookie(res: VercelResponse, token: string) {
+  res.setHeader('Set-Cookie', authCookie(token, AUTH_COOKIE_MAX_AGE));
+}
+
+function clearAuthCookie(res: VercelResponse) {
+  res.setHeader('Set-Cookie', authCookie('', 0));
 }
 
 // ============================================================================
@@ -441,11 +575,11 @@ async function syncProfileFromSocialLinks(links: Array<{ platform: string; url?:
 // Helper xác thực (JWT admin bảo mật)
 async function verifyAdminJWT(req: VercelRequest): Promise<boolean> {
   try {
-    const authHeader = (req.headers.authorization || req.headers.Authorization) as string | undefined;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) return false;
-    const token = authHeader.split(' ')[1];
-    
-    const secret = new TextEncoder().encode(JWT_SECRET);
+    const token = getAuthToken(req);
+    if (!token) return false;
+
+    const secret = getJwtSecret();
+    if (!secret) return false;
     const { payload } = await jwtVerify(token, secret);
     return !!payload;
   } catch (err) {
@@ -459,10 +593,7 @@ async function verifyAdminJWT(req: VercelRequest): Promise<boolean> {
 // ============================================================================
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   // CORS Configuration
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader('Access-Control-Allow-Headers', 'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, Authorization');
+  applyCorsHeaders(req, res);
 
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
@@ -500,47 +631,62 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ error: 'BAD_REQUEST', message: 'Username and password are required.' });
     }
 
+    const rateLimitKey = loginRateLimitKey(req, username);
+    const blockedMs = getLoginBlockMs(rateLimitKey);
+    if (blockedMs > 0) {
+      res.setHeader('Retry-After', Math.ceil(blockedMs / 1000).toString());
+      return res.status(429).json({ error: 'TOO_MANY_ATTEMPTS', message: 'Thử đăng nhập quá nhiều lần. Vui lòng thử lại sau.' });
+    }
+
     try {
-      let rows = await runQuery('SELECT * FROM tbl_users WHERE username = $1 LIMIT 1', [username]);
-      
-      if (rows.length === 0) {
-        try {
-          rows = await runQuery('SELECT * FROM admin_users WHERE username = $1 LIMIT 1', [username]);
-        } catch (dbErr) {
-          // Ignore
-        }
-      }
+      const rows = await runQuery('SELECT * FROM tbl_users WHERE username = $1 LIMIT 1', [username]);
 
       if (rows.length === 0) {
+        recordLoginFailure(rateLimitKey);
         return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Tài khoản hoặc mật khẩu không chính xác.' });
       }
 
       const user = rows[0];
-      let isMatch = false;
-
-      if (user.password_hash.startsWith('$2a$') || user.password_hash.startsWith('$2b$')) {
-        isMatch = await bcrypt.compare(password, user.password_hash);
-      } else {
-        const hash = crypto.createHash('sha256').update(password).digest('hex');
-        isMatch = (hash === user.password_hash);
-      }
-
-      if (!isMatch) {
+      if (!user.password_hash || !isBcryptHash(user.password_hash)) {
+        console.error('[API Login Error]: Unsupported password hash format for user id:', user.id);
+        recordLoginFailure(rateLimitKey);
         return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Tài khoản hoặc mật khẩu không chính xác.' });
       }
 
-      const secret = new TextEncoder().encode(JWT_SECRET);
+      const isMatch = await bcrypt.compare(password, user.password_hash);
+      if (!isMatch) {
+        recordLoginFailure(rateLimitKey);
+        return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Tài khoản hoặc mật khẩu không chính xác.' });
+      }
+
+      const secret = getJwtSecret();
+      if (!secret) {
+        return res.status(500).json({ error: 'SERVER_MISCONFIGURED', message: 'JWT secret is not configured.' });
+      }
+
       const token = await new SignJWT({ id: user.id, username: user.username })
         .setProtectedHeader({ alg: 'HS256' })
         .setIssuedAt()
         .setExpirationTime('24h')
         .sign(secret);
 
-      return res.status(200).json({ token });
+      clearLoginFailures(rateLimitKey);
+      setAuthCookie(res, token);
+      return res.status(200).json({ ok: true });
     } catch (e: any) {
       console.error('[API Login Error]:', e);
       return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
     }
+  }
+
+  if (req.method === 'POST' && path === '/auth/logout') {
+    clearAuthCookie(res);
+    return res.status(200).json({ ok: true });
+  }
+
+  if (req.method === 'GET' && path === '/auth/session') {
+    const isAuthorized = await verifyAdminJWT(req);
+    return res.status(isAuthorized ? 200 : 401).json({ authenticated: isAuthorized });
   }
 
   // -------------------------------------------------------------
@@ -798,8 +944,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // ADMIN ROUTES (CẦN JWT)
   // -------------------------------------------------------------
   if (path.startsWith('/admin')) {
-    const authHeader = (req.headers.authorization || req.headers.Authorization) as string | undefined;
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    if (!getAuthToken(req)) {
       return res.status(401).json({ error: 'UNAUTHORIZED', message: 'Thiếu token xác thực.' });
     }
 
