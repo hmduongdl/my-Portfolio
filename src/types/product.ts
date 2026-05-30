@@ -1,4 +1,7 @@
-export type ProductCategory = 'PC Gaming' | 'Office PC' | 'Laptop' | 'VGA' | 'Gaming Gear' | 'Keyboard' | 'Audio';
+import type { ProductCategory } from '../constants/productCategories';
+
+export type { ProductCategory } from '../constants/productCategories';
+export { DEFAULT_PRODUCT_CATEGORY, PRODUCT_CATEGORIES, PRODUCT_CATEGORY_META } from '../constants/productCategories';
 
 export interface Product {
   id: string | number;

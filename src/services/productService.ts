@@ -1,4 +1,5 @@
-import type { Product, ProductCategory } from '../types/product';
+import type { Product } from '../types/product';
+import { normalizeProductCategory } from '../constants/productCategories';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 
@@ -38,10 +39,11 @@ function parsePriceOrString(raw: string | number | null | undefined): number | s
 }
 
 function toProduct(raw: ApiProduct): Product {
+  const category = normalizeProductCategory(raw.category);
   return {
     id: raw.id,
     name: raw.name,
-    category: raw.category as ProductCategory,
+    category,
     price: parsePriceOrString(raw.price),
     oldPrice: raw.oldPrice ? parsePrice(raw.oldPrice) : undefined,
     discount: raw.discount !== undefined && raw.discount !== null ? Number(raw.discount) : null,

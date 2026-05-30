@@ -1,4 +1,53 @@
 const BASE = '/api';
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
+type CacheEntry = {
+  data: unknown;
+  expiresAt: number;
+};
+
+const getCache = new Map<string, CacheEntry>();
+const pendingGets = new Map<string, Promise<unknown>>();
+
+function cloneData<T>(data: T): T {
+  if (data === undefined || data === null) return data;
+  if (typeof structuredClone === 'function') return structuredClone(data);
+  return JSON.parse(JSON.stringify(data)) as T;
+}
+
+function cacheKey(path: string): string {
+  return path;
+}
+
+function invalidatePath(path: string): void {
+  const related = new Set<string>([path]);
+
+  if (path === '/admin/profile') related.add('/profile');
+  if (path === '/admin/timeline' || path === '/admin/tech-stack') related.add('/profile');
+
+  for (const key of getCache.keys()) {
+    for (const prefix of related) {
+      if (key === prefix || key.startsWith(`${prefix}?`)) {
+        getCache.delete(key);
+        break;
+      }
+    }
+  }
+
+  for (const key of pendingGets.keys()) {
+    for (const prefix of related) {
+      if (key === prefix || key.startsWith(`${prefix}?`)) {
+        pendingGets.delete(key);
+        break;
+      }
+    }
+  }
+}
+
+function clearCache(): void {
+  getCache.clear();
+  pendingGets.clear();
+}
 
 function getToken(): string | null {
   return localStorage.getItem('admin_token');
@@ -17,6 +66,7 @@ let onUnauthorizedCallback: (() => void) | null = null;
 async function handle<T>(res: Response): Promise<T> {
   if (res.status === 401 && !res.url.includes('/auth/login')) {
     localStorage.removeItem('admin_token');
+    clearCache();
     alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
     if (onUnauthorizedCallback) {
       onUnauthorizedCallback();
@@ -44,10 +94,12 @@ export const api = {
     });
     const data = await handle<{ token: string }>(res);
     localStorage.setItem('admin_token', data.token);
+    clearCache();
   },
 
   logout(): void {
     localStorage.removeItem('admin_token');
+    clearCache();
   },
 
   isLoggedIn(): boolean {
@@ -55,31 +107,63 @@ export const api = {
   },
 
   async get<T>(path: string): Promise<T> {
-    return handle<T>(await fetch(`${BASE}${path}`, { headers: headers(false) }));
+    const key = cacheKey(path);
+    const cached = getCache.get(key);
+
+    if (cached && cached.expiresAt > Date.now()) {
+      return cloneData(cached.data) as T;
+    }
+
+    const pending = pendingGets.get(key);
+    if (pending) {
+      return pending.then(data => cloneData(data) as T);
+    }
+
+    const request = fetch(`${BASE}${path}`, { headers: headers(false) })
+      .then(res => handle<unknown>(res))
+      .then(data => {
+        if (pendingGets.get(key) === request) {
+          getCache.set(key, {
+            data: cloneData(data),
+            expiresAt: Date.now() + CACHE_TTL_MS,
+          });
+        }
+        return data;
+      })
+      .finally(() => {
+        pendingGets.delete(key);
+      });
+
+    pendingGets.set(key, request);
+    return request.then(data => cloneData(data) as T);
   },
 
   async put<T>(path: string, body: unknown): Promise<T> {
-    return handle<T>(await fetch(`${BASE}${path}`, {
+    const result = await handle<T>(await fetch(`${BASE}${path}`, {
       method: 'PUT',
       headers: headers(),
       body: JSON.stringify(body),
     }));
+    invalidatePath(path);
+    return result;
   },
 
   async post<T>(path: string, body: unknown): Promise<T> {
-    return handle<T>(await fetch(`${BASE}${path}`, {
+    const result = await handle<T>(await fetch(`${BASE}${path}`, {
       method: 'POST',
       headers: headers(),
       body: JSON.stringify(body),
     }));
+    invalidatePath(path);
+    return result;
   },
 
   async del(path: string, body?: unknown): Promise<void> {
-    return handle<void>(await fetch(`${BASE}${path}`, {
+    await handle<void>(await fetch(`${BASE}${path}`, {
       method: 'DELETE',
       headers: headers(body !== undefined),
       body: body !== undefined ? JSON.stringify(body) : undefined,
     }));
+    invalidatePath(path);
   },
 };
-
