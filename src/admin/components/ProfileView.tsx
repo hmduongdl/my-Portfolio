@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Code2, MessageCircle, Edit2, Trash2, Plus, X, Save, Upload } from 'lucide-react';
+import { Globe, Code2, MessageCircle, Edit2, Trash2, Plus, X, Upload } from 'lucide-react';
 import { api } from '../api';
 import { useOSStore } from '../../store/useOSStore';
 
@@ -43,6 +43,51 @@ interface TechStackItem {
 interface ProfileViewProps {
   initialData?: any;
 }
+
+const Toggle = ({ checked, onChange }: { checked: boolean, onChange: (v: boolean) => void }) => (
+  <div 
+    className={`w-10 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${checked ? 'bg-white' : 'bg-zinc-700'}`}
+    onClick={() => onChange(!checked)}
+  >
+    <div className={`w-4 h-4 rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-4 bg-black' : 'translate-x-0 bg-white'}`} />
+  </div>
+);
+
+const SocialRow = ({ 
+  icon: Icon, 
+  label, 
+  urlKey, 
+  visibleKey,
+  formData,
+  handleChange
+}: { 
+  icon: any, 
+  label: string, 
+  urlKey: keyof ProfileData, 
+  visibleKey: keyof ProfileData,
+  formData: ProfileData,
+  handleChange: (field: keyof ProfileData, value: any) => void
+}) => (
+  <div className="flex items-center gap-4 p-3 hover:bg-white/[0.02] rounded-xl transition-colors border border-transparent hover:border-white/5">
+    <div className="w-10 h-10 rounded-xl bg-zinc-800/50 border border-white/10 flex items-center justify-center shrink-0">
+      <Icon size={18} className="text-zinc-400" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1">{label}</div>
+      <input 
+        type="text" 
+        value={formData[urlKey] as string}
+        onChange={(e) => handleChange(urlKey, e.target.value)}
+        className="w-full bg-transparent border-none p-0 text-[13px] text-white focus:ring-0 outline-none placeholder:text-zinc-600"
+        placeholder="https://..."
+      />
+    </div>
+    <div className="shrink-0 ml-4 flex items-center gap-3">
+      <span className="text-[11px] text-zinc-500 font-medium">{formData[visibleKey] ? 'Hiện' : 'Ẩn'}</span>
+      <Toggle checked={formData[visibleKey] as boolean} onChange={(v) => handleChange(visibleKey, v)} />
+    </div>
+  </div>
+);
 
 const TECH_CATEGORIES: TechCategory[] = ['Frontend', 'Backend', 'Design', 'Tools'];
 const NEW_TECH_DEFAULT: Pick<TechStackItem, 'name' | 'category'> = { name: '', category: 'Frontend' };
@@ -277,38 +322,19 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
     }
   };
 
+  useEffect(() => {
+    const handleSaveRequest = (event: Event) => {
+      if (isSaving) return;
+      (event as CustomEvent<{ promises: Promise<unknown>[] }>).detail?.promises.push(handleSaveAll());
+    };
+
+    window.addEventListener('global-save-triggered', handleSaveRequest);
+    return () => window.removeEventListener('global-save-triggered', handleSaveRequest);
+  }, [formData, timelineData, deletedTimelineIds, isSaving]);
+
   const inputClass = "w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors";
   
-  const Toggle = ({ checked, onChange }: { checked: boolean, onChange: (v: boolean) => void }) => (
-    <div 
-      className={`w-10 h-6 flex items-center rounded-full p-1 cursor-pointer transition-colors ${checked ? 'bg-white' : 'bg-zinc-700'}`}
-      onClick={() => onChange(!checked)}
-    >
-      <div className={`w-4 h-4 rounded-full shadow-sm transform transition-transform ${checked ? 'translate-x-4 bg-black' : 'translate-x-0 bg-white'}`} />
-    </div>
-  );
-
-  const SocialRow = ({ icon: Icon, label, urlKey, visibleKey }: { icon: any, label: string, urlKey: keyof ProfileData, visibleKey: keyof ProfileData }) => (
-    <div className="flex items-center gap-4 p-3 hover:bg-white/[0.02] rounded-xl transition-colors border border-transparent hover:border-white/5">
-      <div className="w-10 h-10 rounded-xl bg-zinc-800/50 border border-white/10 flex items-center justify-center shrink-0">
-        <Icon size={18} className="text-zinc-400" />
-      </div>
-      <div className="flex-1 min-w-0">
-        <div className="text-[11px] font-semibold text-zinc-400 uppercase tracking-wider mb-1">{label}</div>
-        <input 
-          type="text" 
-          value={formData[urlKey] as string}
-          onChange={(e) => handleChange(urlKey, e.target.value)}
-          className="w-full bg-transparent border-none p-0 text-[13px] text-white focus:ring-0 outline-none placeholder:text-zinc-600"
-          placeholder="https://..."
-        />
-      </div>
-      <div className="shrink-0 ml-4 flex items-center gap-3">
-        <span className="text-[11px] text-zinc-500 font-medium">{formData[visibleKey] ? 'Hiện' : 'Ẩn'}</span>
-        <Toggle checked={formData[visibleKey] as boolean} onChange={(v) => handleChange(visibleKey, v)} />
-      </div>
-    </div>
-  );
+  // Toggle and SocialRow helper component definitions removed from here
 
   return (
     <div className="space-y-6 pb-24 relative">
@@ -352,29 +378,32 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
           <div>
             <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Avatar</label>
             <div className="flex gap-4 items-center">
-              <div className="relative group shrink-0 w-16 h-16 rounded-full border border-white/10 overflow-hidden bg-zinc-800 flex items-center justify-center cursor-pointer">
+              <div className="shrink-0 w-16 h-16 rounded-full border border-white/10 overflow-hidden bg-zinc-800 flex items-center justify-center">
                 {formData.avatarUrl ? (
-                  <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" onError={(e) => (e.currentTarget.style.display = 'none')} />
+                  <img src={formData.avatarUrl} alt="Avatar" className="w-full h-full object-cover" onError={(e) => (e.currentTarget.style.display = 'none')} />
                 ) : (
                   <span className="text-zinc-500 text-[10px]">No img</span>
                 )}
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity bg-black/50">
-                  <Upload size={18} className="text-white" />
-                </div>
-                <input 
-                  type="file" 
-                  accept="image/*" 
-                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
-                  onChange={handleImageUpload}
-                />
               </div>
-              <input 
-                type="text" 
-                value={formData.avatarUrl}
-                onChange={(e) => handleChange('avatarUrl', e.target.value)}
-                className={`${inputClass} flex-1`}
-                placeholder="Hoặc dán link hình (https://...)"
-              />
+              <div className="flex-1 flex gap-2">
+                <input 
+                  type="text" 
+                  value={formData.avatarUrl}
+                  onChange={(e) => handleChange('avatarUrl', e.target.value)}
+                  className={`${inputClass} flex-1`}
+                  placeholder="Dán link hình hoặc tải lên..."
+                />
+                <label className="shrink-0 flex items-center gap-1.5 px-3 py-2 rounded-lg border border-white/10 bg-white/5 hover:bg-white/10 text-[13px] font-semibold text-zinc-300 hover:text-white cursor-pointer transition-colors">
+                  <Upload size={15} />
+                  <span>Tải lên</span>
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    className="hidden"
+                    onChange={handleImageUpload}
+                  />
+                </label>
+              </div>
             </div>
           </div>
         </div>
@@ -440,10 +469,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
         <h2 className="text-zinc-500 text-xs font-bold tracking-wider uppercase mb-3">Mạng xã hội & Liên kết</h2>
         <div className="bg-zinc-900/30 border border-white/5 rounded-2xl p-5 mb-6">
           <div className="space-y-1">
-            <SocialRow icon={Globe} label="Website" urlKey="websiteUrl" visibleKey="websiteVisible" />
-            <SocialRow icon={Code2} label="GitHub" urlKey="githubUrl" visibleKey="githubVisible" />
-            <SocialRow icon={MessageCircle} label="Facebook" urlKey="facebookUrl" visibleKey="facebookVisible" />
-            <SocialRow icon={MessageCircle} label="Zalo" urlKey="zaloUrl" visibleKey="zaloVisible" />
+            <SocialRow icon={Globe} label="Website" urlKey="websiteUrl" visibleKey="websiteVisible" formData={formData} handleChange={handleChange} />
+            <SocialRow icon={Code2} label="GitHub" urlKey="githubUrl" visibleKey="githubVisible" formData={formData} handleChange={handleChange} />
+            <SocialRow icon={MessageCircle} label="Facebook" urlKey="facebookUrl" visibleKey="facebookVisible" formData={formData} handleChange={handleChange} />
+            <SocialRow icon={MessageCircle} label="Zalo" urlKey="zaloUrl" visibleKey="zaloVisible" formData={formData} handleChange={handleChange} />
           </div>
         </div>
       </section>
@@ -586,28 +615,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({ initialData }) => {
           </button>
         </div>
       </section>
-
-      {/* ── ACTION BAR ─────────────────────────────────────────── */}
-      <div className="fixed bottom-0 left-0 right-0 md:left-64 bg-zinc-900/90 backdrop-blur-xl border-t border-white/10 px-6 py-4 pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-4 flex items-center justify-end z-40">
-        <div className="flex items-center gap-4">
-          <div className="text-[12px] text-zinc-400 mr-2 hidden sm:block">
-            Hãy chắc chắn dữ liệu đã chính xác trước khi lưu.
-          </div>
-          <button
-            onClick={handleSaveAll}
-            disabled={isSaving}
-            className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-[13px] font-semibold bg-white text-black hover:bg-zinc-200 transition-all disabled:opacity-50"
-          >
-            {isSaving ? (
-              <div className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
-            ) : (
-              <Save size={16} />
-            )}
-            {isSaving ? 'Đang lưu...' : 'Lưu thay đổi'}
-          </button>
-        </div>
-      </div>
-
       {/* TIMELINE MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">

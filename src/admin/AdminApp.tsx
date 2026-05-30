@@ -81,6 +81,22 @@ export const AdminApp: React.FC = () => {
   ];
 
   const currentTabItem = navGroups.flatMap(g => g.items).find(item => item.id === tab);
+  const handleGlobalSave = async () => {
+    setIsSaving(true);
+    const saveEvent = new CustomEvent<{ promises: Promise<unknown>[] }>('global-save-triggered', {
+      detail: { promises: [] },
+    });
+    window.dispatchEvent(saveEvent);
+
+    try {
+      await Promise.all(saveEvent.detail.promises);
+      setIsDirty(false);
+    } catch (error) {
+      console.error('Global save failed:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   return (
     <div className="admin-dark h-screen w-screen flex items-center justify-center bg-zinc-950 text-white font-['Inter'] overflow-hidden relative selection:bg-blue-500/30">
@@ -205,16 +221,7 @@ export const AdminApp: React.FC = () => {
             Hủy bỏ
           </button>
           <button 
-            onClick={() => {
-              setIsSaving(true);
-              // Fire an event that child components might listen to
-              window.dispatchEvent(new Event('global-save-triggered'));
-              // Mock API delay
-              setTimeout(() => {
-                setIsSaving(false);
-                setIsDirty(false);
-              }, 1000);
-            }}
+            onClick={handleGlobalSave}
             disabled={isSaving}
             className="bg-blue-600 hover:bg-blue-500 text-white rounded-lg px-4 py-2 text-sm font-medium transition-colors flex items-center justify-center min-w-[120px] disabled:opacity-50 disabled:cursor-not-allowed"
           >

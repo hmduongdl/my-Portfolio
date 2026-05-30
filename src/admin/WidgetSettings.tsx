@@ -67,15 +67,15 @@ export const WidgetSettings: React.FC = () => {
                   value={tweaks.wallpaperUrl || ''}
                   onChange={e => setTweak('wallpaperUrl', e.target.value)}
                   className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
-                  placeholder="e.g. /wallpapers/sonoma-light.jpg"
+                  placeholder="e.g. /images/wallpapers/sonoma-light.jpg"
                 />
               </div>
             )}
 
             <div className="flex flex-wrap gap-2 pt-1">
               {[
-                { label: 'Sonoma Sáng',  type: 'image', url: '/wallpapers/sonoma-light.jpg' },
-                { label: 'Sonoma Tối',   type: 'image', url: '/wallpapers/sonoma-dark.jpg'  },
+                { label: 'Sonoma Sáng',  type: 'image', url: '/images/wallpapers/mobile-background.jpg' },
+                { label: 'Sonoma Tối',   type: 'image', url: '/images/profile/profile-background.jpg'  },
                 { label: 'Video Động',   type: 'video', url: '/bkgr.mp4'                   },
               ].map(preset => (
                 <button

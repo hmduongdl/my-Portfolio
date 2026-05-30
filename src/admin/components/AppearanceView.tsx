@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useOSStore } from '../../store/useOSStore';
-import { Image, Film, SunMoon, Monitor, MapPin, Save, Moon, Sun } from 'lucide-react';
+import { Image, Film, SunMoon, Monitor, MapPin, Moon, Sun } from 'lucide-react';
 import { api } from '../api';
 
 type WallpaperMode = 'image' | 'video' | 'time-shifting';
@@ -42,7 +42,7 @@ export const AppearanceView: React.FC = () => {
   // ── Section 3 state (Theme & Accent Color) ───────────
   const [accentColor, setAccentColor] = useState((tweaks as any).accentColor || '#007AFF');
   const [isDarkMode, setIsDarkMode] = useState((tweaks as any).themeMode !== 'light');
-  const [globalSaveStatus, setGlobalSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'error'>('idle');
+  const [, setGlobalSaveStatus] = useState<'idle' | 'saving' | 'ok' | 'error'>('idle');
 
   const wf = (field: keyof typeof widgetForm, value: string) =>
     setWidgetForm(prev => ({ ...prev, [field]: value }));
@@ -100,6 +100,15 @@ export const AppearanceView: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    const handleSaveRequest = (event: Event) => {
+      (event as CustomEvent<{ promises: Promise<unknown>[] }>).detail?.promises.push(handleGlobalSave());
+    };
+
+    window.addEventListener('global-save-triggered', handleSaveRequest);
+    return () => window.removeEventListener('global-save-triggered', handleSaveRequest);
+  }, [mode, url, widgetForm, accentColor, isDarkMode]);
+
   // Keep local state in sync when store changes externally
   useEffect(() => {
     setMode(tweaks.wallpaperType || 'image');
@@ -132,9 +141,9 @@ export const AppearanceView: React.FC = () => {
   ];
 
   const presets = [
-    { label: 'Sonoma Light', mode: 'image' as WallpaperMode, url: '/wallpapers/sonoma-light.jpg' },
-    { label: 'Sonoma Dark',  mode: 'image' as WallpaperMode, url: '/wallpapers/sonoma-dark.jpg' },
-    { label: 'Video Wave',   mode: 'video' as WallpaperMode, url: '/wallpapers/wave.webm' },
+    { label: 'Sonoma Light', mode: 'image' as WallpaperMode, url: '/images/wallpapers/mobile-background.jpg' },
+    { label: 'Sonoma Dark',  mode: 'image' as WallpaperMode, url: '/images/profile/profile-background.jpg' },
+    { label: 'Video Wave',   mode: 'video' as WallpaperMode, url: '/bkgr.mp4' },
   ];
 
   return (
@@ -410,7 +419,7 @@ export const AppearanceView: React.FC = () => {
                 <div className="flex items-center justify-between w-full">
                   <div className="flex items-center space-x-3">
                     <div className="w-12 h-12 rounded-full border border-white/50 bg-zinc-700 flex items-center justify-center overflow-hidden">
-                      <img src="/songphuong-logo.png" className="w-full h-full object-cover" alt="" onError={e => { e.currentTarget.style.display = 'none'; }} />
+                      <img src="/images/brand/songphuong-logo.png" className="w-full h-full object-cover" alt="" onError={e => { e.currentTarget.style.display = 'none'; }} />
                     </div>
                     <div className="flex flex-col">
                       <span className="text-[9px] font-bold text-zinc-500 tracking-wider">ABOUT ME</span>
@@ -569,28 +578,6 @@ export const AppearanceView: React.FC = () => {
           </div>
         </div>
       </section>
-
-      {/* ── Sticky Save Bar ────────────────────────────────────── */}
-      <footer className="fixed bottom-0 left-0 right-0 md:left-64 h-16 bg-zinc-950/80 backdrop-blur-xl flex items-center justify-end px-6 gap-3 border-t border-white/5 z-40 pb-[max(env(safe-area-inset-bottom,16px),16px)] md:pb-0">
-        <button
-          onClick={handleGlobalSave}
-          disabled={globalSaveStatus === 'saving'}
-          className={`px-6 py-2 rounded-xl text-[13px] font-bold shadow-sm transition-all disabled:opacity-50 flex items-center gap-2 ${
-            globalSaveStatus === 'ok'    ? 'bg-green-500/20 text-green-400 border border-green-500/30' :
-            globalSaveStatus === 'error' ? 'bg-red-500/20 text-red-400 border border-red-500/30'  :
-            'bg-white text-black hover:bg-zinc-200'
-          }`}
-          style={globalSaveStatus === 'idle' ? { backgroundColor: accentColor, color: '#fff' } : undefined}
-        >
-          {globalSaveStatus === 'saving' && (
-            <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-          )}
-          {globalSaveStatus === 'saving' ? 'Đang lưu...' :
-           globalSaveStatus === 'ok'     ? '✓ Đã lưu tất cả'   :
-           globalSaveStatus === 'error'  ? '✗ Lỗi lưu trữ'   :
-           <><Save size={16} /> Lưu Thay Đổi Giao Diện</>}
-        </button>
-      </footer>
     </div>
   );
 };
