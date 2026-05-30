@@ -310,7 +310,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
 
   // Build breadcrumb path for current view
   const getBreadcrumb = useMemo(() => {
-    const prefix = 'Macintosh HD  >  Song Phương Products';
+    const prefix = 'Song Phương Products';
     const groupLabel = SIDEBAR_GROUPS.find((g) => g.id === activeCategory)?.label ?? activeCategory;
     const translatedCat = getCategoryTranslation(activeCategory === 'all' ? 'all' : groupLabel);
     
@@ -338,10 +338,16 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
     return '';
   }, [products]);
 
+
   const disclaimerMarquee = (
     <div className="bg-orange-500/10 border-b border-orange-500/30 overflow-hidden flex items-center py-1 flex-shrink-0">
-      <div className="whitespace-nowrap animate-marquee inline-block text-orange-600 dark:text-orange-400 text-[11px] font-semibold tracking-wide w-full" style={{ paddingLeft: '100%' }}>
-        Giá hiển thị trên trang này chỉ mang tính chất tham khảo, để xem giá chính xác hay nhấp vào từng sản phẩm để xem giá thực tế tại thời điểm xem sản phẩm. {latestUpdateStr && `— ${latestUpdateStr}`}
+      <div
+        className="whitespace-nowrap inline-block text-orange-600 dark:text-orange-400 text-[11px] font-semibold tracking-wide"
+        style={{ animation: 'marqueeScroll 22s linear infinite' }}
+      >
+        Giá hiển thị trên trang này chỉ mang tính chất tham khảo, để xem giá chính xác hãy nhấp vào từng sản phẩm để xem giá thực tế tại thời điểm xem sản phẩm.{latestUpdateStr && `  —  ${latestUpdateStr}`}
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        Giá hiển thị trên trang này chỉ mang tính chất tham khảo, để xem giá chính xác hãy nhấp vào từng sản phẩm để xem giá thực tế tại thời điểm xem sản phẩm.{latestUpdateStr && `  —  ${latestUpdateStr}`}
       </div>
     </div>
   );
