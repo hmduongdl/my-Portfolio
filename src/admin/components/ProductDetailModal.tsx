@@ -1,5 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { api } from '../api';
+import { DEFAULT_PRODUCT_CATEGORY, PRODUCT_CATEGORIES, PRODUCT_CATEGORY_META, normalizeProductCategory } from '../../constants/productCategories';
+import type { ProductCategory } from '../../constants/productCategories';
 
 type ProductStatus = 'New' | 'Hot' | 'Sale';
 type PriceMode = 'contact' | 'number';
@@ -44,7 +46,6 @@ interface ProductFormState {
   link: string;
 }
 
-const CATEGORIES = ['PC Gaming', 'Office PC', 'Laptop', 'VGA', 'Gaming Gear', 'Keyboard', 'Audio'];
 const STATUSES: Array<ProductStatus | ''> = ['', 'New', 'Hot', 'Sale'];
 const GLYPHS = ['🖥', '💻', '⌨', '🎧', '🎮', '🧩', '⚡', '📦'];
 
@@ -63,11 +64,12 @@ function parseNumber(value: string): number | null {
 function initialState(product: ProductRecord | null): ProductFormState {
   const rawPrice = valueToString(product?.price);
   const isContactPrice = !product || rawPrice.trim().toLowerCase() === 'liên hệ';
+  const category = normalizeProductCategory(valueToString(product?.category));
 
   return {
     name: valueToString(product?.name),
-    category: valueToString(product?.category) || 'PC Gaming',
-    glyph: valueToString(product?.glyph) || '🖥',
+    category,
+    glyph: valueToString(product?.glyph) || PRODUCT_CATEGORY_META[category].icon,
     status: (product?.status === 'New' || product?.status === 'Hot' || product?.status === 'Sale') ? product.status : '',
     order_index: Number(product?.order_index ?? product?.orderIndex ?? 0) || 0,
     visible: product?.visible !== false,
@@ -128,7 +130,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
       image_url: form.image_url.trim() || null,
       link: form.link.trim() || null,
       color: '#3B82F6',
-      glyph: form.glyph.trim() || '🖥',
+      glyph: form.glyph.trim() || PRODUCT_CATEGORY_META[form.category as ProductCategory]?.icon || PRODUCT_CATEGORY_META[DEFAULT_PRODUCT_CATEGORY].icon,
       status: form.status || null,
       override_name: null,
       override_price: null,
@@ -203,7 +205,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                   onChange={event => updateForm('category', event.target.value)}
                   className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
                 >
-                  {CATEGORIES.map(category => (
+                  {PRODUCT_CATEGORIES.map(category => (
                     <option key={category} value={category}>{category}</option>
                   ))}
                 </select>
@@ -334,7 +336,7 @@ export const ProductDetailModal: React.FC<ProductDetailModalProps> = ({ product,
                           ? 'border-red-400 focus:border-red-500 focus:ring-red-400'
                           : 'border-outline-variant/60 focus:border-primary focus:ring-primary'
                       }`}
-                      placeholder="15.390.000"
+                      placeholder="Giá bán hiện tại"
                     />
                     {oldPrice !== null && currentPrice !== null && oldPrice < currentPrice && (
                       <p className="mt-1 text-[11px] font-semibold text-red-500">

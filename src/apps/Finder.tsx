@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { productService } from '../services/productService';
 import type { Product, ProductCategory } from '../types/product';
+import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_META } from '../constants/productCategories';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -13,21 +14,16 @@ type TagType = 'Hot' | 'New' | 'Sale';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const CATEGORY_COLORS: Record<ProductCategory, string> = {
-  'PC Gaming': '#3B82F6',
-  'Office PC': '#6B7280',
-  'Laptop': '#8B5CF6',
-  'VGA': '#10B981',
-  'Gaming Gear': '#F59E0B',
-  'Keyboard': '#EC4899',
-  'Audio': '#06B6D4',
-};
+type ProductCategoryFilter = 'all' | ProductCategory;
 
-const SIDEBAR_GROUPS: { id: string; label: string; icon: string; categories: ProductCategory[] | null }[] = [
-  { id: 'all', label: 'All Products', icon: '◯', categories: null },
-  { id: 'pc-laptop', label: 'PC & Laptop', icon: '💻', categories: ['PC Gaming', 'Office PC', 'Laptop'] },
-  { id: 'gaming-gear', label: 'Gaming Gear', icon: '🕹', categories: ['VGA', 'Gaming Gear', 'Keyboard'] },
-  { id: 'audio', label: 'Audio & More', icon: '🎧', categories: ['Audio'] },
+const SIDEBAR_ITEMS: { id: ProductCategoryFilter; label: string; icon: string; category: ProductCategory | null }[] = [
+  { id: 'all', label: 'All Products', icon: '◯', category: null },
+  ...PRODUCT_CATEGORIES.map((category) => ({
+    id: category,
+    label: category,
+    icon: PRODUCT_CATEGORY_META[category].icon,
+    category,
+  })),
 ];
 
 const TAG_ITEMS: { id: TagType; label: string; dot: string }[] = [
@@ -47,18 +43,7 @@ const getCategoryTranslation = (cat: string) => {
   const translations: Record<string, string> = {
     'all': 'Tất cả sản phẩm',
     'All Products': 'Tất cả sản phẩm',
-    'pc-laptop': 'PC & Laptop',
-    'PC & Laptop': 'PC & Laptop',
-    'gaming-gear': 'Gaming Gear',
-    'audio': 'Thiết bị Âm thanh',
-    'Audio & More': 'Thiết bị Âm thanh',
-    'PC Gaming': 'PC Gaming cấu hình cao',
-    'Office PC': 'Máy tính Văn phòng',
-    'Laptop': 'Laptop Acer / Asus',
-    'VGA': 'VGA',
-    'Gaming Gear': 'Gaming Gear',
-    'Keyboard': 'Bàn phím cơ',
-    'Audio': 'Thiết bị Âm thanh',
+    ...Object.fromEntries(PRODUCT_CATEGORIES.map((category) => [category, PRODUCT_CATEGORY_META[category].labelVn])),
   };
   return translations[cat] || cat;
 };
@@ -139,7 +124,7 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean; viewMode?: 'g
           ) : (
             <div
               className="w-full h-full rounded-xl flex items-center justify-center text-white text-2xl"
-              style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[product.category]}, ${CATEGORY_COLORS[product.category]}cc)` }}
+              style={{ background: `linear-gradient(135deg, ${PRODUCT_CATEGORY_META[product.category]?.color ?? PRODUCT_CATEGORY_META.Other.color}, ${PRODUCT_CATEGORY_META[product.category]?.color ?? PRODUCT_CATEGORY_META.Other.color}cc)` }}
             >
               {product.glyph ?? '📦'}
             </div>
@@ -178,7 +163,7 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean; viewMode?: 'g
           ) : (
             <div
               className="w-full h-full rounded-xl flex items-center justify-center text-white text-[24px] font-light shadow-sm"
-              style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[product.category]}, ${CATEGORY_COLORS[product.category]}cc)` }}
+              style={{ background: `linear-gradient(135deg, ${PRODUCT_CATEGORY_META[product.category]?.color ?? PRODUCT_CATEGORY_META.Other.color}, ${PRODUCT_CATEGORY_META[product.category]?.color ?? PRODUCT_CATEGORY_META.Other.color}cc)` }}
             >
               {product.glyph ?? '📦'}
             </div>
@@ -217,7 +202,7 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean; viewMode?: 'g
         ) : (
           <div
             className="w-full h-full rounded-2xl flex items-center justify-center text-white text-[36px] font-light shadow-[0_4px_12px_rgba(0,0,0,0.12)]"
-            style={{ background: `linear-gradient(135deg, ${CATEGORY_COLORS[product.category]}, ${CATEGORY_COLORS[product.category]}cc)` }}
+            style={{ background: `linear-gradient(135deg, ${PRODUCT_CATEGORY_META[product.category]?.color ?? PRODUCT_CATEGORY_META.Other.color}, ${PRODUCT_CATEGORY_META[product.category]?.color ?? PRODUCT_CATEGORY_META.Other.color}cc)` }}
           >
             {product.glyph ?? '📦'}
           </div>
@@ -245,7 +230,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
   const [products, setProducts] = useState<Product[]>(() => productService.getCachedProducts(lang) || []);
   const [isLoading, setIsLoading] = useState<boolean>(() => !productService.getCachedProducts(lang));
   const [error, setError] = useState<string | null>(null);
-  const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [activeCategory, setActiveCategory] = useState<ProductCategoryFilter>('all');
   const [activeTag, setActiveTag] = useState<TagType | null>(null);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -283,10 +268,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
     let result = products;
 
     if (activeCategory !== 'all') {
-      const group = SIDEBAR_GROUPS.find((g) => g.id === activeCategory);
-      if (group?.categories) {
-        result = result.filter((p) => (group.categories as ProductCategory[]).includes(p.category));
-      }
+      result = result.filter((p) => p.category === activeCategory);
     }
 
     if (activeTag) {
@@ -303,7 +285,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
 
   // ── Sidebar handlers ──────────────────────────────────────────────────────
 
-  const handleGroupClick = (groupId: string) => {
+  const handleGroupClick = (groupId: ProductCategoryFilter) => {
     setActiveCategory(groupId);
     setActiveTag(null);
   };
@@ -316,8 +298,8 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
   // Build breadcrumb path for current view
   const getBreadcrumb = useMemo(() => {
     const prefix = 'Song Phương Products';
-    const groupLabel = SIDEBAR_GROUPS.find((g) => g.id === activeCategory)?.label ?? activeCategory;
-    const translatedCat = getCategoryTranslation(activeCategory === 'all' ? 'all' : groupLabel);
+    const itemLabel = SIDEBAR_ITEMS.find((item) => item.id === activeCategory)?.label ?? activeCategory;
+    const translatedCat = getCategoryTranslation(activeCategory === 'all' ? 'all' : itemLabel);
     
     if (activeTag) {
       const tagLabel = TAG_ITEMS.find((t) => t.id === activeTag)?.label || activeTag;
@@ -395,7 +377,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
   // ── Compact layout ────────────────────────────────────────────────────────
 
   if (compact) {
-    const compactTabs = SIDEBAR_GROUPS.map((g) => ({ id: g.id, label: g.id === 'all' ? 'All' : g.label }));
+    const compactTabs = SIDEBAR_ITEMS.map((item) => ({ id: item.id, label: item.id === 'all' ? 'All' : item.label }));
 
     return (
       <div className="flex flex-col h-full select-text">
@@ -450,7 +432,7 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
         <div className="text-[11px] uppercase tracking-wider font-semibold text-ink-3 px-2 py-1">
           Favorites
         </div>
-        {SIDEBAR_GROUPS.map((g) => {
+        {SIDEBAR_ITEMS.map((g) => {
           const isActive = activeCategory === g.id && !activeTag;
           return (
             <div

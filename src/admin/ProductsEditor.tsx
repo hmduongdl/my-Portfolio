@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { api } from './api';
+import { DEFAULT_PRODUCT_CATEGORY, PRODUCT_CATEGORIES, PRODUCT_CATEGORY_META, normalizeProductCategory } from '../constants/productCategories';
 
 interface Product {
   id: number;
@@ -23,12 +24,18 @@ interface Product {
   order_index: number;
 }
 
-const CATEGORIES = ['PC Gaming', 'Office PC', 'Laptop', 'VGA', 'Gaming Gear', 'Keyboard', 'Audio', 'Other'];
+function normalizeProductRow(product: Product): Product {
+  return {
+    ...product,
+    category: normalizeProductCategory(product.category),
+  };
+}
+
 const STATUSES = ['', 'New', 'Hot', 'Sale'];
 
 const EMPTY_FORM: Omit<Product, 'id'> = {
   name: '',
-  category: 'PC Gaming',
+  category: DEFAULT_PRODUCT_CATEGORY,
   tag: null,
   price: null,
   old_price: null,
@@ -36,7 +43,7 @@ const EMPTY_FORM: Omit<Product, 'id'> = {
   image_url: null,
   link: null,
   color: '#3B82F6',
-  glyph: '📦',
+  glyph: PRODUCT_CATEGORY_META[DEFAULT_PRODUCT_CATEGORY].icon,
   status: null,
   override_name: null,
   override_price: null,
@@ -71,7 +78,7 @@ export const ProductsEditor: React.FC = () => {
     try {
       // Fetch all products from our secure admin endpoint
       const data = await api.get<Product[]>('/admin/products');
-      setProducts(data ?? []);
+      setProducts((data ?? []).map(normalizeProductRow));
     } catch (e) {
       console.error('Failed to load products:', e);
     } finally {
@@ -209,7 +216,7 @@ export const ProductsEditor: React.FC = () => {
 
         {/* Category Filter Switch/Pill Bar */}
         <div className="flex items-center gap-1.5 overflow-x-auto py-1.5 no-scrollbar border-b border-outline-variant/20 pb-3">
-          {['All', ...CATEGORIES].map((cat) => {
+          {['All', ...PRODUCT_CATEGORIES].map((cat) => {
             const isActive = selectedCategory === cat;
             return (
               <button
@@ -421,7 +428,7 @@ export const ProductsEditor: React.FC = () => {
                           onChange={e => setEditingProduct({ ...editingProduct, category: e.target.value })}
                           className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all appearance-none cursor-pointer"
                         >
-                          {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                          {PRODUCT_CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                         </select>
                         <span className="material-symbols-outlined text-outline-variant text-[18px] absolute right-2 pointer-events-none">unfold_more</span>
                       </div>
@@ -444,7 +451,7 @@ export const ProductsEditor: React.FC = () => {
                         type="text"
                         value={editingProduct.price ?? ''}
                         onChange={e => setEditingProduct({ ...editingProduct, price: formatPriceInput(e.target.value) })}
-                        placeholder="15.390.000"
+                        placeholder="Giá bán hiện tại"
                         className={`bg-surface-container-low border rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 transition-all ${
                           (() => {
                             const op = editingProduct.old_price ? Number(editingProduct.old_price.toString().replace(/\D/g, '')) : null;

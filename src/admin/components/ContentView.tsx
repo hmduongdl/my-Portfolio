@@ -425,6 +425,7 @@ export const ContentView: React.FC = () => {
       {/* Product Editor Modal */}
       {isProductModalOpen && (
         <ProductDetailModal
+          key={selectedProduct ? `product-${selectedProduct.id ?? selectedProduct.name ?? 'editing'}` : 'product-new'}
           product={selectedProduct}
           onClose={() => {
             setIsProductModalOpen(false);
