@@ -71,7 +71,7 @@ src/
 - [ ] Thay "Song Phương Dev" → "Hoàng Minh Dương"
 - [ ] Thay "Product Designer · Developer" → "Web Developer · IT Student"
 - [ ] Thay "Song Phương Technology" → URL link đến songphuong.vn
-- [ ] Thay avatar placeholder "SP" → dùng ảnh `public/images/profile/my-avatar.png`
+- [ ] Thay avatar placeholder "SP" → dùng ảnh `public/images/profile/my-avatar.webp`
 - [ ] Cập nhật tech stack cho đúng với stack thực tế
 - [ ] Thêm section "Experience" với 3 mốc từ dữ liệu cũ
 
@@ -236,8 +236,8 @@ export const t = {
 ### 5.2 Wallpaper & visual polish
 - [ ] Kiểm tra Wallpaper gradient có hợp với brand màu không
 - [ ] Cân nhắc thêm tùy chọn wallpaper (solid, gradient, image)
-- [ ] Avatar trong About: dùng `public/images/profile/my-avatar.png` với `object-fit: cover`
-- [ ] Logo Song Phương trong Dock: dùng `public/images/brand/songphuong-logo.png`
+- [ ] Avatar trong About: dùng `public/images/profile/my-avatar.webp` với `object-fit: cover`
+- [ ] Logo Song Phương trong Dock: dùng `public/images/brand/songphuong-logo.webp`
 
 ### 5.3 Mobile iOS view
 - [ ] Cập nhật app icon cho Finder (sản phẩm)
@@ -256,7 +256,7 @@ export const t = {
 <!-- Thay các placeholder hiện tại -->
 <title>Hoàng Minh Dương — Song Phương Technology</title>
 <meta name="description" content="Portfolio của Hoàng Minh Dương, Web Developer tại Song Phương Technology." />
-<meta property="og:image" content="/images/profile/my-avatar.png" />
+<meta property="og:image" content="/images/profile/my-avatar.webp" />
 <!-- Thêm canonical URL -->
 ```
 
@@ -304,8 +304,8 @@ Thay 8 dòng data là portfolio đã có "bộ mặt" thật. Từ đó tiếp t
 | [src/apps/index.tsx](src/apps/index.tsx) | Thay social links |
 | [src/apps/Projects.tsx](src/apps/Projects.tsx) | Thay project data |
 | [src/store/useOSStore.ts](src/store/useOSStore.ts) | Thêm lang state |
-| [public/images/profile/my-avatar.png](public/images/profile/my-avatar.png) | Ảnh avatar sẵn có |
-| [public/images/brand/songphuong-logo.png](public/images/brand/songphuong-logo.png) | Logo sẵn có |
+| [public/images/profile/my-avatar.webp](public/images/profile/my-avatar.webp) | Ảnh avatar sẵn có |
+| [public/images/brand/songphuong-logo.webp](public/images/brand/songphuong-logo.webp) | Logo sẵn có |
 
 ---
 

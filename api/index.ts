@@ -13,7 +13,7 @@ const DEFAULT_SEO = {
   title: 'Hoàng Minh Dương — Portfolio | Web Developer tại Song Phương Technology',
   description: 'Hoàng Minh Dương — Sinh viên IT Đại học Đà Lạt, Web Developer thực chiến tại Song Phương Technology, Freelance Designer. Chuyên React, TypeScript, Node.js và thiết kế UI/UX hiện đại.',
   keywords: 'Hoàng Minh Dương, Web Developer, Front End Developer, React, TypeScript, Node.js, Song Phương Technology, Đại học Đà Lạt, Freelance Designer, Portfolio',
-  ogImage: 'https://hmduongdl.github.io/Minimalist-Design-Portfolio/images/brand/songphuong-logo.png',
+  ogImage: 'https://hmduongdl.github.io/Minimalist-Design-Portfolio/images/brand/songphuong-logo.webp',
   twitterCard: 'summary_large_image'
 };
 
@@ -24,7 +24,7 @@ const DEFAULT_PROFILE = {
   title_vn: 'Nhà phát triển Web · Sinh viên IT',
   bio_en: 'IT Student at Da Lat University & Web Developer at Song Phương Technology. Passionate about creative UI design and optimizing user experience.',
   bio_vn: 'Sinh viên IT tại Đại học Đà Lạt & Web Developer tại Song Phương Technology. Đam mê thiết kế giao diện sáng tạo và tối ưu hóa trải nghiệm người dùng.',
-  avatar_url: '/images/profile/my-avatar.png',
+  avatar_url: '/images/profile/my-avatar.webp',
   email: 'duonghm.work@gmail.com',
   phone: '',
   github_url: 'https://github.com/hmduongdl',
@@ -34,8 +34,8 @@ const DEFAULT_PROFILE = {
 };
 
 function normalizeAvatarUrl(url?: string | null): string {
-  if (!url || url === '/images/profile/my-avatar.jpg' || url === '/my-avatar.jpg' || url === '/img/my-avatar.jpg') {
-    return '/images/profile/my-avatar.png';
+  if (!url || url === '/images/profile/my-avatar.jpg' || url === '/images/profile/my-avatar.png' || url === '/my-avatar.jpg' || url === '/img/my-avatar.jpg') {
+    return '/images/profile/my-avatar.webp';
   }
   return url;
 }
@@ -1345,7 +1345,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
             { key: 'seo_title', value: 'Hoàng Minh Dương — Portfolio | Web Developer tại Song Phương Technology' },
             { key: 'seo_description', value: 'Hoàng Minh Dương — Sinh viên IT Đại học Đà Lạt, Web Developer thực chiến tại Song Phương Technology, Freelance Designer. Chuyên React, TypeScript, Node.js và thiết kế UI/UX hiện đại.' },
             { key: 'seo_keywords', value: 'Hoàng Minh Dương, Web Developer, Front End Developer, React, TypeScript, Node.js, Song Phương Technology, Đại học Đà Lạt, Freelance Designer, Portfolio' },
-            { key: 'og_image', value: 'https://hmduongdl.github.io/Minimalist-Design-Portfolio/images/brand/songphuong-logo.png' },
+            { key: 'og_image', value: 'https://hmduongdl.github.io/Minimalist-Design-Portfolio/images/brand/songphuong-logo.webp' },
             { key: 'twitter_card', value: 'summary_large_image' }
           ];
           for (const d of defaults) {

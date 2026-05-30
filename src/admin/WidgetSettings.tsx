@@ -74,8 +74,8 @@ export const WidgetSettings: React.FC = () => {
 
             <div className="flex flex-wrap gap-2 pt-1">
               {[
-                { label: 'Sonoma Sáng',  type: 'image', url: '/images/wallpapers/mobile-background.jpg' },
-                { label: 'Sonoma Tối',   type: 'image', url: '/images/profile/profile-background.jpg'  },
+                { label: 'Sonoma Sáng',  type: 'image', url: '/images/wallpapers/mobile-background.webp' },
+                { label: 'Sonoma Tối',   type: 'image', url: '/images/profile/profile-background.webp'  },
                 { label: 'Video Động',   type: 'video', url: '/bkgr.mp4'                   },
               ].map(preset => (
                 <button

@@ -74,7 +74,7 @@ export const ZaloApp: React.FC = () => {
           <div className="relative p-1 rounded-xl border border-gray-100 bg-white shadow-sm overflow-hidden w-full aspect-square flex items-center justify-center">
             <img
               src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=https://zalo.me/${cleanPhone}`}
-              alt="Zalo QR Code"
+              alt="QR code kết nối Zalo với Hoàng Minh Dương"
               className="w-full h-full object-contain select-none mix-blend-multiply"
               draggable={false}
             />
@@ -91,8 +91,8 @@ export const ZaloApp: React.FC = () => {
           {/* Avatar */}
           <div className="relative">
             <img
-              src="/images/profile/my-avatar.png"
-              alt="Hoàng Minh Dương"
+              src="/images/profile/my-avatar.webp"
+              alt="Hoàng Minh Dương - Web Developer Song Phương Technology"
               className="w-16 h-16 rounded-full border-4 border-white dark:border-zinc-800 shadow-[0_4px_12px_rgba(0,0,0,0.12)] object-cover bg-neutral-100 select-none"
               draggable={false}
             />

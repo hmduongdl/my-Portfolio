@@ -12,12 +12,12 @@ export const PRODUCT_CATEGORIES = [
 export type ProductCategory = typeof PRODUCT_CATEGORIES[number];
 
 export const PRODUCT_CATEGORY_META: Record<ProductCategory, { icon: string; color: string; labelVn: string }> = {
-  'PC Gaming': { icon: '🖥', color: '#3B82F6', labelVn: 'PC Gaming cấu hình cao' },
-  'Office PC': { icon: '▦', color: '#6B7280', labelVn: 'Máy tính văn phòng' },
+  'PC Gaming': { icon: '🖥️', color: '#3B82F6', labelVn: 'PC Gaming cấu hình cao' },
+  'Office PC': { icon: '🏢', color: '#6B7280', labelVn: 'Máy tính văn phòng' },
   Laptop: { icon: '💻', color: '#8B5CF6', labelVn: 'Laptop' },
-  'Linh kiện máy tính': { icon: '▤', color: '#10B981', labelVn: 'Linh kiện máy tính' },
+  'Linh kiện máy tính': { icon: '🧩', color: '#10B981', labelVn: 'Linh kiện máy tính' },
   'Gaming Gear': { icon: '🎮', color: '#F59E0B', labelVn: 'Gaming Gear' },
-  Keyboard: { icon: '⌨', color: '#EC4899', labelVn: 'Bàn phím' },
+  Keyboard: { icon: '⌨️', color: '#EC4899', labelVn: 'Bàn phím' },
   Audio: { icon: '🎧', color: '#06B6D4', labelVn: 'Thiết bị âm thanh' },
   Other: { icon: '📦', color: '#64748B', labelVn: 'Khác' },
 };

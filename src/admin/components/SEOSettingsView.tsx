@@ -212,7 +212,7 @@ export const SEOSettingsView: React.FC = () => {
         <section className="rounded-2xl border border-outline-variant/45 bg-surface-container-lowest p-4 shadow-sm">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="w-full sm:w-56 aspect-[1.91/1] rounded-xl overflow-hidden border border-outline-variant/40 bg-surface-container-low flex items-center justify-center">
-              <img src={seo.og_image} alt="OpenGraph preview" className="w-full h-full object-cover" />
+              <img src={seo.og_image} alt="OpenGraph social sharing preview image" className="w-full h-full object-cover" />
             </div>
             <div className="min-w-0 flex-1">
               <p className="text-[11px] font-bold uppercase tracking-wider text-on-surface-variant/65">OpenGraph Image</p>

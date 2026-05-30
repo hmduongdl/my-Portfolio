@@ -89,8 +89,8 @@ export const AboutApp: React.FC = () => {
       {/* ── Header: Avatar + Name + Title + Company badge ── */}
       <div className="flex flex-col items-center gap-3">
         <ImageWithFallback
-          src={profile.avatarUrl || "/images/profile/my-avatar.png"}
-          alt={profile.name}
+          src={profile.avatarUrl || "/images/profile/my-avatar.webp"}
+          alt={`${profile.name} - Web Developer Song Phương Technology`}
           fallbackText={profile.name}
           className="w-[100px] h-[100px] object-cover rounded-full shadow-md aspect-square border border-gray-200/50"
         />
