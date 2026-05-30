@@ -91,7 +91,7 @@ export const ZaloApp: React.FC = () => {
           {/* Avatar */}
           <div className="relative">
             <img
-              src="/images/profile/my-avatar.jpg"
+              src="/images/profile/my-avatar.png"
               alt="Hoàng Minh Dương"
               className="w-16 h-16 rounded-full border-4 border-white dark:border-zinc-800 shadow-[0_4px_12px_rgba(0,0,0,0.12)] object-cover bg-neutral-100 select-none"
               draggable={false}

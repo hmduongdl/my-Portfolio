@@ -67,7 +67,7 @@ export const WidgetSettings: React.FC = () => {
                   value={tweaks.wallpaperUrl || ''}
                   onChange={e => setTweak('wallpaperUrl', e.target.value)}
                   className="w-full bg-surface-container/30 border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface focus:border-primary focus:ring-1 focus:ring-primary/20 transition-all outline-none"
-                  placeholder="e.g. /images/wallpapers/sonoma-light.jpg"
+                  placeholder="e.g. /images/wallpapers/mobile-background.jpg"
                 />
               </div>
             )}

@@ -21,7 +21,7 @@ export const profileVN: ProfileData = {
   githubUrl: 'https://github.com/hmduongdl',
   facebookUrl: 'https://facebook.com/',
   songphuongUrl: 'https://songphuong.vn',
-  avatarUrl: '/images/profile/my-avatar.jpg'
+  avatarUrl: '/images/profile/my-avatar.png'
 };
 
 export const timelineVN: TimelineItem[] = [
