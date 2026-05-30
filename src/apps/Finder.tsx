@@ -237,8 +237,8 @@ const ProductCard: React.FC<{ product: Product; compact?: boolean; viewMode?: 'g
 // ─── FinderApp ────────────────────────────────────────────────────────────────
 
 export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'vn' }) => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [products, setProducts] = useState<Product[]>(() => productService.getCachedProducts(lang) || []);
+  const [isLoading, setIsLoading] = useState<boolean>(() => !productService.getCachedProducts(lang));
   const [error, setError] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState<string>('all');
   const [activeTag, setActiveTag] = useState<TagType | null>(null);
@@ -246,7 +246,9 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const loadProducts = () => {
-    setIsLoading(true);
+    if (!productService.getCachedProducts(lang)) {
+      setIsLoading(true);
+    }
     setError(null);
     productService
       .getProducts(lang)

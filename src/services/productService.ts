@@ -54,11 +54,14 @@ function toProduct(raw: ApiProduct): Product {
 }
 
 const cache: Record<string, any> = {};
+const pending: Record<string, Promise<any> | undefined> = {};
 
 if (typeof window !== 'undefined') {
   window.addEventListener('products-updated', () => {
     delete cache.products_vn;
     delete cache.products_en;
+    delete pending.products_vn;
+    delete pending.products_en;
   });
 }
 
@@ -66,19 +69,31 @@ export const productService = {
   async getProducts(lang: 'en' | 'vn' = 'vn'): Promise<Product[]> {
     const key = `products_${lang}`;
     if (cache[key]) return cache[key];
-    try {
-      const response = await fetch(`${API_BASE_URL}/products?lang=${lang}`);
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-      const data: ApiProduct[] = await response.json();
-      const mapped = data.filter((r) => r.visible !== false).map(toProduct);
-      cache[key] = mapped;
-      return mapped;
-    } catch (error) {
-      console.error('Failed to fetch products from SQL DB:', error);
-      throw error;
-    }
+    if (pending[key]) return pending[key];
+
+    pending[key] = fetch(`${API_BASE_URL}/products?lang=${lang}`)
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        const data: ApiProduct[] = await response.json();
+        const mapped = data.filter((r) => r.visible !== false).map(toProduct);
+        cache[key] = mapped;
+        return mapped;
+      })
+      .catch((error) => {
+        console.error('Failed to fetch products from SQL DB:', error);
+        throw error;
+      })
+      .finally(() => {
+        delete pending[key];
+      });
+
+    return pending[key];
+  },
+
+  getCachedProducts(lang: 'en' | 'vn' = 'vn'): Product[] | null {
+    return cache[`products_${lang}`] || null;
   },
 
   clearCache() {

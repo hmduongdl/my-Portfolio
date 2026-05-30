@@ -19,14 +19,19 @@ const dotAccent: Record<string, string> = {
 export const AboutApp: React.FC = () => {
   const language = useOSStore((state) => state.language);
 
-  const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [timeline, setTimeline] = useState<TimelineItem[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [profile, setProfile] = useState<ProfileData | null>(() => profileService.getCachedProfile(language));
+  const [timeline, setTimeline] = useState<TimelineItem[]>(() => profileService.getCachedTimeline(language) || []);
+  const [isLoading, setIsLoading] = useState<boolean>(() => {
+    return !profileService.getCachedProfile(language) || !profileService.getCachedTimeline(language);
+  });
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const loadData = () => {
-      setIsLoading(true);
+      // Only set loading if we don't have data already
+      if (!profileService.getCachedProfile(language) || !profileService.getCachedTimeline(language)) {
+        setIsLoading(true);
+      }
       setError(null);
 
       Promise.all([

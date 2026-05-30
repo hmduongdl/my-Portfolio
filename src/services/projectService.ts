@@ -43,11 +43,14 @@ function toProject(raw: ApiProject): Project {
 }
 
 const cache: Record<string, any> = {};
+const pending: Record<string, Promise<any> | undefined> = {};
 
 if (typeof window !== 'undefined') {
   window.addEventListener('projects-updated', () => {
     delete cache.projects_vn;
     delete cache.projects_en;
+    delete pending.projects_vn;
+    delete pending.projects_en;
   });
 }
 
@@ -55,12 +58,25 @@ export const projectService = {
   async getProjects(lang: 'en' | 'vn' = 'vn'): Promise<Project[]> {
     const key = `projects_${lang}`;
     if (cache[key]) return cache[key];
-    const response = await fetch(`${API_BASE_URL}/projects?lang=${lang}`);
-    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-    const data: ApiProject[] = await response.json();
-    const mapped = data.map(toProject);
-    cache[key] = mapped;
-    return mapped;
+    if (pending[key]) return pending[key];
+
+    pending[key] = fetch(`${API_BASE_URL}/projects?lang=${lang}`)
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+        const data: ApiProject[] = await response.json();
+        const mapped = data.map(toProject);
+        cache[key] = mapped;
+        return mapped;
+      })
+      .finally(() => {
+        delete pending[key];
+      });
+
+    return pending[key];
+  },
+
+  getCachedProjects(lang: 'en' | 'vn' = 'vn'): Project[] | null {
+    return cache[`projects_${lang}`] || null;
   },
 
   clearCache() {

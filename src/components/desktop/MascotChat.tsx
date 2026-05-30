@@ -10,7 +10,7 @@ interface Message {
 export const MascotChat: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [showBubble, setShowBubble] = useState(true);
-  const [qaList, setQaList] = useState<ChatbotQA[]>([]);
+  const [qaList, setQaList] = useState<ChatbotQA[]>(() => chatbotService.getCachedQAList() || []);
   const [messages, setMessages] = useState<Message[]>([
     {
       sender: 'bot',
@@ -20,7 +20,7 @@ export const MascotChat: React.FC = () => {
   const [askedIds, setAskedIds] = useState<number[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [isResponding, setIsResponding] = useState(false);
-  const [hotline, setHotline] = useState('');
+  const [hotline, setHotline] = useState(() => profileService.getCachedProfile('vn')?.phone || '');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 

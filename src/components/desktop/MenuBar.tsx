@@ -26,7 +26,7 @@ export const MenuBar: React.FC = () => {
   const setOpenMenu = useOSStore((state) => state.setOpenMenu);
   const openApp = useOSStore((state) => state.openApp);
   const language = useOSStore((state) => state.language);
-  const [profile, setProfile] = useState<any>(null);
+  const [profile, setProfile] = useState<any>(() => profileService.getCachedProfile(language));
 
   useEffect(() => {
     const t = setInterval(() => setTime(new Date()), 1000);
