@@ -282,3 +282,8 @@ body {
 .animate-gentle-bounce {
   animation: gentle-bounce 3s ease-in-out infinite;
 }
+
+@keyframes marqueeScroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
