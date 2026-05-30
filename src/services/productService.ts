@@ -15,6 +15,7 @@ interface ApiProduct {
   visible?: boolean;
   color?: string | null;
   discount?: number | string | null;
+  updatedAt?: string;
 }
 
 function parsePrice(raw: string | number | null | undefined): number {
@@ -50,6 +51,7 @@ function toProduct(raw: ApiProduct): Product {
     glyph: raw.glyph || '📦',
     status: (raw.status as Product['status']) ?? null,
     visible: raw.visible === undefined ? true : raw.visible,
+    updatedAt: raw.updatedAt,
   };
 }
 

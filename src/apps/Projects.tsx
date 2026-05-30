@@ -25,9 +25,9 @@ export const ProjectsApp: React.FC = () => {
   const [selectedProjectId, setSelectedProjectId] = useState<string | number | null>(null);
 
   const loadProjects = () => {
-    if (!projectService.getCachedProjects(language)) {
-      setIsLoading(true);
-    }
+    const cachedProjects = projectService.getCachedProjects(language);
+    if (cachedProjects) setProjects(cachedProjects);
+    setIsLoading(!cachedProjects);
     setError(null);
     projectService
       .getProjects(language)

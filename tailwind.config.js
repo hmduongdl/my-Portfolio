@@ -253,6 +253,7 @@ export default {
         'slide-down':  'slideDown 0.30s var(--ease-calm) forwards',
         'scale-in':    'scaleIn 0.20s var(--ease-spring) forwards',
         'dock-bounce': 'dockBounce 0.5s var(--ease-spring)',
+        'marquee':     'marquee 25s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -275,6 +276,10 @@ export default {
           '0%, 100%': { transform: 'translateY(0)' },
           '40%':      { transform: 'translateY(-12px)' },
           '70%':      { transform: 'translateY(-4px)' },
+        },
+        marquee: {
+          '0%': { transform: 'translateX(100%)' },
+          '100%': { transform: 'translateX(-100%)' },
         },
       },
     },

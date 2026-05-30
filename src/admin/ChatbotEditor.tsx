@@ -222,7 +222,7 @@ export const ChatbotEditor: React.FC = () => {
                   type="text" 
                   value={editingItem.question}
                   onChange={(e) => setEditingItem({ ...editingItem, question: e.target.value })}
-                  placeholder="Ví dụ: Hoàng Minh Dương đang làm việc ở đâu?"
+                  placeholder="Nội dung câu hỏi"
                   className="w-full border border-outline-variant bg-surface-container-lowest focus:border-primary focus:ring-1 focus:ring-primary rounded-xl px-3 py-2 text-[12px] text-on-surface outline-none transition-all"
                 />
               </div>

@@ -197,15 +197,15 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="flex flex-col text-[11px] font-semibold text-on-surface-variant gap-1">
                     Link GitHub
-                    <input type="url" value={project.github_url ?? ''} onChange={(event) => onChange({ ...project, github_url: event.target.value || null })} placeholder="https://github.com/..." className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
+                    <input type="url" value={project.github_url ?? ''} onChange={(event) => onChange({ ...project, github_url: event.target.value || null })} placeholder="Đường dẫn GitHub" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
                   </label>
                   <label className="flex flex-col text-[11px] font-semibold text-on-surface-variant gap-1">
                     Link Demo Live
-                    <input type="url" value={project.demo_url ?? ''} onChange={(event) => onChange({ ...project, demo_url: event.target.value || null })} placeholder="https://..." className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
+                    <input type="url" value={project.demo_url ?? ''} onChange={(event) => onChange({ ...project, demo_url: event.target.value || null })} placeholder="Đường dẫn demo" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
                   </label>
                   <label className="flex flex-col text-[11px] font-semibold text-on-surface-variant gap-1 sm:col-span-2">
                     Mảng công nghệ (tags)
-                    <input type="text" value={project.tags.join(', ')} onChange={(event) => onChange({ ...project, tags: splitTags(event.target.value) })} placeholder="React, TypeScript, Node.js" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
+                    <input type="text" value={project.tags.join(', ')} onChange={(event) => onChange({ ...project, tags: splitTags(event.target.value) })} placeholder="Danh sách công nghệ" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
                   </label>
                 </div>
               )}
@@ -214,11 +214,11 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <label className="flex flex-col text-[11px] font-semibold text-on-surface-variant gap-1">
                     Link Figma
-                    <input type="url" value={designDetails.figmaUrl ?? ''} onChange={(event) => updateDesignDetail('figmaUrl', event.target.value)} placeholder="https://figma.com/..." className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
+                    <input type="url" value={designDetails.figmaUrl ?? ''} onChange={(event) => updateDesignDetail('figmaUrl', event.target.value)} placeholder="Đường dẫn Figma" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
                   </label>
                   <label className="flex flex-col text-[11px] font-semibold text-on-surface-variant gap-1">
                     Link Dribbble
-                    <input type="url" value={designDetails.dribbbleUrl ?? ''} onChange={(event) => updateDesignDetail('dribbbleUrl', event.target.value)} placeholder="https://dribbble.com/..." className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
+                    <input type="url" value={designDetails.dribbbleUrl ?? ''} onChange={(event) => updateDesignDetail('dribbbleUrl', event.target.value)} placeholder="Đường dẫn Dribbble" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary" />
                   </label>
                 </div>
               )}
@@ -227,7 +227,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
                 <div className="grid grid-cols-1 gap-4">
                   <label className="flex flex-col text-[11px] font-semibold text-on-surface-variant gap-1">
                     Lệnh cài đặt
-                    <input type="text" value={toolDetails.installCmd ?? ''} onChange={(event) => updateToolDetail({ installCmd: event.target.value })} placeholder="npm install -g package-name" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface font-mono outline-none focus:ring-1 focus:ring-primary" />
+                    <input type="text" value={toolDetails.installCmd ?? ''} onChange={(event) => updateToolDetail({ installCmd: event.target.value })} placeholder="Lệnh cài đặt" className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface font-mono outline-none focus:ring-1 focus:ring-primary" />
                   </label>
                   <div className="flex flex-col gap-2">
                     <span className="text-[11px] font-semibold text-on-surface-variant">Môi trường tương thích</span>
@@ -253,7 +253,7 @@ export const ProjectModal: React.FC<ProjectModalProps> = ({
             <h4 className="text-[11px] font-bold text-on-surface-variant px-1 uppercase tracking-wider">Description / Mô tả</h4>
             <div className="bg-surface-container-lowest rounded-xl border border-outline-variant/60 shadow-sm p-4 grid grid-cols-1 gap-4">
               <textarea value={project.desc_vn} onChange={(event) => onChange({ ...project, desc_vn: event.target.value })} placeholder="Mô tả tiếng Việt..." rows={3} className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2.5 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary resize-none" />
-              <textarea value={project.desc_en} onChange={(event) => onChange({ ...project, desc_en: event.target.value })} placeholder="English description..." rows={3} className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2.5 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary resize-none" />
+              <textarea value={project.desc_en} onChange={(event) => onChange({ ...project, desc_en: event.target.value })} placeholder="Mô tả tiếng Anh..." rows={3} className="w-full bg-surface-container-low border border-outline-variant/50 rounded-lg p-2.5 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary resize-none" />
             </div>
           </section>
 

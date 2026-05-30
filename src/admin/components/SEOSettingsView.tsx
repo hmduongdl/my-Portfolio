@@ -163,7 +163,7 @@ export const SEOSettingsView: React.FC = () => {
             label="SEO Title"
             value={seo.seo_title}
             onChange={updateField('seo_title')}
-            placeholder="Hoàng Minh Dương - Portfolio | Web Developer"
+            placeholder="Tiêu đề SEO"
             max={60}
           />
           <TextField
@@ -178,13 +178,13 @@ export const SEOSettingsView: React.FC = () => {
             label="Keywords"
             value={seo.seo_keywords}
             onChange={updateField('seo_keywords')}
-            placeholder="portfolio, web developer, react, typescript"
+            placeholder="Từ khóa SEO"
           />
           <TextField
             label="OpenGraph Image"
             value={seo.og_image}
             onChange={updateField('og_image')}
-            placeholder="https://example.com/og-image.png"
+            placeholder="Đường dẫn ảnh chia sẻ"
           />
         </div>
       </section>

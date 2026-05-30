@@ -47,6 +47,8 @@ if (typeof window !== 'undefined') {
     window.addEventListener('timeline-updated', () => {
         delete cache.timeline_vn;
         delete cache.timeline_en;
+        delete pending.timeline_vn;
+        delete pending.timeline_en;
     });
 }
 

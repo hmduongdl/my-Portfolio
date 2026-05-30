@@ -28,10 +28,13 @@ export const AboutApp: React.FC = () => {
 
   useEffect(() => {
     const loadData = () => {
-      // Only set loading if we don't have data already
-      if (!profileService.getCachedProfile(language) || !profileService.getCachedTimeline(language)) {
-        setIsLoading(true);
-      }
+      const cachedProfile = profileService.getCachedProfile(language);
+      const cachedTimeline = profileService.getCachedTimeline(language);
+
+      if (cachedProfile) setProfile(cachedProfile);
+      if (cachedTimeline) setTimeline(cachedTimeline);
+
+      setIsLoading(!cachedProfile || !cachedTimeline);
       setError(null);
 
       Promise.all([

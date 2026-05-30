@@ -47,6 +47,14 @@ const EMPTY_FORM: Omit<Product, 'id'> = {
   order_index: 0,
 };
 
+function formatPriceInput(val: string | null): string | null {
+  if (!val) return null;
+  if (val.trim().toLowerCase() === 'liên hệ') return 'Liên hệ';
+  const digits = val.replace(/\D/g, '');
+  if (!digits) return null;
+  return new Intl.NumberFormat('vi-VN').format(Number(digits));
+}
+
 type ActionStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 export const ProductsEditor: React.FC = () => {
@@ -400,7 +408,7 @@ export const ProductsEditor: React.FC = () => {
                         type="text"
                         value={editingProduct.name}
                         onChange={e => setEditingProduct({ ...editingProduct, name: e.target.value })}
-                        placeholder="e.g. SP PC INTEL i5 12400F"
+                        placeholder="Tên sản phẩm"
                         className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
@@ -420,25 +428,40 @@ export const ProductsEditor: React.FC = () => {
                     </div>
 
                     <div className="flex flex-col">
-                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Base Price / Giá bán</label>
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Old Price / Giá gốc (trước giảm)</label>
                       <input 
                         type="text"
-                        value={editingProduct.price ?? ''}
-                        onChange={e => setEditingProduct({ ...editingProduct, price: e.target.value || null })}
-                        placeholder="e.g. 15.390.000"
+                        value={editingProduct.old_price ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, old_price: formatPriceInput(e.target.value) })}
+                        placeholder="Nhập giá gốc (bỏ trống nếu không giảm giá)"
                         className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
 
                     <div className="flex flex-col">
-                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Old Price / Giá gốc</label>
+                      <label className="text-[11px] font-semibold text-on-surface-variant mb-1">Base Price / Giá bán hiện tại *</label>
                       <input 
                         type="text"
-                        value={editingProduct.old_price ?? ''}
-                        onChange={e => setEditingProduct({ ...editingProduct, old_price: e.target.value || null })}
-                        placeholder="e.g. 16.399.000"
-                        className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
+                        value={editingProduct.price ?? ''}
+                        onChange={e => setEditingProduct({ ...editingProduct, price: formatPriceInput(e.target.value) })}
+                        placeholder="15.390.000"
+                        className={`bg-surface-container-low border rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 transition-all ${
+                          (() => {
+                            const op = editingProduct.old_price ? Number(editingProduct.old_price.toString().replace(/\D/g, '')) : null;
+                            const cp = editingProduct.price ? Number(editingProduct.price.toString().replace(/\D/g, '')) : null;
+                            return op !== null && cp !== null && op < cp
+                              ? 'border-red-400 focus:ring-red-400 focus:border-red-500'
+                              : 'border-outline-variant/50 focus:ring-primary focus:border-primary';
+                          })()
+                        }`}
                       />
+                      {(() => {
+                        const op = editingProduct.old_price ? Number(editingProduct.old_price.toString().replace(/\D/g, '')) : null;
+                        const cp = editingProduct.price ? Number(editingProduct.price.toString().replace(/\D/g, '')) : null;
+                        return op !== null && cp !== null && op < cp
+                          ? <p className="mt-1 text-[11px] font-semibold text-red-500">⚠️ Giá gốc không được thấp hơn giá bán!</p>
+                          : null;
+                      })()}
                     </div>
 
                     <div className="flex flex-col">
@@ -447,7 +470,7 @@ export const ProductsEditor: React.FC = () => {
                         type="number"
                         value={editingProduct.discount ?? ''}
                         onChange={e => setEditingProduct({ ...editingProduct, discount: e.target.value ? Number(e.target.value) : null })}
-                        placeholder="e.g. 6"
+                        placeholder="Phần trăm giảm giá"
                         className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
@@ -484,7 +507,7 @@ export const ProductsEditor: React.FC = () => {
                         type="text"
                         value={editingProduct.glyph}
                         onChange={e => setEditingProduct({ ...editingProduct, glyph: e.target.value })}
-                        placeholder="e.g. 🖥"
+                        placeholder="Emoji đại diện"
                         className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
@@ -527,7 +550,7 @@ export const ProductsEditor: React.FC = () => {
                         type="text"
                         value={editingProduct.image_url ?? ''}
                         onChange={e => setEditingProduct({ ...editingProduct, image_url: e.target.value || null })}
-                        placeholder="e.g. https://songphuong.vn/Content/uploads/..."
+                        placeholder="URL ảnh sản phẩm"
                         className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface font-mono outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
@@ -544,7 +567,7 @@ export const ProductsEditor: React.FC = () => {
                         type="text"
                         value={editingProduct.link ?? ''}
                         onChange={e => setEditingProduct({ ...editingProduct, link: e.target.value || null })}
-                        placeholder="e.g. https://songphuong.vn/product/..."
+                        placeholder="Đường dẫn chi tiết sản phẩm"
                         className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />
                     </div>
@@ -576,7 +599,7 @@ export const ProductsEditor: React.FC = () => {
                       <input 
                         type="text"
                         value={editingProduct.override_price ?? ''}
-                        onChange={e => setEditingProduct({ ...editingProduct, override_price: e.target.value || null })}
+                        onChange={e => setEditingProduct({ ...editingProduct, override_price: formatPriceInput(e.target.value) })}
                         placeholder="Ghi đè giá hiển thị"
                         className="bg-surface-container-low border border-outline-variant/50 rounded-lg px-3 py-2 text-[13px] text-on-surface outline-none focus:ring-1 focus:ring-primary focus:border-primary transition-all"
                       />

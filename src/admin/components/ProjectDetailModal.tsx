@@ -312,7 +312,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                   value={form.name}
                   onChange={event => updateForm('name', event.target.value)}
                   className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                  placeholder="Portfolio OS"
+                  placeholder="Tên dự án"
                 />
               </label>
 
@@ -324,7 +324,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                   disabled={isEditing}
                   onChange={event => updateForm('id', normalizeSlug(event.target.value))}
                   className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 font-mono text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary disabled:opacity-60"
-                  placeholder="portfolio-os"
+                  placeholder="Slug ID"
                 />
               </label>
 
@@ -404,7 +404,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                     onChange={event => updateForm('desc_en', event.target.value)}
                     rows={8}
                     className="w-full resize-none rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="English project description..."
+                    placeholder="Mô tả dự án bằng tiếng Anh..."
                   />
                 </label>
               </div>
@@ -423,7 +423,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                     value={form.github_url}
                     onChange={event => updateForm('github_url', event.target.value)}
                     className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="https://github.com/..."
+                    placeholder="Đường dẫn GitHub"
                   />
                 </label>
 
@@ -434,7 +434,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                     value={form.demo_url}
                     onChange={event => updateForm('demo_url', event.target.value)}
                     className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="https://..."
+                    placeholder="Đường dẫn demo live"
                   />
                 </label>
 
@@ -445,7 +445,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                     value={form.tagsText}
                     onChange={event => updateForm('tagsText', event.target.value)}
                     className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="React, TypeScript, Vite"
+                    placeholder="Danh sách công nghệ"
                   />
                   <span className="mt-1 block text-[11px] text-on-surface-variant">Khi lưu sẽ split theo dấu phẩy thành mảng `tags`.</span>
                 </label>
@@ -461,7 +461,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                     value={form.figma_url}
                     onChange={event => updateForm('figma_url', event.target.value)}
                     className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="https://figma.com/..."
+                    placeholder="Đường dẫn Figma"
                   />
                 </label>
 
@@ -472,7 +472,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                     value={form.dribbble_url}
                     onChange={event => updateForm('dribbble_url', event.target.value)}
                     className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="https://dribbble.com/..."
+                    placeholder="Đường dẫn Dribbble"
                   />
                 </label>
               </div>
@@ -487,7 +487,7 @@ export const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project,
                     value={form.install_cmd}
                     onChange={event => updateForm('install_cmd', event.target.value)}
                     className="w-full rounded-lg border border-outline-variant/60 bg-surface-container-low px-3 py-2 font-mono text-[13px] text-on-surface outline-none transition focus:border-primary focus:ring-1 focus:ring-primary"
-                    placeholder="npm install -g tool-name"
+                    placeholder="Lệnh cài đặt"
                   />
                 </label>
 

@@ -246,9 +246,9 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   const loadProducts = () => {
-    if (!productService.getCachedProducts(lang)) {
-      setIsLoading(true);
-    }
+    const cachedProducts = productService.getCachedProducts(lang);
+    if (cachedProducts) setProducts(cachedProducts);
+    setIsLoading(!cachedProducts);
     setError(null);
     productService
       .getProducts(lang)
@@ -322,6 +322,30 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
     return `${prefix}  >  ${translatedCat}`;
   }, [activeCategory, activeTag]);
 
+  const latestUpdateStr = useMemo(() => {
+    if (!products || products.length === 0) return '';
+    let latest = 0;
+    for (const p of products) {
+      if (p.updatedAt) {
+        const time = new Date(p.updatedAt).getTime();
+        if (time > latest) latest = time;
+      }
+    }
+    if (latest > 0) {
+      const d = new Date(latest);
+      return `Ngày cập nhật giá: ${d.toLocaleDateString('vi-VN')}`;
+    }
+    return '';
+  }, [products]);
+
+  const disclaimerMarquee = (
+    <div className="bg-orange-500/10 border-b border-orange-500/30 overflow-hidden flex items-center py-1 flex-shrink-0">
+      <div className="whitespace-nowrap animate-marquee inline-block text-orange-600 dark:text-orange-400 text-[11px] font-semibold tracking-wide w-full" style={{ paddingLeft: '100%' }}>
+        Giá hiển thị trên trang này chỉ mang tính chất tham khảo, để xem giá chính xác hay nhấp vào từng sản phẩm để xem giá thực tế tại thời điểm xem sản phẩm. {latestUpdateStr && `— ${latestUpdateStr}`}
+      </div>
+    </div>
+  );
+
   // ── Error state ───────────────────────────────────────────────────────────
 
   const ErrorPane: React.FC = () => (
@@ -379,6 +403,8 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
             </button>
           ))}
         </div>
+
+        {disclaimerMarquee}
 
         {/* Grid */}
         <div className="flex-1 overflow-auto p-3.5">
@@ -486,6 +512,8 @@ export const FinderApp: React.FC<FinderAppProps> = ({ compact = false, lang = 'v
             </button>
           </div>
         </div>
+
+        {disclaimerMarquee}
 
         {/* Items grid */}
         <div className="flex-1 overflow-auto p-5 bg-paper">

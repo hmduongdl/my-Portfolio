@@ -13,4 +13,5 @@ export interface Product {
   discount?: number | null;
   color?: string;
   visible?: boolean;
+  updatedAt?: string;
 }

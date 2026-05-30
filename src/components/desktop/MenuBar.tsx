@@ -35,6 +35,9 @@ export const MenuBar: React.FC = () => {
 
   useEffect(() => {
     const loadProfile = () => {
+      const cachedProfile = profileService.getCachedProfile(language);
+      if (cachedProfile) setProfile(cachedProfile);
+
       profileService.getProfile(language)
         .then((p) => {
           if (p) setProfile(p);

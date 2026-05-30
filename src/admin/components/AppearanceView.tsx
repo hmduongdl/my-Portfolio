@@ -226,7 +226,7 @@ export const AppearanceView: React.FC = () => {
                     value={url}
                     onChange={e => handleUrlChange(e.target.value)}
                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                    placeholder={mode === 'video' ? '/bkgr.mp4' : lightWallpaperUrl}
+                    placeholder={mode === 'video' ? 'Đường dẫn video nền' : 'Đường dẫn hình nền'}
                   />
                 </div>
               )}
@@ -362,13 +362,13 @@ export const AppearanceView: React.FC = () => {
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Focus Title</label>
                   <input type="text" value={widgetForm.focusTitle} onChange={e => wf('focusTitle', e.target.value)}
                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                    placeholder="UI/UX" />
+                    placeholder="Tiêu đề focus" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Focus Sub</label>
                   <input type="text" value={widgetForm.focusSub} onChange={e => wf('focusSub', e.target.value)}
                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                    placeholder="Design" />
+                    placeholder="Phụ đề focus" />
                 </div>
               </div>
 
@@ -377,7 +377,7 @@ export const AppearanceView: React.FC = () => {
                 <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Công nghệ chính (Stack)</label>
                 <input type="text" value={widgetForm.stack} onChange={e => wf('stack', e.target.value)}
                   className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                  placeholder="React, TypeScript, Node.js" />
+                  placeholder="Danh sách công nghệ chính" />
               </div>
 
               {/* Status */}
@@ -386,13 +386,13 @@ export const AppearanceView: React.FC = () => {
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Status Title</label>
                   <input type="text" value={widgetForm.statusTitle} onChange={e => wf('statusTitle', e.target.value)}
                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                    placeholder="Open" />
+                    placeholder="Tiêu đề trạng thái" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Status Sub</label>
                   <input type="text" value={widgetForm.statusSub} onChange={e => wf('statusSub', e.target.value)}
                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                    placeholder="to work" />
+                    placeholder="Phụ đề trạng thái" />
                 </div>
               </div>
 
@@ -402,13 +402,13 @@ export const AppearanceView: React.FC = () => {
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Location</label>
                   <input type="text" value={widgetForm.locationTitle} onChange={e => wf('locationTitle', e.target.value)}
                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                    placeholder="DaLat, VN" />
+                    placeholder="Địa điểm" />
                 </div>
                 <div>
                   <label className="block text-[11px] font-semibold text-zinc-400 mb-1.5 uppercase tracking-wider">Timezone</label>
                   <input type="text" value={widgetForm.locationSub} onChange={e => wf('locationSub', e.target.value)}
                     className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                    placeholder="GMT+7" />
+                    placeholder="Múi giờ" />
                 </div>
               </div>
 
@@ -419,7 +419,7 @@ export const AppearanceView: React.FC = () => {
                 </label>
                 <input type="text" value={widgetForm.tools} onChange={e => wf('tools', e.target.value)}
                   className="w-full bg-black/20 border border-white/10 rounded-lg p-2.5 text-[13px] text-white focus:outline-none focus:border-white/30 placeholder:text-zinc-600 transition-colors"
-                  placeholder="Figma, VS Code, Git" />
+                  placeholder="Danh sách công cụ" />
               </div>
 
             </div>
