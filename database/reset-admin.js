@@ -41,6 +41,10 @@ async function hashPassword(password) {
   return await bcrypt.hash(password, saltRounds);
 }
 
+function sqlString(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
 async function run() {
   // Lấy tham số dòng lệnh
   const args = process.argv.slice(2);
@@ -97,11 +101,11 @@ async function run() {
     console.log("\n============================================================");
     console.log("🟢 THÀNH CÔNG: Tài khoản Admin đã được cập nhật trực tiếp!");
     console.log(`   - Tài khoản: ${username}`);
-    console.log(`   - Mật khẩu:  ${rawPassword}`);
+    console.log("   - Mật khẩu:  <không hiển thị>");
     console.log("============================================================\n");
 
     console.log("💡 CÂU LỆNH SQL DỰ PHÒNG (Dùng để dán trực tiếp vào Neon Console nếu cần):");
-    console.log(`\nINSERT INTO tbl_users (username, password_hash, created_at) \nVALUES ('${username}', '${passwordHash}', NOW()) \nON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash;\n`);
+    console.log(`\nINSERT INTO tbl_users (username, password_hash, created_at) \nVALUES (${sqlString(username)}, ${sqlString(passwordHash)}, NOW()) \nON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash;\n`);
 
   } catch (error) {
     console.error("\n🔴 LỖI: Không thể thực thi cập nhật trên Neon SQL!");
@@ -109,7 +113,7 @@ async function run() {
     
     console.log("\n💡 GIẢI PHÁP THỦ CÔNG:");
     console.log("Bạn có thể truy cập vào Neon Console > SQL Editor và dán câu lệnh sau:");
-    console.log(`\nINSERT INTO tbl_users (username, password_hash, created_at) VALUES ('${username}', '${passwordHash}', NOW());\n`);
+    console.log(`\nINSERT INTO tbl_users (username, password_hash, created_at) VALUES (${sqlString(username)}, ${sqlString(passwordHash)}, NOW());\n`);
   } finally {
     await pool.end();
   }

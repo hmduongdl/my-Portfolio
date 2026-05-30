@@ -12,27 +12,40 @@ import { LayoutDashboard, UserCircle, FolderDot, MessageSquare, Palette, Setting
 type Tab = 'dashboard' | 'profile' | 'content' | 'chatbot' | 'ui' | 'settings';
 
 export const AdminApp: React.FC = () => {
-  const [isAuthenticated, setIsAuthenticated] = useState(api.isLoggedIn());
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [tab, setTab] = useState<Tab>('dashboard');
   const [isDirty, setIsDirty] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   useEffect(() => {
+    let mounted = true;
+    api.isLoggedIn().then((authenticated) => {
+      if (mounted) setIsAuthenticated(authenticated);
+    });
     api.onUnauthorized(() => {
       setIsAuthenticated(false);
     });
     return () => {
+      mounted = false;
       api.onUnauthorized(() => {});
     };
   }, []);
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="admin-dark h-screen w-screen flex items-center justify-center bg-zinc-950 text-white">
+        <Loader2 className="h-6 w-6 animate-spin text-blue-400" />
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return <LoginPage onLogin={() => setIsAuthenticated(true)} />;
   }
 
-  const handleLogout = () => {
-    api.logout();
+  const handleLogout = async () => {
+    await api.logout();
     setIsAuthenticated(false);
   };
 

@@ -49,15 +49,9 @@ function clearCache(): void {
   pendingGets.clear();
 }
 
-function getToken(): string | null {
-  return localStorage.getItem('admin_token');
-}
-
 function headers(json = true): HeadersInit {
   const h: Record<string, string> = {};
   if (json) h['Content-Type'] = 'application/json';
-  const t = getToken();
-  if (t) h['Authorization'] = `Bearer ${t}`;
   return h;
 }
 
@@ -65,7 +59,6 @@ let onUnauthorizedCallback: (() => void) | null = null;
 
 async function handle<T>(res: Response): Promise<T> {
   if (res.status === 401 && !res.url.includes('/auth/login')) {
-    localStorage.removeItem('admin_token');
     clearCache();
     alert("Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại!");
     if (onUnauthorizedCallback) {
@@ -89,21 +82,28 @@ export const api = {
   async login(username: string, password: string): Promise<void> {
     const res = await fetch(`${BASE}/auth/login`, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, password }),
     });
-    const data = await handle<{ token: string }>(res);
-    localStorage.setItem('admin_token', data.token);
+    await handle<{ ok: boolean }>(res);
     clearCache();
   },
 
-  logout(): void {
-    localStorage.removeItem('admin_token');
+  async logout(): Promise<void> {
+    await fetch(`${BASE}/auth/logout`, {
+      method: 'POST',
+      credentials: 'same-origin',
+    }).catch(() => undefined);
     clearCache();
   },
 
-  isLoggedIn(): boolean {
-    return !!getToken();
+  async isLoggedIn(): Promise<boolean> {
+    const res = await fetch(`${BASE}/auth/session`, {
+      method: 'GET',
+      credentials: 'same-origin',
+    }).catch(() => null);
+    return res?.ok ?? false;
   },
 
   async get<T>(path: string): Promise<T> {
@@ -119,7 +119,7 @@ export const api = {
       return pending.then(data => cloneData(data) as T);
     }
 
-    const request = fetch(`${BASE}${path}`, { headers: headers(false) })
+    const request = fetch(`${BASE}${path}`, { credentials: 'same-origin', headers: headers(false) })
       .then(res => handle<unknown>(res))
       .then(data => {
         if (pendingGets.get(key) === request) {
@@ -141,6 +141,7 @@ export const api = {
   async put<T>(path: string, body: unknown): Promise<T> {
     const result = await handle<T>(await fetch(`${BASE}${path}`, {
       method: 'PUT',
+      credentials: 'same-origin',
       headers: headers(),
       body: JSON.stringify(body),
     }));
@@ -151,6 +152,7 @@ export const api = {
   async post<T>(path: string, body: unknown): Promise<T> {
     const result = await handle<T>(await fetch(`${BASE}${path}`, {
       method: 'POST',
+      credentials: 'same-origin',
       headers: headers(),
       body: JSON.stringify(body),
     }));
@@ -161,6 +163,7 @@ export const api = {
   async del(path: string, body?: unknown): Promise<void> {
     await handle<void>(await fetch(`${BASE}${path}`, {
       method: 'DELETE',
+      credentials: 'same-origin',
       headers: headers(body !== undefined),
       body: body !== undefined ? JSON.stringify(body) : undefined,
     }));

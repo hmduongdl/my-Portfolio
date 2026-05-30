@@ -68,7 +68,7 @@ CREATE TABLE  ✓ profile
 CREATE TABLE  ✓ social_links
 CREATE TABLE  ✓ products
 CREATE VIEW   ✓ products_resolved
-CREATE TABLE  ✓ admin_users
+CREATE TABLE  ✓ tbl_users
 ```
 
 ### 2.3 Chạy seed.sql
@@ -113,8 +113,8 @@ node database/create-admin.js admin MySecretPass123
 
 Output sẽ là một câu SQL như sau:
 ```sql
-INSERT INTO admin_users (username, password_hash)
-VALUES ('admin', '$2b$12$...')
+INSERT INTO tbl_users (username, password_hash, created_at)
+VALUES ('admin', '$2b$12$...', NOW())
 ON CONFLICT (username) DO UPDATE SET password_hash = EXCLUDED.password_hash;
 ```
 
@@ -313,7 +313,7 @@ vercel dev
                           │  ├── profile      (1 row)     │
                           │  ├── social_links (5 rows)    │
                           │  ├── products     (n rows)    │
-                          │  └── admin_users  (1 row)     │
+                          │  └── tbl_users    (1 row)     │
                           │                               │
                           │  View:                        │
                           │  └── products_resolved        │
