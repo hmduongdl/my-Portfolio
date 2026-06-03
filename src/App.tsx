@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useOSStore } from './store/useOSStore';
 import { Wallpaper } from './components/desktop/Wallpaper';
 import { MenuBar } from './components/desktop/MenuBar';
@@ -34,15 +35,27 @@ export const App: React.FC = () => {
   const isMobile = useOSStore((state) => state.isMobile);
 
   const didOpenInitialWindows = useRef(false);
+  const [searchParams, setSearchParams] = useSearchParams();
 
-  // Initialize About + Notes (Welcome) side-by-side on first desktop load
+  // Initialize windows on first desktop load.
+  // If ?open=<appId> query param is present (redirected from SEO page),
+  // auto-open that specific app. Otherwise, open About + Notes (Welcome) as default.
   useEffect(() => {
     if (!didOpenInitialWindows.current && !isMobile) {
       didOpenInitialWindows.current = true;
-      setTimeout(() => openApp('about', APP_DEFS), 100);
-      setTimeout(() => openApp('welcome', APP_DEFS), 250);
+      const deepLinkApp = searchParams.get('open');
+      if (deepLinkApp && APP_DEFS.some((app) => app.id === deepLinkApp)) {
+        // Open the deep-linked app from SEO redirect
+        setTimeout(() => openApp(deepLinkApp as import('./types').AppID, APP_DEFS), 100);
+        // Clean up the query param from URL
+        setSearchParams({}, { replace: true });
+      } else {
+        // Default: open About + Notes side-by-side
+        setTimeout(() => openApp('about', APP_DEFS), 100);
+        setTimeout(() => openApp('welcome', APP_DEFS), 250);
+      }
     }
-  }, [isMobile, openApp]);
+  }, [isMobile, openApp, searchParams, setSearchParams]);
 
   // Handle outside click to close active Menu Bar dropdown
   useEffect(() => {

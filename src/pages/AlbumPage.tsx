@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '../components/shared/SEOHead';
 import { AlbumWithPhotos, Photo, fetchAlbumsWithPhotos } from '../services/galleryService';
 
@@ -23,6 +24,12 @@ const PhotoFigure: React.FC<{ photo: Photo }> = ({ photo }) => (
 );
 
 const AlbumPage: React.FC = () => {
+  // Redirect real users (JS-enabled) to OS desktop with auto-open Gallery app.
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/?open=gallery', { replace: true });
+  }, [navigate]);
+
   const [albums, setAlbums] = useState<AlbumWithPhotos[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
