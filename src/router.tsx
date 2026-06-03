@@ -3,6 +3,7 @@ import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import App from './App';
 
 const AboutPage = React.lazy(() => import('./pages/AboutPage'));
+const ProductsPage = React.lazy(() => import('./pages/ProductsPage'));
 const ProjectsPage = React.lazy(() => import('./pages/ProjectsPage'));
 const AlbumPage = React.lazy(() => import('./pages/AlbumPage'));
 
@@ -19,6 +20,7 @@ export const AppRouter: React.FC = () => {
         <Routes>
           <Route path="/" element={<App />} />
           <Route path="/about" element={<AboutPage />} />
+          <Route path="/san-pham" element={<ProductsPage />} />
           <Route path="/du-an" element={<ProjectsPage />} />
           <Route path="/album" element={<AlbumPage />} />
         </Routes>

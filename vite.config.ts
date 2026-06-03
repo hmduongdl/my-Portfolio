@@ -9,7 +9,7 @@ function prerenderPlugin() {
     name: 'vite-plugin-prerender-custom',
     closeBundle() {
       const outDir = path.resolve(__dirname, 'dist');
-      const routes = ['/about', '/du-an', '/album'];
+      const routes = ['/about', '/san-pham', '/du-an', '/album'];
 
       const indexPath = path.join(outDir, 'index.html');
       if (!fs.existsSync(indexPath)) {
@@ -42,6 +42,27 @@ function prerenderPlugin() {
                 </section>
               </div>
             </article>
+          </main>
+        `,
+        '/san-pham': `
+          <main class="min-h-screen bg-zinc-950 px-5 py-10 text-zinc-100 sm:px-8 lg:px-10">
+            <div class="mx-auto max-w-7xl">
+              <header class="border-b border-white/10 pb-8">
+                <p class="text-sm font-medium uppercase tracking-[0.18em] text-cyan-300">Sản phẩm Song Phương</p>
+                <h1 class="mt-4 max-w-5xl text-4xl font-semibold leading-tight text-white sm:text-5xl">
+                  Sản phẩm máy tính, PC Gaming, Laptop & Linh kiện
+                </h1>
+                <p class="mt-5 max-w-3xl text-base leading-7 text-zinc-300">
+                  Trang sản phẩm riêng cho Song Phương Technology, tách khỏi trang dự án để công cụ tìm kiếm thu thập đúng nội dung sản phẩm từ dữ liệu quản trị.
+                </p>
+              </header>
+              <section class="mt-10">
+                <h2 class="text-2xl font-semibold text-white">Danh mục sản phẩm máy tính Song Phương</h2>
+                <p class="mt-3 max-w-3xl text-base leading-7 text-zinc-300">
+                  PC Gaming, laptop, linh kiện máy tính và gaming gear được quản lý từ hệ thống admin.
+                </p>
+              </section>
+            </div>
           </main>
         `,
         '/du-an': `

@@ -75,7 +75,7 @@ function topZ(windows: WindowInstance[]): number {
 
 const SEO_ROUTE_BY_APP: Partial<Record<AppID, string>> = {
   about: '/about',
-  finder: '/du-an',
+  finder: '/san-pham',
   projects: '/du-an',
   gallery: '/album',
 };
