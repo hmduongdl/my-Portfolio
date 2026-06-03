@@ -425,6 +425,40 @@ async function ensureTechStackTable() {
   }
 }
 
+async function ensureAlbumGalleryTables() {
+  await runQuery(`
+    CREATE TABLE IF NOT EXISTS tbl_albums (
+      id          VARCHAR(50)  PRIMARY KEY,
+      name        VARCHAR(255) NOT NULL,
+      description TEXT,
+      order_index INT          DEFAULT 0,
+      visible     BOOLEAN      DEFAULT true
+    )
+  `);
+
+  await runQuery(`
+    CREATE TABLE IF NOT EXISTS tbl_photos (
+      id         SERIAL       PRIMARY KEY,
+      album_id   VARCHAR(50)  NOT NULL REFERENCES tbl_albums(id) ON DELETE CASCADE,
+      title      VARCHAR(255) NOT NULL,
+      caption    TEXT,
+      image_url  TEXT         NOT NULL,
+      alt_text   VARCHAR(255) NOT NULL,
+      created_at TIMESTAMP    DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await runQuery(`
+    CREATE INDEX IF NOT EXISTS idx_tbl_albums_visible_order
+    ON tbl_albums (visible, order_index, id)
+  `);
+
+  await runQuery(`
+    CREATE INDEX IF NOT EXISTS idx_tbl_photos_album_created
+    ON tbl_photos (album_id, created_at DESC, id DESC)
+  `);
+}
+
 function normalizeProjectPayload(body: Record<string, any>) {
   const projectType = normalizeProjectType(body.project_type ?? body.projectType, body.category);
   const category = categoryFromProjectType(projectType);
@@ -725,6 +759,43 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   // PUBLIC ENDPOINTS WITH STATIC FALLBACK
   // -------------------------------------------------------------
   if (req.method === 'GET') {
+    // /ALBUMS
+    if (path === '/albums') {
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery(
+          `SELECT id, name, description, order_index, visible
+           FROM tbl_albums
+           WHERE visible = true
+           ORDER BY order_index ASC, id ASC`
+        );
+        res.setHeader('x-database-status', 'online');
+        return res.status(200).json(rows);
+      } catch (e) {
+        return sendDatabaseError(res, '/albums', e);
+      }
+    }
+
+    const albumPhotosMatch = path.match(/^\/albums\/([^/]+)\/photos$/);
+    if (albumPhotosMatch) {
+      const albumId = decodeURIComponent(albumPhotosMatch[1]);
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery(
+          `SELECT p.id, p.album_id, p.title, p.caption, p.image_url, p.alt_text, p.created_at
+           FROM tbl_photos p
+           INNER JOIN tbl_albums a ON a.id = p.album_id
+           WHERE p.album_id = $1
+             AND a.visible = true
+           ORDER BY p.created_at DESC, p.id DESC`,
+          [albumId]
+        );
+        res.setHeader('x-database-status', 'online');
+        return res.status(200).json(rows);
+      } catch (e) {
+        return sendDatabaseError(res, `/albums/${albumId}/photos`, e);
+      }
+    }
     
     // /PROFILE
     if (path === '/profile') {
@@ -1149,6 +1220,177 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       try {
         await runQuery('DELETE FROM tbl_products WHERE id = $1', [b.id]);
         return res.status(200).json({ success: true });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    // --- 3. ALBUMS ---
+    if (req.method === 'GET' && path === '/admin/albums') {
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery('SELECT * FROM tbl_albums ORDER BY order_index ASC, id ASC');
+        return res.status(200).json(rows);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'POST' && path === '/admin/albums') {
+      const b = req.body ?? {};
+      const id = String(b.id ?? '').trim();
+      const name = String(b.name ?? '').trim();
+      if (!id || !name) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Album ID and name are required.' });
+      }
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery(
+          `INSERT INTO tbl_albums (id, name, description, order_index, visible)
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING *`,
+          [
+            id,
+            name,
+            b.description ?? null,
+            Number.isFinite(Number(b.order_index ?? b.orderIndex)) ? Number(b.order_index ?? b.orderIndex) : 0,
+            b.visible !== false
+          ]
+        );
+        return res.status(201).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'PUT' && path === '/admin/albums') {
+      const b = req.body ?? {};
+      const id = String(b.id ?? '').trim();
+      const name = String(b.name ?? '').trim();
+      if (!id || !name) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Album ID and name are required.' });
+      }
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery(
+          `UPDATE tbl_albums
+           SET name = $1,
+               description = $2,
+               order_index = $3,
+               visible = $4
+           WHERE id = $5
+           RETURNING *`,
+          [
+            name,
+            b.description ?? null,
+            Number.isFinite(Number(b.order_index ?? b.orderIndex)) ? Number(b.order_index ?? b.orderIndex) : 0,
+            b.visible !== false,
+            id
+          ]
+        );
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Album not found.' });
+        }
+        return res.status(200).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'DELETE' && path === '/admin/albums') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing album ID' });
+      }
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery('DELETE FROM tbl_albums WHERE id = $1 RETURNING id', [b.id]);
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Album not found.' });
+        }
+        return res.status(200).json({ success: true, deletedId: rows[0].id });
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    // --- 4. PHOTOS ---
+    if (req.method === 'GET' && path === '/admin/photos') {
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery('SELECT * FROM tbl_photos ORDER BY created_at DESC, id DESC');
+        return res.status(200).json(rows);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'POST' && path === '/admin/photos') {
+      const b = req.body ?? {};
+      const albumId = String(b.album_id ?? b.albumId ?? '').trim();
+      const title = String(b.title ?? '').trim();
+      const imageUrl = String(b.image_url ?? b.imageUrl ?? '').trim();
+      const altText = String(b.alt_text ?? b.altText ?? '').trim();
+      if (!albumId || !title || !imageUrl || !altText) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'album_id, title, image_url, and alt_text are required.' });
+      }
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery(
+          `INSERT INTO tbl_photos (album_id, title, caption, image_url, alt_text)
+           VALUES ($1, $2, $3, $4, $5)
+           RETURNING *`,
+          [albumId, title, b.caption ?? null, imageUrl, altText]
+        );
+        return res.status(201).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'PUT' && path === '/admin/photos') {
+      const b = req.body ?? {};
+      const albumId = String(b.album_id ?? b.albumId ?? '').trim();
+      const title = String(b.title ?? '').trim();
+      const imageUrl = String(b.image_url ?? b.imageUrl ?? '').trim();
+      const altText = String(b.alt_text ?? b.altText ?? '').trim();
+      if (!b.id || !albumId || !title || !imageUrl || !altText) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'id, album_id, title, image_url, and alt_text are required.' });
+      }
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery(
+          `UPDATE tbl_photos
+           SET album_id = $1,
+               title = $2,
+               caption = $3,
+               image_url = $4,
+               alt_text = $5
+           WHERE id = $6
+           RETURNING *`,
+          [albumId, title, b.caption ?? null, imageUrl, altText, b.id]
+        );
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Photo not found.' });
+        }
+        return res.status(200).json(rows[0]);
+      } catch (e: any) {
+        return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
+      }
+    }
+
+    if (req.method === 'DELETE' && path === '/admin/photos') {
+      const b = req.body ?? {};
+      if (!b.id) {
+        return res.status(400).json({ error: 'BAD_REQUEST', message: 'Missing photo ID' });
+      }
+      try {
+        await ensureAlbumGalleryTables();
+        const rows = await runQuery('DELETE FROM tbl_photos WHERE id = $1 RETURNING id', [b.id]);
+        if (rows.length === 0) {
+          return res.status(404).json({ error: 'NOT_FOUND', message: 'Photo not found.' });
+        }
+        return res.status(200).json({ success: true, deletedId: rows[0].id });
       } catch (e: any) {
         return res.status(500).json({ error: 'DATABASE_ERROR', message: e.message });
       }

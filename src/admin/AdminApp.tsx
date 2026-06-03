@@ -7,9 +7,10 @@ import { ChatbotEditor } from './ChatbotEditor';
 import { DashboardView } from './components/DashboardView';
 import { ProfileView } from './components/ProfileView';
 import { ContentView } from './components/ContentView';
-import { LayoutDashboard, UserCircle, FolderDot, MessageSquare, Palette, Settings, LogOut, Loader2, Menu, X } from 'lucide-react';
+import { GalleryManagerView } from './components/GalleryManagerView';
+import { LayoutDashboard, UserCircle, FolderDot, MessageSquare, Palette, Settings, LogOut, Loader2, Menu, X, Image } from 'lucide-react';
 
-type Tab = 'dashboard' | 'profile' | 'content' | 'chatbot' | 'ui' | 'settings';
+type Tab = 'dashboard' | 'profile' | 'content' | 'chatbot' | 'ui' | 'settings' | 'gallery_manager';
 
 export const AdminApp: React.FC = () => {
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -71,6 +72,7 @@ export const AdminApp: React.FC = () => {
       title: 'NỘI DUNG',
       items: [
         { id: 'content', label: 'Nội dung & Dự án', icon: FolderDot, content: <ContentView /> },
+        { id: 'gallery_manager', label: 'Quản lý Album ảnh', icon: Image, content: <GalleryManagerView /> },
       ]
     },
     {

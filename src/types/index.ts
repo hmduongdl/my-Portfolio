@@ -1,6 +1,6 @@
 import React from 'react';
 
-export type AppID = 'finder' | 'about' | 'projects' | 'mail' | 'welcome' | 'zalo';
+export type AppID = 'finder' | 'about' | 'projects' | 'gallery' | 'mail' | 'welcome' | 'zalo';
 
 export interface AppDefinition {
   id: AppID;

@@ -1,6 +1,9 @@
 {
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/index.ts" },
+    { "source": "/about", "destination": "/index.html" },
+    { "source": "/du-an", "destination": "/index.html" },
+    { "source": "/album", "destination": "/index.html" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
 

@@ -1,6 +1,5 @@
 User-agent: *
 Allow: /
-Disallow: /api/admin/             # Chặn Google index các API admin riêng tư
-Disallow: /admin-settings         # Chặn Google index trang đăng nhập quản trị của bạn
-
+Disallow: /api/admin/
+Disallow: /admin-settings
 Sitemap: https://sp-hoangminhduong.id.vn/sitemap.xml

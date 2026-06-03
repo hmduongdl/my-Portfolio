@@ -58,22 +58,24 @@ interface DockProps {
 
 export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
     const windows = useOSStore((state) => state.windows);
-    const socials = useOSStore((state) => state.socials);
     const runningIds = useMemo(() => windows.map((w) => w.id), [windows]);
 
-    const handleSocialClick = (app: any) => {
+    const handleContactTrigger = (app: typeof SOCIAL_APPS[number]) => {
+        if (app.id === 'phone') {
+            window.open('tel:0911818016');
+            return;
+        }
+
         if (app.id === 'zalo') {
             onOpen('zalo');
             return;
         }
-        const matchedSocial = socials.find(s => s.platform === app.id);
-        const url = matchedSocial?.url;
-        if (!url) {
-            console.warn(`Missing database social URL for ${app.id}`);
+
+        if (app.id === 'facebook') {
+            window.dispatchEvent(new CustomEvent('contact-trigger', {
+                detail: { platform: 'facebook' },
+            }));
             return;
-        }
-        if (url) {
-            window.open(url, '_blank', 'noopener,noreferrer');
         }
     };
 
@@ -106,7 +108,7 @@ export const Dock: React.FC<DockProps> = ({ apps, onOpen }) => {
                         id={`dock-icon-${app.id}`}
                         name={app.name}
                         icon={app.icon}
-                        onClick={() => handleSocialClick(app)}
+                        onClick={() => handleContactTrigger(app)}
                         isRunning={app.id === 'zalo' ? runningIds.includes('zalo') : false}
                     />
                 ))}
