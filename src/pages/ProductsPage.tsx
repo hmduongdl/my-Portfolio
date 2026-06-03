@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '../components/shared/SEOHead';
 import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_META } from '../constants/productCategories';
 import { productService } from '../services/productService';
@@ -59,6 +60,12 @@ const ProductCard: React.FC<{ product: Product }> = ({ product }) => (
 );
 
 const ProductsPage: React.FC = () => {
+  // Redirect real users (JS-enabled) to OS desktop with auto-open Finder (products) app.
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/?open=finder', { replace: true });
+  }, [navigate]);
+
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);

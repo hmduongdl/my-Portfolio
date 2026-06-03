@@ -1,8 +1,15 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { SEOHead } from '../components/shared/SEOHead';
 
 const AboutPage: React.FC = () => {
+  // Redirect real users (JS-enabled) to OS desktop with auto-open About app.
+  // Crawlers (no JS) will not execute this and will see the static SEO HTML below.
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/?open=about', { replace: true });
+  }, [navigate]);
+
   useEffect(() => {
     const schemaData = {
       "@context": "https://schema.org",

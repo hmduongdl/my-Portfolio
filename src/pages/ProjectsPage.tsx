@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { SEOHead } from '../components/shared/SEOHead';
 
 type ProjectCategory = 'web' | 'design' | 'tools';
@@ -135,6 +136,12 @@ const ProjectCard: React.FC<{ project: SeoProject }> = ({ project }) => {
 };
 
 const ProjectsPage: React.FC = () => {
+  // Redirect real users (JS-enabled) to OS desktop with auto-open Projects app.
+  const navigate = useNavigate();
+  useEffect(() => {
+    navigate('/?open=projects', { replace: true });
+  }, [navigate]);
+
   const [projects, setProjects] = useState<SeoProject[]>(STATIC_PROJECTS);
 
   useEffect(() => {
