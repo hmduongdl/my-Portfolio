@@ -1,9 +1,10 @@
 import React, { useState, useMemo, useCallback, useEffect, useRef } from 'react';
 import { Images, X, ChevronLeft, ChevronRight, ZoomIn, Heart, Download, Grid3X3, LayoutGrid } from 'lucide-react';
+import { AlbumWithPhotos, fetchAlbumsWithPhotos } from '../services/galleryService';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-interface Photo {
+interface GalleryPhoto {
   id: string;
   src: string;
   thumb: string;
@@ -21,223 +22,40 @@ interface Category {
   count: number;
 }
 
-// ─── Demo Photo Data (Unsplash) ──────────────────────────────────────────────
+function toGalleryPhotos(albums: AlbumWithPhotos[]): GalleryPhoto[] {
+  return albums.flatMap((album) =>
+    album.photos
+      .filter((photo) => Boolean(photo.image_url))
+      .map((photo) => ({
+        id: String(photo.id),
+        category: album.id,
+        src: photo.image_url,
+        thumb: photo.image_url,
+        title: photo.title,
+        caption: photo.caption || album.name,
+        width: 4,
+        height: 3,
+      })),
+  );
+}
 
-const DEMO_PHOTOS: Photo[] = [
-  // Phong cảnh
-  {
-    id: 'p1', category: 'landscape',
-    src: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=70',
-    title: 'Đỉnh núi trong sương',
-    caption: 'Phong cảnh thiên nhiên hùng vĩ',
-    width: 4, height: 3,
-  },
-  {
-    id: 'p2', category: 'landscape',
-    src: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?w=400&q=70',
-    title: 'Rừng xanh mát',
-    caption: 'Cánh rừng nhiệt đới xanh ngát',
-    width: 4, height: 3,
-  },
-  {
-    id: 'p3', category: 'landscape',
-    src: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=70',
-    title: 'Ánh nắng xuyên cây',
-    caption: 'Tia nắng sớm chiếu qua tán lá',
-    width: 4, height: 5,
-  },
-  {
-    id: 'p4', category: 'landscape',
-    src: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=400&q=70',
-    title: 'Đồng cỏ hoàng hôn',
-    caption: 'Bầu trời vàng rực lúc chiều tà',
-    width: 4, height: 3,
-  },
-  {
-    id: 'p5', category: 'landscape',
-    src: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1501785888041-af3ef285b470?w=400&q=70',
-    title: 'Hồ nước tĩnh lặng',
-    caption: 'Mặt hồ phản chiếu bầu trời',
-    width: 4, height: 3,
-  },
-
-  // Kiến trúc
-  {
-    id: 'a1', category: 'architecture',
-    src: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=400&q=70',
-    title: 'Tòa nhà hiện đại',
-    caption: 'Kiến trúc đương đại ấn tượng',
-    width: 3, height: 4,
-  },
-  {
-    id: 'a2', category: 'architecture',
-    src: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&q=70',
-    title: 'Mặt tiền kính',
-    caption: 'Kính phản chiếu bầu trời xanh',
-    width: 3, height: 4,
-  },
-  {
-    id: 'a3', category: 'architecture',
-    src: 'https://images.unsplash.com/photo-1431576901776-e539bd916ba2?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1431576901776-e539bd916ba2?w=400&q=70',
-    title: 'Cầu thang xoắn',
-    caption: 'Đường nét hình học tinh tế',
-    width: 4, height: 3,
-  },
-  {
-    id: 'a4', category: 'architecture',
-    src: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1518005020951-eccb494ad742?w=400&q=70',
-    title: 'Đền cổ điển',
-    caption: 'Kiến trúc cổ kính châu Âu',
-    width: 4, height: 3,
-  },
-
-  // Chân dung
-  {
-    id: 'pt1', category: 'portrait',
-    src: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&q=70',
-    title: 'Ánh mắt',
-    caption: 'Chân dung nghệ thuật ánh sáng tự nhiên',
-    width: 3, height: 4,
-  },
-  {
-    id: 'pt2', category: 'portrait',
-    src: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&q=70',
-    title: 'Nụ cười tươi',
-    caption: 'Chân dung ngoài trời nắng đẹp',
-    width: 3, height: 4,
-  },
-  {
-    id: 'pt3', category: 'portrait',
-    src: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=70',
-    title: 'Phong cách đường phố',
-    caption: 'Street style chụp tự nhiên',
-    width: 3, height: 4,
-  },
-
-  // Công nghệ
-  {
-    id: 't1', category: 'technology',
-    src: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=70',
-    title: 'Mạch điện tử',
-    caption: 'Vi mạch bo mạch chủ macro',
-    width: 4, height: 3,
-  },
-  {
-    id: 't2', category: 'technology',
-    src: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=400&q=70',
-    title: 'Bảo mật mạng',
-    caption: 'Hệ thống an ninh mạng hiện đại',
-    width: 4, height: 3,
-  },
-  {
-    id: 't3', category: 'technology',
-    src: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?w=400&q=70',
-    title: 'Lập trình viên',
-    caption: 'Dòng code chạy trên màn hình',
-    width: 4, height: 3,
-  },
-  {
-    id: 't4', category: 'technology',
-    src: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=400&q=70',
-    title: 'Không gian làm việc',
-    caption: 'Setup bàn làm việc công nghệ',
-    width: 4, height: 3,
-  },
-
-  // Du lịch
-  {
-    id: 'tr1', category: 'travel',
-    src: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=400&q=70',
-    title: 'Thuyền trên hồ',
-    caption: 'Du thuyền giữa hồ nước xanh biếc',
-    width: 4, height: 3,
-  },
-  {
-    id: 'tr2', category: 'travel',
-    src: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&q=70',
-    title: 'Bản đồ hành trình',
-    caption: 'Lên kế hoạch khám phá thế giới',
-    width: 4, height: 3,
-  },
-  {
-    id: 'tr3', category: 'travel',
-    src: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=400&q=70',
-    title: 'Con đường phiêu lưu',
-    caption: 'Road trip trên xa lộ tuyệt đẹp',
-    width: 4, height: 3,
-  },
-  {
-    id: 'tr4', category: 'travel',
-    src: 'https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1530789253388-582c481c54b0?w=400&q=70',
-    title: 'Bãi biển hoàng hôn',
-    caption: 'Ngắm hoàng hôn trên bãi biển',
-    width: 4, height: 3,
-  },
-
-  // Ẩm thực
-  {
-    id: 'f1', category: 'food',
-    src: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400&q=70',
-    title: 'Bàn tiệc',
-    caption: 'Ẩm thực tinh hoa trình bày đẹp mắt',
-    width: 4, height: 3,
-  },
-  {
-    id: 'f2', category: 'food',
-    src: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=400&q=70',
-    title: 'Salad tươi mát',
-    caption: 'Món ăn healthy đầy màu sắc',
-    width: 4, height: 3,
-  },
-  {
-    id: 'f3', category: 'food',
-    src: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=1200&q=80',
-    thumb: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=400&q=70',
-    title: 'Pizza nóng hổi',
-    caption: 'Bánh pizza phô mai hấp dẫn',
-    width: 4, height: 3,
-  },
-];
-
-// ─── Categories ──────────────────────────────────────────────────────────────
-
-const CATEGORIES: Category[] = [
-  { id: 'all',          label: 'Tất cả ảnh',     icon: '🖼️', count: DEMO_PHOTOS.length },
-  { id: 'landscape',    label: 'Phong cảnh',      icon: '🏔️', count: DEMO_PHOTOS.filter(p => p.category === 'landscape').length },
-  { id: 'architecture', label: 'Kiến trúc',       icon: '🏛️', count: DEMO_PHOTOS.filter(p => p.category === 'architecture').length },
-  { id: 'portrait',     label: 'Chân dung',       icon: '👤', count: DEMO_PHOTOS.filter(p => p.category === 'portrait').length },
-  { id: 'technology',   label: 'Công nghệ',       icon: '💻', count: DEMO_PHOTOS.filter(p => p.category === 'technology').length },
-  { id: 'travel',       label: 'Du lịch',         icon: '✈️', count: DEMO_PHOTOS.filter(p => p.category === 'travel').length },
-  { id: 'food',         label: 'Ẩm thực',         icon: '🍜', count: DEMO_PHOTOS.filter(p => p.category === 'food').length },
-  { id: 'favorites',    label: 'Yêu thích',       icon: '❤️', count: 0 },
-];
+function toCategories(albums: AlbumWithPhotos[], photos: GalleryPhoto[], favoritesSize: number): Category[] {
+  return [
+    { id: 'all', label: 'Tất cả ảnh', icon: '🖼️', count: photos.length },
+    ...albums.map((album) => ({
+      id: album.id,
+      label: album.name,
+      icon: '📁',
+      count: photos.filter((photo) => photo.category === album.id).length,
+    })),
+    { id: 'favorites', label: 'Yêu thích', icon: '❤️', count: favoritesSize },
+  ];
+}
 
 // ─── Photo Card ──────────────────────────────────────────────────────────────
 
 const PhotoCard: React.FC<{
-  photo: Photo;
+  photo: GalleryPhoto;
   onClick: () => void;
   onToggleFav: (id: string) => void;
   isFav: boolean;
@@ -318,8 +136,8 @@ PhotoCard.displayName = 'PhotoCard';
 // ─── Lightbox ────────────────────────────────────────────────────────────────
 
 const Lightbox: React.FC<{
-  photo: Photo;
-  photos: Photo[];
+  photo: GalleryPhoto;
+  photos: GalleryPhoto[];
   currentIndex: number;
   onClose: () => void;
   onPrev: () => void;
@@ -484,20 +302,48 @@ export const GalleryApp: React.FC<{ compact?: boolean }> = ({ compact }) => {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [viewMode, setViewMode] = useState<'masonry' | 'grid'>('masonry');
+  const [albums, setAlbums] = useState<AlbumWithPhotos[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const contentRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    async function loadGallery() {
+      try {
+        const data = await fetchAlbumsWithPhotos();
+        if (!active) return;
+        setAlbums(data);
+        setLoadError(null);
+      } catch (error) {
+        console.error('Failed to load gallery data:', error);
+        if (active) setLoadError('Không tải được dữ liệu album từ database.');
+      } finally {
+        if (active) setIsLoading(false);
+      }
+    }
+
+    void loadGallery();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const photos = useMemo(() => toGalleryPhotos(albums), [albums]);
 
   // Compute filtered photos
   const filteredPhotos = useMemo(() => {
-    if (activeCategory === 'all') return DEMO_PHOTOS;
-    if (activeCategory === 'favorites') return DEMO_PHOTOS.filter(p => favorites.has(p.id));
-    return DEMO_PHOTOS.filter(p => p.category === activeCategory);
-  }, [activeCategory, favorites]);
+    if (activeCategory === 'all') return photos;
+    if (activeCategory === 'favorites') return photos.filter(p => favorites.has(p.id));
+    return photos.filter(p => p.category === activeCategory);
+  }, [activeCategory, favorites, photos]);
 
   // Update category counts for favorites
-  const categoriesWithCounts = useMemo(() =>
-    CATEGORIES.map(c =>
-      c.id === 'favorites' ? { ...c, count: favorites.size } : c
-    ), [favorites]
+  const categoriesWithCounts = useMemo(
+    () => toCategories(albums, photos, favorites.size),
+    [albums, favorites.size, photos],
   );
 
   const toggleFavorite = useCallback((id: string) => {
@@ -532,6 +378,12 @@ export const GalleryApp: React.FC<{ compact?: boolean }> = ({ compact }) => {
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeCategory]);
 
+  useEffect(() => {
+    if (activeCategory !== 'all' && activeCategory !== 'favorites' && !albums.some(album => album.id === activeCategory)) {
+      setActiveCategory('all');
+    }
+  }, [activeCategory, albums]);
+
   // ── Compact mode (mobile-like) ──────────────────────────────────────────
   if (compact) {
     return (
@@ -555,23 +407,37 @@ export const GalleryApp: React.FC<{ compact?: boolean }> = ({ compact }) => {
 
         {/* Grid */}
         <div ref={contentRef} className="flex-1 overflow-auto p-3">
-          <div className="columns-2 gap-3">
-            {filteredPhotos.map((photo, i) => (
-              <PhotoCard
-                key={photo.id}
-                photo={photo}
-                index={i}
-                onClick={() => openLightbox(i)}
-                onToggleFav={toggleFavorite}
-                isFav={favorites.has(photo.id)}
-              />
-            ))}
-          </div>
-          {filteredPhotos.length === 0 && (
+          {isLoading ? (
             <div className="flex flex-col items-center justify-center py-20 text-white/40">
               <Images className="w-12 h-12 mb-3 opacity-40" />
-              <div className="text-sm font-medium">Chưa có ảnh nào</div>
+              <div className="text-sm font-medium">Đang tải album...</div>
             </div>
+          ) : loadError ? (
+            <div className="flex flex-col items-center justify-center py-20 px-6 text-center text-red-200/80">
+              <Images className="w-12 h-12 mb-3 opacity-40" />
+              <div className="text-sm font-medium">{loadError}</div>
+            </div>
+          ) : (
+            <>
+              <div className="columns-2 gap-3">
+                {filteredPhotos.map((photo, i) => (
+                  <PhotoCard
+                    key={photo.id}
+                    photo={photo}
+                    index={i}
+                    onClick={() => openLightbox(i)}
+                    onToggleFav={toggleFavorite}
+                    isFav={favorites.has(photo.id)}
+                  />
+                ))}
+              </div>
+              {filteredPhotos.length === 0 && (
+                <div className="flex flex-col items-center justify-center py-20 text-white/40">
+                  <Images className="w-12 h-12 mb-3 opacity-40" />
+                  <div className="text-sm font-medium">Chưa có ảnh nào</div>
+                </div>
+              )}
+            </>
           )}
         </div>
 
@@ -620,7 +486,7 @@ export const GalleryApp: React.FC<{ compact?: boolean }> = ({ compact }) => {
             </div>
             <div>
               <div className="text-[13px] font-bold text-white/90 leading-tight">Album Trưng Bày</div>
-              <div className="text-[10px] text-white/40 font-medium">{DEMO_PHOTOS.length} ảnh</div>
+              <div className="text-[10px] text-white/40 font-medium">{photos.length} ảnh</div>
             </div>
           </div>
         </div>
@@ -726,7 +592,34 @@ export const GalleryApp: React.FC<{ compact?: boolean }> = ({ compact }) => {
             scrollbarColor: 'rgba(255,255,255,0.08) transparent',
           }}
         >
-          {filteredPhotos.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col items-center justify-center h-full py-20">
+              <div
+                className="w-20 h-20 rounded-2xl bg-white/[0.04] flex items-center justify-center mb-5"
+                style={{ animation: 'galleryFadeIn 0.6s ease-out' }}
+              >
+                <Images className="w-8 h-8 text-white/20" />
+              </div>
+              <div className="text-[14px] font-semibold text-white/40 mb-1">
+                Đang tải album...
+              </div>
+              <div className="text-[12px] text-white/20">
+                Dữ liệu được lấy từ database qua admin.
+              </div>
+            </div>
+          ) : loadError ? (
+            <div className="flex flex-col items-center justify-center h-full py-20 px-8 text-center">
+              <div
+                className="w-20 h-20 rounded-2xl bg-red-500/[0.08] flex items-center justify-center mb-5"
+                style={{ animation: 'galleryFadeIn 0.6s ease-out' }}
+              >
+                <Images className="w-8 h-8 text-red-200/40" />
+              </div>
+              <div className="text-[14px] font-semibold text-red-200/80 mb-1">
+                {loadError}
+              </div>
+            </div>
+          ) : filteredPhotos.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-20">
               <div
                 className="w-20 h-20 rounded-2xl bg-white/[0.04] flex items-center justify-center mb-5"

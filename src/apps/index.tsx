@@ -6,8 +6,8 @@ import { MailApp } from './Mail';
 import { WelcomeApp } from './Welcome';
 import { ZaloApp } from './Zalo';
 import { AppDefinition, SocialAppDefinition } from '../types';
-import { Images } from 'lucide-react';
 
+import albumIcon from '../assets/icons/apps/album.png';
 import aboutIcon from '../assets/icons/apps/About.png';
 import notesIcon from '../assets/icons/apps/Notes.png';
 import projectsIcon from '../assets/icons/apps/Project-folder.png';
@@ -90,9 +90,7 @@ export const APP_DEFS: AppDefinition[] = [
     title: 'Album Trưng Bày',
     bg: '#ffffff',
     icon: (
-      <div className="w-full h-full rounded-[22%] bg-sky-500 flex items-center justify-center shadow-[inset_0_1px_1px_rgba(255,255,255,0.45),0_2px_4px_rgba(0,0,0,0.2)]">
-        <Images className="h-[58%] w-[58%] text-white pointer-events-none" strokeWidth={1.9} />
-      </div>
+      <img src={albumIcon} alt="Album" className="w-full h-full object-contain pointer-events-none" />
     ),
     initial: { w: 820, h: 560, x: 240, y: 90 },
     Component: GalleryApp,
