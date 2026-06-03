@@ -1,11 +1,13 @@
 import { AboutApp } from './About';
 import { FinderApp } from './Finder';
 import { ProjectsApp } from './Projects';
+import { GalleryApp } from './GalleryApp';
 import { MailApp } from './Mail';
 import { WelcomeApp } from './Welcome';
 import { ZaloApp } from './Zalo';
 import { AppDefinition, SocialAppDefinition } from '../types';
 
+import albumIcon from '../assets/icons/apps/album.png';
 import aboutIcon from '../assets/icons/apps/About.png';
 import notesIcon from '../assets/icons/apps/Notes.png';
 import projectsIcon from '../assets/icons/apps/Project-folder.png';
@@ -83,6 +85,17 @@ export const APP_DEFS: AppDefinition[] = [
     Component: ProjectsApp,
   },
   {
+    id: 'gallery',
+    name: 'Thư viện ảnh',
+    title: 'Album Trưng Bày',
+    bg: '#ffffff',
+    icon: (
+      <img src={albumIcon} alt="Album" className="w-full h-full object-contain pointer-events-none" />
+    ),
+    initial: { w: 820, h: 560, x: 240, y: 90 },
+    Component: GalleryApp,
+  },
+  {
     id: 'mail',
     name: 'Mail',
     title: 'New Message',
@@ -118,4 +131,4 @@ export const APP_DEFS: AppDefinition[] = [
   },
 ];
 
-export { AboutApp, FinderApp, ProjectsApp, MailApp, WelcomeApp, ZaloApp };
+export { AboutApp, FinderApp, ProjectsApp, GalleryApp, MailApp, WelcomeApp, ZaloApp };

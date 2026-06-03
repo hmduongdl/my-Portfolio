@@ -3,7 +3,7 @@
 Portfolio cá nhân của Hoàng Minh Dương, được thiết kế như một desktop macOS thu nhỏ. Thay vì một landing page tĩnh, trang web hoạt động như một hệ điều hành portfolio: có Dock, Menu Bar, cửa sổ ứng dụng, Finder sản phẩm, About Me, Projects, Mail/Zalo contact và chatbot hỗ trợ.
 
 Dữ liệu hiển thị được quản lý qua admin panel và lưu trong Neon PostgreSQL. Frontend dùng React/Vite, API chạy bằng serverless functions để phù hợp triển khai trên Vercel.
-![alt text](image-1.png)
+![alt text](preview.png)
 ## Tính năng chính
 
 - Desktop UI phong cách macOS với Window, Dock, Menu Bar và wallpaper tùy chỉnh.

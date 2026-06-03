@@ -73,6 +73,50 @@ function topZ(windows: WindowInstance[]): number {
   return windows.reduce((m, w) => Math.max(m, w.z), 10);
 }
 
+const SEO_ROUTE_BY_APP: Partial<Record<AppID, string>> = {
+  about: '/about',
+  finder: '/san-pham',
+  projects: '/du-an',
+  gallery: '/album',
+};
+
+let hasUserInteracted = false;
+
+function markUserInteracted(): void {
+  hasUserInteracted = true;
+}
+
+function pushSeoRoute(path: string): void {
+  if (typeof window === 'undefined') return;
+  if (!hasUserInteracted) return;
+  if (window.location.pathname.startsWith('/admin')) return;
+  if (window.location.pathname === path) return;
+  window.history.pushState({ osDeepLink: true }, '', path);
+}
+
+function pushFocusedAppRoute(id: AppID): void {
+  const route = SEO_ROUTE_BY_APP[id];
+  if (route) pushSeoRoute(route);
+}
+
+function pushVisibleWindowRoute(windows: WindowInstance[], preferredId?: AppID): void {
+  const visibleWindows = windows.filter((w) => !w.minimized);
+  if (visibleWindows.length === 0) {
+    pushSeoRoute('/');
+    return;
+  }
+
+  const preferredWindow = preferredId
+    ? visibleWindows.find((w) => w.id === preferredId)
+    : undefined;
+  const activeWindow = preferredWindow ?? visibleWindows.reduce((active, win) => (win.z > active.z ? win : active));
+  const route = SEO_ROUTE_BY_APP[activeWindow.id];
+
+  if (route) {
+    pushSeoRoute(route);
+  }
+}
+
 export interface SocialLink {
   id?: number;
   platform: string;
@@ -80,6 +124,24 @@ export interface SocialLink {
   url: string;
   visible?: boolean;
   order_index?: number;
+}
+
+export interface Album {
+  id: string;
+  name: string;
+  description?: string | null;
+  order_index?: number;
+  visible?: boolean;
+}
+
+export interface Photo {
+  id: number;
+  album_id: string;
+  title: string;
+  caption?: string | null;
+  image_url: string;
+  alt_text: string;
+  created_at?: string;
 }
 
 interface OSState {
@@ -92,6 +154,9 @@ interface OSState {
   iosOpenAppId: string | null;
   language: 'en' | 'vn';
   socials: SocialLink[];
+  albums: Album[];
+  photos: Photo[];
+  isLoading: boolean;
 
   openApp: (id: AppID, defs: AppDefinition[]) => void;
   closeWindow: (id: AppID) => void;
@@ -105,10 +170,14 @@ interface OSState {
   setIosOpenAppId: (id: string | null) => void;
   setLanguage: (lang: 'en' | 'vn') => void;
   fetchSocials: () => Promise<void>;
+  fetchAlbums: () => Promise<void>;
+  fetchPhotosByAlbum: (albumId: string) => Promise<void>;
 }
 
 export const useOSStore = create<OSState>((set, get) => {
   if (typeof window !== 'undefined') {
+    window.addEventListener('pointerdown', markUserInteracted, { passive: true });
+    window.addEventListener('keydown', markUserInteracted, { passive: true });
     window.addEventListener(
       'resize',
       () => {
@@ -128,9 +197,14 @@ export const useOSStore = create<OSState>((set, get) => {
     activeAppName: 'Finder',
     iosOpenAppId: null,
     language: 'vn',
+    socials: [],
+    albums: [],
+    photos: [],
+    isLoading: false,
 
     openApp: (id, defs) =>
       set((state) => {
+        pushFocusedAppRoute(id);
         const nextZ = topZ(state.windows) + 1;
         const appDef = defs.find((a) => a.id === id);
         const appTitle = appDef?.title ?? id;
@@ -210,18 +284,26 @@ export const useOSStore = create<OSState>((set, get) => {
       }),
 
     closeWindow: (id) =>
-      set((state) => ({
-        windows: state.windows.filter((w) => w.id !== id),
-        focusedId: state.focusedId === id ? null : state.focusedId,
-        activeAppName: state.focusedId === id ? 'Finder' : state.activeAppName,
-      })),
+      set((state) => {
+        const nextWindows = state.windows.filter((w) => w.id !== id);
+        pushVisibleWindowRoute(nextWindows);
+        return {
+          windows: nextWindows,
+          focusedId: state.focusedId === id ? null : state.focusedId,
+          activeAppName: state.focusedId === id ? 'Finder' : state.activeAppName,
+        };
+      }),
 
     minWindow: (id) =>
-      set((state) => ({
-        windows: state.windows.map((w) => w.id === id ? { ...w, minimized: true } : w),
-        focusedId: state.focusedId === id ? null : state.focusedId,
-        activeAppName: state.focusedId === id ? 'Finder' : state.activeAppName,
-      })),
+      set((state) => {
+        const nextWindows = state.windows.map((w) => w.id === id ? { ...w, minimized: true } : w);
+        pushVisibleWindowRoute(nextWindows);
+        return {
+          windows: nextWindows,
+          focusedId: state.focusedId === id ? null : state.focusedId,
+          activeAppName: state.focusedId === id ? 'Finder' : state.activeAppName,
+        };
+      }),
 
     maxWindow: (id) =>
       set((state) => {
@@ -253,6 +335,7 @@ export const useOSStore = create<OSState>((set, get) => {
 
     focusWindow: (id) =>
       set((state) => {
+        pushFocusedAppRoute(id);
         const nextZ = topZ(state.windows) + 1;
         const win = state.windows.find((w) => w.id === id);
         return {
@@ -279,7 +362,6 @@ export const useOSStore = create<OSState>((set, get) => {
     setIsMobile: (val) => set({ isMobile: val }),
     setIosOpenAppId: (id) => set({ iosOpenAppId: id }),
     setLanguage: (lang) => set({ language: lang }),
-    socials: [],
     fetchSocials: async () => {
       try {
         const res = await fetch('/api/socials');
@@ -289,6 +371,38 @@ export const useOSStore = create<OSState>((set, get) => {
         }
       } catch (err) {
         console.error('Failed to fetch socials:', err);
+      }
+    },
+    fetchAlbums: async () => {
+      set({ isLoading: true });
+      try {
+        const res = await fetch('/api/albums');
+        if (!res.ok) throw new Error(`Failed to fetch albums: ${res.status}`);
+        const data = await res.json();
+        set({ albums: Array.isArray(data) ? data : [] });
+      } catch (err) {
+        console.error('Failed to fetch albums:', err);
+        set({ albums: [] });
+      } finally {
+        set({ isLoading: false });
+      }
+    },
+    fetchPhotosByAlbum: async (albumId) => {
+      if (!albumId) {
+        set({ photos: [] });
+        return;
+      }
+      set({ isLoading: true });
+      try {
+        const res = await fetch(`/api/albums/${encodeURIComponent(albumId)}/photos`);
+        if (!res.ok) throw new Error(`Failed to fetch photos: ${res.status}`);
+        const data = await res.json();
+        set({ photos: Array.isArray(data) ? data : [] });
+      } catch (err) {
+        console.error('Failed to fetch photos:', err);
+        set({ photos: [] });
+      } finally {
+        set({ isLoading: false });
       }
     },
   };

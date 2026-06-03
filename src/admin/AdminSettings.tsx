@@ -5,6 +5,7 @@ import { useOSStore } from '../store/useOSStore';
 import { ProfileView } from './components/ProfileView';
 import { SEOSettingsView } from './components/SEOSettingsView';
 import { ContentView } from './components/ContentView';
+import { GalleryManagerView } from './components/GalleryManagerView';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Types
@@ -22,6 +23,18 @@ interface ProfileData {
   facebook_url: string;
   zalo_url: string;
   songphuong_url: string;
+}
+
+interface ProfileApiResponse extends Partial<ProfileData> {
+  titleEn?: string;
+  titleVn?: string;
+  bioEn?: string;
+  bioVn?: string;
+  avatarUrl?: string;
+  githubUrl?: string;
+  facebookUrl?: string;
+  zaloUrl?: string;
+  songphuongUrl?: string;
 }
 
 const EMPTY: ProfileData = {
@@ -47,6 +60,9 @@ interface ContactAudit {
     url: string;
   }>;
 }
+
+const getErrorMessage = (error: unknown, fallback = 'Lỗi không xác định') =>
+  error instanceof Error ? error.message : fallback;
 
 // ────────────────────────────────────────────────────────────────────────────
 // Sub-components
@@ -132,7 +148,8 @@ const reloadRuntimeProfileState = async () => {
 // Main Component
 // ────────────────────────────────────────────────────────────────────────────
 export const AdminSettings: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'profile' | 'seo' | 'content'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'seo' | 'content' | 'gallery_manager'>('profile');
+  const [isGalleryDirty, setIsGalleryDirty] = useState(false);
   const [data, setData] = useState<ProfileData>(EMPTY);
   const [original, setOriginal] = useState<ProfileData>(EMPTY);
   const [loading, setLoading] = useState(true);
@@ -149,11 +166,11 @@ export const AdminSettings: React.FC = () => {
   const loadProfile = async () => {
     setLoading(true);
     try {
-      const d = await api.get<any>('/profile');
+      const d = await api.get<ProfileApiResponse>('/profile');
       if (!d) return;
       // Map camelCase API response to our snake_case interface
       const mapped: ProfileData = {
-        name: d.name || d.name || '',
+        name: d.name || '',
         title_en: d.title_en || d.titleEn || '',
         title_vn: d.title_vn || d.titleVn || '',
         bio_en: d.bio_en || d.bioEn || '',
@@ -189,9 +206,9 @@ export const AdminSettings: React.FC = () => {
         result.mismatches.length === 0 ? 'Liên hệ đang đồng bộ' : `Phát hiện ${result.mismatches.length} mục lệch`,
         result.mismatches.length === 0 ? 'ok' : 'error'
       );
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
-      showToast(`Không kiểm tra được DB: ${e.message || 'Lỗi không xác định'}`, 'error');
+      showToast(`Không kiểm tra được DB: ${getErrorMessage(e)}`, 'error');
     } finally {
       setAuditStatus('idle');
     }
@@ -205,9 +222,9 @@ export const AdminSettings: React.FC = () => {
       await reloadRuntimeProfileState();
       await runAudit();
       showToast('Đã đồng bộ thông tin liên hệ', 'ok');
-    } catch (e: any) {
+    } catch (e) {
       console.error(e);
-      showToast(`Không đồng bộ được: ${e.message || 'Lỗi không xác định'}`, 'error');
+      showToast(`Không đồng bộ được: ${getErrorMessage(e)}`, 'error');
     } finally {
       setAuditStatus('idle');
     }
@@ -216,7 +233,7 @@ export const AdminSettings: React.FC = () => {
   const set = (k: keyof ProfileData) => (v: string) =>
     setData((d) => ({ ...d, [k]: v }));
 
-  const isDirty = JSON.stringify(data) !== JSON.stringify(original);
+  const isDirty = JSON.stringify(data) !== JSON.stringify(original) || isGalleryDirty;
   const cleanEmail = data.email.replace(/^mailto:/i, '').trim();
   const cleanPhone = data.phone.replace(/^tel:/i, '').trim();
   const mailtoPreview = cleanEmail ? `mailto:${cleanEmail}` : '';
@@ -227,6 +244,13 @@ export const AdminSettings: React.FC = () => {
   const save = async () => {
     setStatus('saving');
     try {
+      const saveEvent = new CustomEvent<{ promises: Promise<unknown>[] }>('global-save-triggered', {
+        detail: { promises: [] },
+      });
+      window.dispatchEvent(saveEvent);
+      await Promise.all(saveEvent.detail.promises);
+      setIsGalleryDirty(false);
+
       await api.put('/admin/profile', data);
       setOriginal(data);
       setStatus('ok');
@@ -234,9 +258,9 @@ export const AdminSettings: React.FC = () => {
       await reloadRuntimeProfileState();
       void runAudit();
       setTimeout(() => setStatus('idle'), 2000);
-    } catch (e: any) {
+    } catch (e) {
       setStatus('error');
-      showToast(`Lỗi cập nhật: ${e.message || 'Thử lại sau.'}`, 'error');
+      showToast(`Lỗi cập nhật: ${getErrorMessage(e, 'Thử lại sau.')}`, 'error');
       setTimeout(() => setStatus('idle'), 3000);
     }
   };
@@ -289,12 +313,23 @@ export const AdminSettings: React.FC = () => {
         >
           SEO
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('gallery_manager')}
+          className={`px-4 py-1.5 rounded-xl text-[13px] font-semibold transition-colors ${
+            activeTab === 'gallery_manager' ? 'bg-primary text-on-primary shadow-sm' : 'text-on-surface-variant hover:text-on-surface'
+          }`}
+        >
+          🖼️ Quản lý Album ảnh
+        </button>
       </div>
 
       {activeTab === 'seo' ? (
         <SEOSettingsView />
       ) : activeTab === 'content' ? (
         <ContentView />
+      ) : activeTab === 'gallery_manager' ? (
+        <GalleryManagerView onDirtyChange={setIsGalleryDirty} />
       ) : (
         <>
       <ProfileView initialData={data} />
